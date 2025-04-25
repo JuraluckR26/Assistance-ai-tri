@@ -62,7 +62,7 @@ export default function InputSearch() {
             </div>
             {isSubmitted && (
                 <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
-                    <div className="p-4 bg-[#B4D4FF] rounded-md">
+                    <div className="p-2 bg-[#B4D4FF] rounded-md">
                         {isLoading ? (
                             <Skeleton className="w-full h-[50px] rounded-md" />
                         ) : (
@@ -108,8 +108,6 @@ export default function InputSearch() {
                                 </CardContent>
                                 <CardFooter className="flex flex-row-reverse ...">
                                     <Feedback/>
-                                    {/* <Button className="ml-2 bg-gray-400 hover:bg-gray-500" variant="default" size="icon"><ThumbsDown/></Button>
-                                    <Button className="bg-lime-600 hover:bg-lime-700" variant="default" size="icon"><ThumbsUp/></Button> */}
                                 </CardFooter>
                             </Card>
                         )}

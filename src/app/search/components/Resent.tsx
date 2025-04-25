@@ -9,7 +9,7 @@ export default function Resent() {
                     <Newspaper/> 
                     <h4 className="font-bold">Resent News</h4>
                 </div>
-                <div className="p-4 bg-[#B4D4FF] rounded-md ...">
+                <div className="p-2 bg-[#B4D4FF] rounded-md ...">
                     <div className="flex flex-col gap-2 overflow-y-auto max-h-[35vh] md:max-h-[50vh] xl:max-h-[31vh]">
                         <Card>
                             <CardContent>
