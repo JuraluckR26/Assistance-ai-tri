@@ -10,7 +10,7 @@ export default function Resent() {
                     <h4 className="font-bold">Resent News</h4>
                 </div>
                 <div className="p-2 bg-[#B4D4FF] rounded-md ...">
-                    <div className="flex flex-col gap-2 overflow-y-auto max-h-[35vh] md:max-h-[50vh] xl:max-h-[31vh]">
+                    <div className="flex flex-col gap-2">
                         <Card>
                             <CardContent>
                                 <CardTitle className="mb-2">
@@ -44,7 +44,7 @@ export default function Resent() {
                         <Card>
                             <CardContent>
                                 <CardTitle className="mb-2">
-                                    <a href="#" className="no-underline hover:underline ... text-blue-600 font-semibold line-clamp-2">3 . PMG-PB-PTA-002 แจ้งข้อมูลการเปลี่ยนแปลงซุ้มล้อรถบรรทุกอีซูซุขนาดใหญ่ .pdf</a>
+                                    <a href="#" className="no-underline hover:underline ... text-blue-600 font-semibold line-clamp-2">4 . PMG-PB-PTA-002 แจ้งข้อมูลการเปลี่ยนแปลงซุ้มล้อรถบรรทุกอีซูซุขนาดใหญ่ .pdf</a>
                                 </CardTitle>
                                 <CardDescription>
                                     <p className="line-clamp-2">บริษัท ตรีเพชรอีซูซุเซลส์ แจ้งการเปลี่ยนแปลงซุ้มล้อหลังสำหรับรถบรรทุกอีซูซุขนาดใหญ่ โดยปรับปรุงให้แข็งแรงขึ้น เปลี่ยนเบอร์อะไหล่จาก...</p>
@@ -54,7 +54,7 @@ export default function Resent() {
                         <Card>
                             <CardContent>
                                 <CardTitle className="mb-2">
-                                    <a href="#" className="no-underline hover:underline ... text-blue-600 font-semibold line-clamp-2">3 . PMG-PB-PTA-002 แจ้งข้อมูลการเปลี่ยนแปลงซุ้มล้อรถบรรทุกอีซูซุขนาดใหญ่ .pdf</a>
+                                    <a href="#" className="no-underline hover:underline ... text-blue-600 font-semibold line-clamp-2">5 . PMG-PB-PTA-002 แจ้งข้อมูลการเปลี่ยนแปลงซุ้มล้อรถบรรทุกอีซูซุขนาดใหญ่ .pdf</a>
                                 </CardTitle>
                                 <CardDescription>
                                     <p className="line-clamp-2">บริษัท ตรีเพชรอีซูซุเซลส์ แจ้งการเปลี่ยนแปลงซุ้มล้อหลังสำหรับรถบรรทุกอีซูซุขนาดใหญ่ โดยปรับปรุงให้แข็งแรงขึ้น เปลี่ยนเบอร์อะไหล่จาก...</p>

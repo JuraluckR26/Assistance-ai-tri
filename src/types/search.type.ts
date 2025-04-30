@@ -14,3 +14,13 @@ export interface FAQResponse {
     ResDecimal: number
     ResString: string[]
 }
+
+export interface RequestFeedback {
+    sender: string
+    searchText: string
+    resultText: string
+    document: string
+    documentLocation: string
+    feecback?: string
+    feecbackDetail?: string
+}

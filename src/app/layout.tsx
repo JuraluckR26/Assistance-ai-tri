@@ -9,11 +9,6 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Home, Slash } from "lucide-react";
 import { Toaster } from 'sonner';
 
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -47,7 +42,6 @@ export default function RootLayout({
         className="font-sans relative"
       >
         <div className="fixed inset-0 -z-10 bg-[url('/images/BG_Blue.png')] bg-repeat bg-center opacity-[0.5]" />
-        {/* <div className="fixed inset-0 -z-10 bg-[url('/images/BG_Blue.png')] bg-repeat bg-[length:200px_auto] bg-center opacity-10" /> */}
 
          <SidebarProvider>
           <AppSidebar />

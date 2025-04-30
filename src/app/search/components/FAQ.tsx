@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getFAQ } from "@/lib/api/searchService";
-import { FAQResponse } from "@/types/search.type";
 import { useState } from "react";
 
 interface FAQButtonProps {
@@ -12,13 +11,11 @@ interface FAQButtonProps {
 function FAQButton({ onSelect }: FAQButtonProps) {
     const [faqList, setFaqList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    // console.log("FAQ foe map: ", faqList)
 
     const fetchFAQ = async () => {
         setLoading(true);
         try {
           const data = await getFAQ("FAQKJD");
-        //   console.log("res from FAQ: ", data)
           setFaqList(data);
         } catch (err) {
           console.error("FAQ fetch error", err);
