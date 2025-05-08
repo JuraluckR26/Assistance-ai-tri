@@ -95,11 +95,11 @@ export default function InputSearch() {
 
                                 <CardHeader>
                                     <CardTitle>
-                                        <div>Your question : {yourQuestion}</div>
+                                        <div>คำถามของคุณ : {yourQuestion}</div>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <CardTitle className="pb-3">Response</CardTitle>
+                                    <CardTitle className="pb-3">ตอบ :</CardTitle>
                                     <CardDescription>
                                     {result.map((item, index) => (
                                         <div key={item.link || index} className="flex flex-col ...">

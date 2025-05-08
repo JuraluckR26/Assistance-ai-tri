@@ -27,7 +27,7 @@ export default function Page() {
             </header>
             <div className="w-full py-0 px-0 flex flex-col items-center">
                 <h1 className="text-2xl font-semibold text-center mb-6">
-                    Hello :D What can I help you?
+                    สวัสดี :D ให้ฉันช่วยอะไรคุณดี?
                 </h1>
                 <InputSearch/>
                 <Resent/>

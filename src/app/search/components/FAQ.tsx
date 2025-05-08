@@ -28,14 +28,15 @@ function FAQButton({ onSelect }: FAQButtonProps) {
         <>
             <DropdownMenu onOpenChange={(open) => open && fetchFAQ()}>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="link" size="icon">FAQ</Button>
+                    {/* <Button variant="link" size="icon">FAQ</Button> */}
+                    <Button variant="link" size="icon"className="mr-8">คำถามที่พบบ่อย</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                 {loading ? (
                     <DropdownMenuLabel>Loading...</DropdownMenuLabel>
                 ) : (
                     <>
-                        <DropdownMenuLabel>Suggested search terms</DropdownMenuLabel>
+                        <DropdownMenuLabel>คำค้นหาที่แนะนำ</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         {faqList.map((text) => (
                             <DropdownMenuItem 

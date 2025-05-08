@@ -7,7 +7,7 @@ export default function Resent() {
             <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
                 <div className="flex flex-row gap-2 pt-3 pb-3">
                     <Newspaper/> 
-                    <h4 className="font-bold">Resent News</h4>
+                    <h4 className="font-bold">ข่าวสารล่าสุด</h4>
                 </div>
                 <div className="p-2 bg-[#B4D4FF] rounded-md ...">
                     <div className="flex flex-col gap-2">

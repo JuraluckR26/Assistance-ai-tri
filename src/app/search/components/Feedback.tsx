@@ -94,11 +94,11 @@ export default function Feedback({ dataProps }: FeedbackProps) {
                 <DialogContent className="bg-white text-gray-900 rounded-lg shadow-md">
                     <DialogHeader>
                         <DialogTitle className="flex flex-row items-center gap-2">
-                            <span className="text-xl">Oh! I'm sorry </span>
+                            <span className="text-xl">ขอโทษด้วยจริงๆ </span>
                             <Frown/>
                         </DialogTitle>
                         <DialogDescription>
-                            Can you please identify the cause?
+                            คุณช่วยระบุสาเหตุได้ไหม?
                         </DialogDescription>
                     </DialogHeader>
                     <div className="">
@@ -132,7 +132,7 @@ export default function Feedback({ dataProps }: FeedbackProps) {
                             // className="bg-blue-500/20"
                             onClick={handleBadFeedbackSubmit}
                         >
-                            Send Feedback
+                            ส่งคำติชม
                         </Button>
                         {/* <Button
                             type="submit"
