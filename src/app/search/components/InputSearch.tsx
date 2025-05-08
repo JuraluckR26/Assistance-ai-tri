@@ -27,8 +27,8 @@ export default function InputSearch() {
         setIsSubmitted(true)
 
         try {
-            const data = await mockFetchSearchDocument(question)
-            // const data = await fetchSearchDocument(question)
+            // const data = await mockFetchSearchDocument(question)
+            const data = await fetchSearchDocument(question)
             setResult(mapRawToDocumentItems(data))
             setYourQuestion(question)
             const feedbackObj: RequestFeedback = {

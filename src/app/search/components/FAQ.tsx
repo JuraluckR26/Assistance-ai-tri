@@ -29,7 +29,7 @@ function FAQButton({ onSelect }: FAQButtonProps) {
             <DropdownMenu onOpenChange={(open) => open && fetchFAQ()}>
                 <DropdownMenuTrigger asChild>
                     {/* <Button variant="link" size="icon">FAQ</Button> */}
-                    <Button variant="link" size="icon"className="mr-8">คำถามที่พบบ่อย</Button>
+                    <Button variant="link" className="">คำถามที่พบบ่อย</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                 {loading ? (
