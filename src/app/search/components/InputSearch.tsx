@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Feedback from "./Feedback";
 import { mapRawToDocumentItems } from "@/lib/mapper/search.mapper";
 import Loader from "@/components/loading";
+import { useTranslations } from "next-intl";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -19,6 +20,7 @@ export default function InputSearch() {
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
+    const t = useTranslations('Search');
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
@@ -27,8 +29,8 @@ export default function InputSearch() {
         setIsSubmitted(true)
 
         try {
-            // const data = await mockFetchSearchDocument(question)
-            const data = await fetchSearchDocument(question)
+            const data = await mockFetchSearchDocument(question)
+            // const data = await fetchSearchDocument(question)
             setResult(mapRawToDocumentItems(data))
             setYourQuestion(question)
             const feedbackObj: RequestFeedback = {
@@ -52,6 +54,9 @@ export default function InputSearch() {
 
     return (
         <>
+            <h1 className="text-2xl font-semibold text-center mb-6">
+                    {t("top_header")}
+            </h1>
             <div className="relative w-full md:max-w-4xl xl:max-w-5xl mb-4">
                 <Input
                     type="text"
@@ -95,11 +100,11 @@ export default function InputSearch() {
 
                                 <CardHeader>
                                     <CardTitle>
-                                        <div>คำถามของคุณ : {yourQuestion}</div>
+                                        <div>{t("response-your_qeuestion")} : {yourQuestion}</div>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <CardTitle className="pb-3">ตอบ :</CardTitle>
+                                    <CardTitle className="pb-3">{t("response-title")} :</CardTitle>
                                     <CardDescription>
                                     {result.map((item, index) => (
                                         <div key={item.link || index} className="flex flex-col ...">

@@ -1,0 +1,22 @@
+{
+    "Search": {
+        "top_header": "Hello :D What can I help you?",
+        "input_placeholder": "Enter your question---",
+
+        "response-your_qeuestion": "Your question",
+        "response-title": "Response",
+
+        "faq-button": "FAQ",
+        "faq-dropdown_title": "Suggested search terms",
+
+        "feedback-thank_you_good": "Thanks for the helpful answer- 👍",
+        "feedback-thank_you_bad": "Thank you for your feedback- 👎",
+        "feedback-thank_you_bad2": "We will improve it-",
+        "feedback-modal_title": "Oh! I'm sorry",
+        "feedback-modal_subtitle": "Can you please identify the cause?",
+        "feedback-modal_button_send": "Send Feedback",
+        "feedback-modal_input_other": "Please provide reasons-",
+
+        "recent-header": "Resent News"
+    }
+}

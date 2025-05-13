@@ -7,6 +7,7 @@ import { sendFeedback } from "@/lib/api/searchService";
 import { searchContent } from "@/lib/data";
 import { RequestFeedback } from "@/types/search.type";
 import { Frown, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -19,6 +20,7 @@ export default function Feedback({ dataProps }: FeedbackProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false); 
     const [selectedReason, setSelectedReason] = useState<string>();
     const [customReason, setCustomReason] = useState<string>("");
+    const t = useTranslations('Search');
 
     const handleFeedback = (value: string) => {
         setFeedback(value);

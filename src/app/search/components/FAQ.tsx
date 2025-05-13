@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getFAQ } from "@/lib/api/searchService";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 interface FAQButtonProps {
@@ -11,6 +12,7 @@ interface FAQButtonProps {
 function FAQButton({ onSelect }: FAQButtonProps) {
     const [faqList, setFaqList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
+    const t = useTranslations('Search');
 
     const fetchFAQ = async () => {
         setLoading(true);
@@ -29,14 +31,14 @@ function FAQButton({ onSelect }: FAQButtonProps) {
             <DropdownMenu onOpenChange={(open) => open && fetchFAQ()}>
                 <DropdownMenuTrigger asChild>
                     {/* <Button variant="link" size="icon">FAQ</Button> */}
-                    <Button variant="link" className="">คำถามที่พบบ่อย</Button>
+                    <Button variant="link" className="">{t("faq-button")}</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                 {loading ? (
                     <DropdownMenuLabel>Loading...</DropdownMenuLabel>
                 ) : (
                     <>
-                        <DropdownMenuLabel>คำค้นหาที่แนะนำ</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t("faq-dropdown_title")}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         {faqList.map((text) => (
                             <DropdownMenuItem 
