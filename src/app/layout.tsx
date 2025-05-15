@@ -38,10 +38,9 @@ export default function RootLayout({
         />
       </head>
       <body
-        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         className="font-sans relative"
       >
-        <div className="fixed inset-0 -z-10 bg-[url('/images/BG_Blue.png')] bg-repeat bg-center opacity-[0.5]" />
+        {/* <div className="fixed inset-0 -z-10 bg-[url('/images/BG_Blue.png')] bg-repeat bg-center opacity-[0.5]" /> */}
 
          <SidebarProvider>
           <AppSidebar />

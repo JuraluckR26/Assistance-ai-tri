@@ -153,7 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar 
       collapsible="icon" 
       {...props}
-      className="m-2 rounded-t-2xl rounded-b-2xl overflow-hidden shadow-lg border border-[hsl(var(--sidebar-border))]/30"
+      className="m-2 rounded-t-2xl rounded-b-2xl overflow-hidden shadow-lg sidebar border"
     >
       <SidebarHeader>
         {!open ? (  

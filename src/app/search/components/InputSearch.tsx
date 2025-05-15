@@ -27,7 +27,6 @@ export default function InputSearch() {
         setIsSubmitted(true)
 
         try {
-            // const data = await mockFetchSearchDocument(question)
             const data = await fetchSearchDocument(question)
             setResult(mapRawToDocumentItems(data))
             setYourQuestion(question)
@@ -42,6 +41,7 @@ export default function InputSearch() {
         } catch (err) {
             console.error("Search failed", err)
         } finally {
+            setQuestion("")
             setIsLoading(false)
         }
     }
@@ -61,11 +61,15 @@ export default function InputSearch() {
                     className="w-full py-6 px-6 rounded-full bg-white border border-[#D9D9D9] shadow-lg shadow-blue-200/50"
                 />
                 <div className="absolute inset-y-0 right-2 bottom-0 flex items-center gap-2">
-                    <FAQButton onSelect={(value) => setQuestion(value)}/>
+                    <FAQButton 
+                        onSelect={(value) => {
+                            if (!isLoading) setQuestion(value);
+                        }}
+                    />
                     <Button
                         size="icon"
                         onClick={handleSubmit}
-                        className="bg-[#06283D] hover:bg-[#164563] text-white rounded-full"
+                        className="bg-[#1E90FF] hover:bg-[#164563] text-white rounded-full"
                     >
                         <Send className="w-4 h-4" />
                     </Button>
@@ -74,7 +78,7 @@ export default function InputSearch() {
 
             {isSubmitted && (
                 <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
-                    <div className="p-2 bg-[#B4D4FF] rounded-md">
+                    <div className="p-2 bg-[#F5F5F5] rounded-md">
                         {isLoading ? (
                             <>
                                 <div className="relative w-full min-h-[80px]">
@@ -82,12 +86,6 @@ export default function InputSearch() {
                                         <Loader />
                                     </div>
                                 </div>
-
-                                {/* <Skeleton className="w-full min-h-[80px] rounded-md flex items-center justify-center">
-                                    <div className="mb-5">
-                                        <Loader />
-                                    </div>
-                                </Skeleton> */}
                             </>
 
                         ) : (
@@ -112,7 +110,7 @@ export default function InputSearch() {
                                                 >
                                                     {index + 1}. {item.title}
                                                 </a>
-                                                <p>{item.description}</p>
+                                                <p className="line-clamp-2">{item.description}</p>
                                             </div>
                                         </div>
                                     ))}

@@ -9,7 +9,7 @@ export default function Resent() {
                     <Newspaper/> 
                     <h4 className="font-bold">ข่าวสารล่าสุด</h4>
                 </div>
-                <div className="p-2 bg-[#B4D4FF] rounded-md ...">
+                <div className="p-2 bg-[#F5F5F5] rounded-md ...">
                     <div className="flex flex-col gap-2">
                         <Card>
                             <CardContent>

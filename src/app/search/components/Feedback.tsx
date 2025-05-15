@@ -25,7 +25,6 @@ export default function Feedback({ dataProps }: FeedbackProps) {
         if (value === "Good") {
             handleGoodFeedback()
         } else if (value === "Bad") {
-            console.log(value)
             setIsDialogOpen(true);
         }
     };
@@ -37,9 +36,7 @@ export default function Feedback({ dataProps }: FeedbackProps) {
             feecback: "Good",
             feecbackDetail: "Test Feedback"
           };
-          console.log("payload ", payload)
           const res = await sendFeedback(payload);
-          console.log("res in Feedback file: ", res)
           if (res === "Success") {
             toast.success("ขอบคุณสำหรับคำตอบที่เป็นประโยชน์ 👍");
           }
@@ -47,7 +44,6 @@ export default function Feedback({ dataProps }: FeedbackProps) {
     };
 
     const handleBadFeedbackSubmit = async () => {
-        console.log(selectedReason)
         if (!selectedReason) return;
     
         if (dataProps) {
@@ -56,7 +52,6 @@ export default function Feedback({ dataProps }: FeedbackProps) {
             feecback: "Bad",
             feecbackDetail: selectedReason === "อื่น ๆ" ? customReason : selectedReason
           };
-          console.log("payload ", payload)
           const res = await sendFeedback(payload);
           if (res === "Success") {
             toast.success("ขอบคุณสำหรับคำติชม 👎", {description: "เราจะนำไปปรับปรุงให้ดีขึ้น",});
@@ -129,20 +124,10 @@ export default function Feedback({ dataProps }: FeedbackProps) {
                         <Button
                             disabled={!selectedReason}
                             variant="outline"
-                            // className="bg-blue-500/20"
                             onClick={handleBadFeedbackSubmit}
                         >
                             ส่งคำติชม
                         </Button>
-                        {/* <Button
-                            type="submit"
-                            variant={"outline"}
-                            onClick={() => {
-                                setIsDialogOpen(false);
-                            }}
-                            >
-                            Close
-                        </Button> */}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -8,7 +8,7 @@
 
 export const searchContent = [
     { key: "incorrect", text: "ข้อมูลไม่ถูกต้อง" },
-    { key: "notFound", text: "ข้อมูลเก่า ไม่ได้อัปเดต" },
-    { key: "notFound", text: "ไม่พบสิ่งที่ค้นหา" },
+    { key: "not_complete", text: "คำตอบยังไม่สมบูรณ์" },
+    { key: "no_answer", text: "ไม่มีคำตอบ" },
     { key: "other", text: "อื่น ๆ" },
 ]

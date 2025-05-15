@@ -12,7 +12,6 @@ export async function fetchSearchDocument(question: string) {
     const data = await httpClient.post("SearchSpe1Document", {
       searchContent: question,
     });
-    console.log("data: ", data)
     const res = data?.data;
 
     if (!res) return [];
@@ -51,7 +50,7 @@ export async function getFAQ(value: string): Promise<string[]> {
     return res.ResString.split(",").map((s: string) => s.trim());
 
   } catch (err) {
-    console.error("getFAQ error", err);
+    console.error("Get FAQ error", err);
     return [];
   }
   
@@ -59,17 +58,16 @@ export async function getFAQ(value: string): Promise<string[]> {
 
 export async function sendFeedback(value: RequestFeedback) {
   try {
-    // const { data } = await httpClient.post("SaveCosmosDb", value)
-    // console.log("res before send feedback: ", data)
-    // return data
+    const { data } = await httpClient.post("SaveCosmosDb", value)
+    return data
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // mock api Send Feedback
+    // await new Promise((resolve) => setTimeout(resolve, 500));
 
-    return "Success"
+    // return "Success"
 
   } catch (err) {
     console.error("sendFeedback error", err);
-    // return "cannot get re seult"
     return { Response: "fail" };
   }
 }
