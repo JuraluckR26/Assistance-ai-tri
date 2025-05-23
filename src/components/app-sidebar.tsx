@@ -3,8 +3,6 @@
 import * as React from "react"
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   BotMessageSquare,
   Command,
   Frame,
@@ -12,14 +10,10 @@ import {
   Map,
   MessageCircleMore,
   PieChart,
-  Settings2,
-  SquareTerminal,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -28,8 +22,9 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faHeadset } from "@fortawesome/free-solid-svg-icons"
+import Image from "next/image"
+import { Separator } from "./ui/separator"
+import { motion, AnimatePresence } from "framer-motion";
 
 const data = {
   user: {
@@ -156,13 +151,46 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className="m-2 rounded-t-2xl rounded-b-2xl overflow-hidden shadow-lg sidebar border"
     >
       <SidebarHeader>
-        {!open ? (  
-          <span className="m-2 text-xl font-bold text-[hsl(var(--sidebar-foreground))]">L</span>
+        <div className="flex justify-center">
+          <div className="flex flex-row items-center gap-2 overflow-hidden">
+            <Image
+              src="/images/chatbot2-blue.png"
+              alt="icon"
+              width={30}
+              height={20}
+              className="transition-all duration-300"
+            />
+            <motion.span
+              initial={false}
+              animate={open ? "open" : "closed"}
+              variants={{
+                open: { opacity: 1, width: "auto", marginLeft: "0.5rem" },
+                closed: { opacity: 0, width: 0, marginLeft: 0 },
+              }}
+              transition={{ duration: 0.25 }}
+              className="text-xl font-bold text-[hsl(var(--sidebar-foreground))] whitespace-nowrap overflow-hidden"
+            >
+              Ai-HelpDesk
+            </motion.span>
+          </div>
+        </div>
+        {/* {!open ? (  
+          <div className="flex justify-center">
+            <Image className="" src="/images/chatbot2-blue.png" alt="icon" width={25} height={20} />
+          </div>
         ) : (
-          <span className="m-2 text-xl font-bold text-[hsl(var(--sidebar-foreground))]">LOGO</span>
-        )}
+          <div className="flex justify-center">
+            <div className="flex flex-row gap-2">
+              <Image className="" src="/images/chatbot2-blue.png" alt="icon" width={25} height={20} />
+              <span className="m-1 text-xl font-bold text-[hsl(var(--sidebar-foreground))]">Ai-HelpDesk</span>
+            </div>
+          </div>
+        )} */}
         {/* <TeamSwitcher teams={data.teams} /> */}
+        <Separator className="my-1" />
         <NavUser user={data.user} />
+        <Separator className="my-0" />
+
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

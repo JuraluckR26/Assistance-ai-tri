@@ -2,15 +2,17 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getFAQ } from "@/lib/api/searchService";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface FAQButtonProps {
     onSelect: (text: string) => void
+    inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
-function FAQButton({ onSelect }: FAQButtonProps) {
+function FAQButton({ onSelect, inputRef }: FAQButtonProps) {
     const [faqList, setFaqList] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const fetchFAQ = async () => {
         setLoading(true);
@@ -28,19 +30,37 @@ function FAQButton({ onSelect }: FAQButtonProps) {
         <>
             <DropdownMenu onOpenChange={(open) => open && fetchFAQ()}>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="link" className="">คำถามที่พบบ่อย</Button>
+                    <Button 
+                        ref={triggerRef} 
+                        variant="link" 
+                        className=""
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                            }
+                        }}
+                    >
+                        คำค้นหาที่แนะนำ
+                    </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                 {loading ? (
                     <DropdownMenuLabel>Loading...</DropdownMenuLabel>
                 ) : (
                     <>
-                        <DropdownMenuLabel>คำค้นหาที่แนะนำ</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                        {/* <DropdownMenuLabel>คำค้นหาที่แนะนำ</DropdownMenuLabel>
+                        <DropdownMenuSeparator /> */}
                         {faqList.map((text) => (
                             <DropdownMenuItem 
                                 key={text} 
-                                onClick={() => onSelect(text)}
+                                onClick={(e) => {
+                                    onSelect(text);
+                                    triggerRef.current?.blur();
+                                    triggerRef.current?.removeAttribute("tabindex"); // ถอด tabindex เผื่อมีผลกระทบ
+                                    setTimeout(() => {
+                                        inputRef?.current?.focus();
+                                    }, 300);
+                                }}
                                 className="data-[highlighted]:bg-[#EEF5FF] focus:bg-[#EEF5FF] hover:bg-[#EEF5FF] px-4 py-2 rounded-md font-medium"
                             >
                                 <p className="truncate max-w-[185px] sm:max-w-[240px] md:max-w-[300px]">{text}</p>

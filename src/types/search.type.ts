@@ -2,6 +2,7 @@ export interface DocumentItem {
     title: string
     description: string
     link: string
+    date?: string
 }
 
 export type ResponseSearch = {
@@ -23,4 +24,11 @@ export interface RequestFeedback {
     documentLocation: string
     feecback?: string
     feecbackDetail?: string
+}
+
+export type ResponseResent = {
+    Date: string;
+    Response: string;
+    SearchDocument: string;
+    SearchDocumentLocation: string;
 }

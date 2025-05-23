@@ -1,7 +1,15 @@
 import httpClient from "./httpClient";
-import { RequestFeedback } from "@/types/search.type";
+import { RequestFeedback, ResponseResent } from "@/types/search.type";
+import { handleAxiosError } from "@/utils/handleAxiosError";
 
 export interface RawResponse {
+  Response: string;
+  SearchDocument: string;
+  SearchDocumentLocation: string;
+}
+
+export interface ResentResponse {
+  Date: string;
   Response: string;
   SearchDocument: string;
   SearchDocumentLocation: string;
@@ -13,13 +21,12 @@ export async function fetchSearchDocument(question: string) {
       searchContent: question,
     });
     const res = data?.data;
-
     if (!res) return [];
     return res
 
-  } catch (err) {
-    console.error("Search Document", err);
-    return [];
+  } catch (err: unknown) {
+    const res = handleAxiosError(err);
+    return res.message
   }
   
 }
@@ -44,6 +51,7 @@ export async function getFAQ(value: string): Promise<string[]> {
     });
   
     const res = data?.data;
+    // const res = {ResString: "อะไหล่รถยนต์,การดูแลรักษารถยนต์,ค่าแรงขันสกรูถ่ายน้ำมันเครื่อง เครื่องยนต์ 4JJ"};
   
     if (!res?.ResString) return [];
   
@@ -69,5 +77,17 @@ export async function sendFeedback(value: RequestFeedback) {
   } catch (err) {
     console.error("sendFeedback error", err);
     return { Response: "fail" };
+  }
+}
+
+export async function getResent(): Promise<ResponseResent | string> {
+  try {
+    const { data } = await httpClient.post("SearchRecentDocument", {
+      searchContent: "",
+    });
+    return data
+  } catch (err: unknown) {
+    const res = handleAxiosError(err);
+    return res.message
   }
 }
