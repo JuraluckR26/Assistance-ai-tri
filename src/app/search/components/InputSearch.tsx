@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import { FAQButton } from "./FAQ";
 import { useEffect, useRef, useState } from "react";
-import { fetchSearchDocument, mockFetchSearchDocument } from "@/lib/api/searchService";
-import { DocumentItem, RequestFeedback } from "@/types/search.type";
+import { searchWithUserId } from "@/lib/api/searchService";
+import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
 import Feedback from "./Feedback";
 import Loader from "@/components/loading";
-import { mapSearchResponse } from "@/lib/mapper/search.mapper";
 import Image from "next/image";
+import { mapSearchResponse } from "@/utils/search.function";
+import { useAuth } from "@/context/auth-context";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -21,6 +22,7 @@ export default function InputSearch() {
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
     const [emptyView, setEmptyView] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null);
+    const { loginId } = useAuth()
 
     function checkEmptyResponse(data: {Response?: string; SearchDocument?: string; SearchDocumentLocation?: string;}): boolean {
         return (
@@ -40,8 +42,12 @@ export default function InputSearch() {
         setFeedbackData(undefined);     
 
         try {
-            // const data = await mockFetchSearchDocument(question)
-            const data = await fetchSearchDocument(question)
+            // const data = await fetchSearchDocument(question)
+            const payload: RequestSearch = {
+                searchContent: question,
+                loginId: loginId
+            };
+            const data = await searchWithUserId(payload)
 
             if(checkEmptyResponse(data))
             {
@@ -52,7 +58,7 @@ export default function InputSearch() {
                 setYourQuestion(question)
 
                 const feedbackObj: RequestFeedback = {
-                    sender: "Test",
+                    sender: loginId,
                     searchText: question,
                     resultText: data.Response,
                     document: data.SearchDocument,
@@ -108,7 +114,7 @@ export default function InputSearch() {
                     <Button
                         size="icon"
                         onClick={handleSubmit}
-                        className="bg-[#1E90FF] hover:bg-[#164563] text-white rounded-full"
+                        className="bg-[#1E90FF] hover:bg-[#164563] text-white rounded-full cursor-pointer"
                     >
                         <Send className="w-4 h-4" />
                     </Button>

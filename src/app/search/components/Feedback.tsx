@@ -19,7 +19,7 @@ export default function Feedback({ dataProps }: FeedbackProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false); 
     const [selectedReason, setSelectedReason] = useState<string>();
     const [customReason, setCustomReason] = useState<string>("");
-
+    
     const handleFeedback = (value: string) => {
         setFeedback(value);
         if (value === "Good") {

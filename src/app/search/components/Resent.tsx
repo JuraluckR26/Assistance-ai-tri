@@ -1,10 +1,12 @@
 'use client';
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { getResent } from "@/lib/api/searchService";
-import { mapResentResponse } from "@/lib/mapper/search.mapper";
 import { DocumentItem, ResponseResent } from "@/types/search.type";
+import { mapResentResponse } from "@/utils/search.function";
 import { Loader, Newspaper } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Resent() {
@@ -53,9 +55,16 @@ export default function Resent() {
     return (
         <>
             <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
-                <div className="flex flex-row gap-2 pt-3 pb-3">
-                    <Newspaper/> 
-                    <h4 className="font-bold">ข่าวสารล่าสุด</h4>
+                <div className="flex justify-between items-center py-2">
+                    <div className="flex flex-row gap-2">
+                        <Newspaper/> 
+                        <h4 className="font-bold">ข่าวสารล่าสุด</h4>
+                    </div>
+                    <div>
+                        <Button variant={"link"} className="cursor-pointer text-blue-700" asChild>
+                            <Link href={"http://172.30.84.149:18090/pages/viewpage.action?pageId=15377435"} target="_blank">ดูข่าวสารเพิ่มเติม</Link>
+                        </Button>
+                    </div>
                 </div>
                 <div className="p-2 bg-[#F5F5F5] rounded-md ...">
                     <div className="flex flex-col gap-2">

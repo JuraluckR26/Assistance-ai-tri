@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getFAQ } from "@/lib/api/searchService";
 import { useRef, useState } from "react";
 
@@ -33,7 +33,7 @@ function FAQButton({ onSelect, inputRef }: FAQButtonProps) {
                     <Button 
                         ref={triggerRef} 
                         variant="link" 
-                        className=""
+                        className="cursor-pointer"
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
                                 e.preventDefault();
@@ -53,10 +53,10 @@ function FAQButton({ onSelect, inputRef }: FAQButtonProps) {
                         {faqList.map((text) => (
                             <DropdownMenuItem 
                                 key={text} 
-                                onClick={(e) => {
+                                onClick={() => {
                                     onSelect(text);
                                     triggerRef.current?.blur();
-                                    triggerRef.current?.removeAttribute("tabindex"); // ถอด tabindex เผื่อมีผลกระทบ
+                                    triggerRef.current?.removeAttribute("tabindex");
                                     setTimeout(() => {
                                         inputRef?.current?.focus();
                                     }, 300);

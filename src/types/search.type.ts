@@ -32,3 +32,8 @@ export type ResponseResent = {
     SearchDocument: string;
     SearchDocumentLocation: string;
 }
+
+export type RequestSearch = {
+    searchContent: string;
+    loginId: string;
+}
