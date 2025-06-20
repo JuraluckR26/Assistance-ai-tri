@@ -61,7 +61,7 @@ function FAQButton({ onSelect, inputRef }: FAQButtonProps) {
                                         inputRef?.current?.focus();
                                     }, 300);
                                 }}
-                                className="data-[highlighted]:bg-[#EEF5FF] focus:bg-[#EEF5FF] hover:bg-[#EEF5FF] px-4 py-2 rounded-md font-medium"
+                                className="data-[highlighted]:bg-[#EEF5FF] focus:bg-[#EEF5FF] hover:bg-[#EEF5FF] p-2 rounded-md font-medium"
                             >
                                 <p className="truncate max-w-[185px] sm:max-w-[240px] md:max-w-[300px]">{text}</p>
                             </DropdownMenuItem>

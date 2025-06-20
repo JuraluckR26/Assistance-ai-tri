@@ -7,11 +7,11 @@ import { FAQButton } from "./FAQ";
 import { useEffect, useRef, useState } from "react";
 import { searchWithUserId } from "@/lib/api/searchService";
 import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
-import Feedback from "./Feedback";
 import Loader from "@/components/loading";
-import Image from "next/image";
-import { mapSearchResponse } from "@/utils/search.function";
+import { setFormatFromSearch } from "@/utils/search.function";
 import { useAuth } from "@/context/auth-context";
+import { FcReading } from "react-icons/fc";
+import Feedback from "@/components/Feedback";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -39,7 +39,7 @@ export default function InputSearch() {
         setIsSubmitted(true)
         setEmptyView(false);
         setResult([]);      
-        setFeedbackData(undefined);     
+        setFeedbackData(undefined);
 
         try {
             // const data = await fetchSearchDocument(question)
@@ -49,12 +49,14 @@ export default function InputSearch() {
             };
             const data = await searchWithUserId(payload)
 
+            if(typeof data === "string") return
+
             if(checkEmptyResponse(data))
             {
                 setEmptyView(true);
                 return;
             } else {
-                setResult(mapSearchResponse(data))
+                setResult(setFormatFromSearch(data))
                 setYourQuestion(question)
 
                 const feedbackObj: RequestFeedback = {
@@ -138,7 +140,8 @@ export default function InputSearch() {
                                 {emptyView ? (
                                     <div className="flex justify-center">
                                         <div className="flex items-center gap-6 bg-white px-6 py-4">
-                                            <Image src="/images/communication.png" alt="icon" width={120} height={20}/>
+                                            <FcReading size={60}/>
+
                                             <div className="text-left">
                                                 <p className="text-lg font-semibold text-gray-800">ขออภัย เราไม่พบข้อมูลที่ตรงกับคำค้นหาของท่าน</p>
                                                 <p className="text-gray-500 font-medium mt-1">กรุณาค้นหาใหม่อีกครั้ง หรือค้นหาจากคำค้นหาที่แนะนำ</p>

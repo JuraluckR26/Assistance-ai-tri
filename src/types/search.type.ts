@@ -12,8 +12,7 @@ export type ResponseSearch = {
 }
 
 export interface FAQResponse {
-    ResDecimal: number
-    ResString: string[]
+    ResString: string
 }
 
 export interface RequestFeedback {

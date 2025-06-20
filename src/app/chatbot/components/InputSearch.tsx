@@ -5,15 +5,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowUpRight } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
-import Feedback from "./Feedback";
 import FAQButton from "./FAQ";
 import { searchChat } from "@/lib/api/chatbotService";
 import { MappedSearchResponse, RequestSearchChat } from "@/types/chatbot.type";
 import { assistantList } from "@/lib/data";
+import { setFormatFromSearchChat } from "@/utils/chatbot.function";
+import { BsChatDotsFill } from "react-icons/bs";
+import { RequestFeedback } from "@/types/search.type";
+import { useAuth } from "@/context/auth-context";
+import Feedback from "@/components/Feedback";
 import Loader from "@/components/loading";
-import { mapSearchChatResponse } from "@/utils/chatbot.function";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -22,6 +24,8 @@ export default function InputSearch() {
     const [responseData, setResponseData] = useState<MappedSearchResponse>()
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [yourQuestion, setYourQuestion] = useState<string>("")
+    const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
+    const { loginId } = useAuth()
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
@@ -33,17 +37,31 @@ export default function InputSearch() {
 
         setIsLoading(true)
         setIsSubmitted(true)
+        setFeedbackData(undefined);     
+
         try {
             const searchObj: RequestSearchChat = {
                 assistantName: assistance,
                 question: question
             }
-            console.log("val be call: ", searchObj)
             const data = await searchChat(searchObj)
-            const mapped = mapSearchChatResponse(data);
+
+            if(typeof data === "string") return
+
+            const mapped = setFormatFromSearchChat(data);
+
             setResponseData(mapped)
             setYourQuestion(question)
-            console.log("val af call: ", data)
+
+            const feedbackObj: RequestFeedback = {
+                sender: loginId,
+                searchText: question,
+                resultText: data.Response,
+                document: data.SearchDocument,
+                documentLocation: data.SearchDocumentLocation,
+            }
+            setFeedbackData(feedbackObj)
+
         } catch (err: unknown) {
             if (err instanceof Error) {
                 console.error("Search failed:", err.message)
@@ -60,18 +78,18 @@ export default function InputSearch() {
         <div>
             {!isSubmitted && (
                 <>
-                    <h1 className="text-3xl font-semibold text-center pb-2 bg-gradient-to-r from-[#723881] to-[#007AFF] bg-clip-text text-transparent">
+                    <p className="text-lg md:text-2xl lg:text-3xl font-semibold text-center pb-2 bg-gradient-to-r from-[#723881] to-[#007AFF] bg-clip-text text-transparent">
                         เริ่มสร้างแชทใหม่ของคุณได้เลย
-                    </h1>
-                    <p className="text-slate-400 text-center">อย่าลืมเลือก Assistance เพื่อการตอบคำถามได้อย่างถูกต้องตรงประเด็น</p>
-                    <Image src="/images/chat.png" alt="icon" width={200} height={100} className="py-6 mx-auto opacity-30 w-auto h-auto" priority/>
+                    </p>
+                    <p className="text-sm text-slate-400 text-center">อย่าลืมเลือก Assistance เพื่อการตอบคำถามได้อย่างถูกต้องตรงประเด็น</p>
+                    <BsChatDotsFill size={250} color="#1d8ffe" className="py-6 mx-auto opacity-20 w-auto h-auto"/>
                 </>
             )}
-            <div className="bg-white rounded-[32px] shadow-md shadow-blue-200/50 p-4 flex flex-col gap-2 w-full border border-gray-200">
+            <div className="bg-white rounded-3xl shadow-md shadow-blue-200/50 p-3 flex flex-col gap-2 w-full border border-gray-200">
                 <Textarea 
                     value={question}
                     placeholder="ระบุคำถามของคุณที่นี่..." 
-                    className="border-none"
+                    className="border-none rounded-tl-xl rounded-tr-xl"
                     onChange={(e) => setQuestion(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
@@ -110,9 +128,6 @@ export default function InputSearch() {
                                 <span className="text-[#1E90FF] font-bold">สอบถาม</span> <ArrowUpRight className="!w-5 !h-5 text-[#1E90FF]" />
                             </Button>
                         </div>
-                        {/* <Button className="rounded-full px-6 border-2 border-pink-500" variant={"outline"}>
-                            ค้นหา <ArrowUpRight/>
-                        </Button> */}
                     </div>
                 </div>
             </div>
@@ -143,68 +158,33 @@ export default function InputSearch() {
                                     <CardContent>
                                         <CardTitle>ตอบ :</CardTitle>
                                         <div className="whitespace-pre-line">
-                                            <div>{responseData.response}</div>
+                                            <div dangerouslySetInnerHTML={{ __html: responseData.response }} />
                                             <div>
-                                                <p>เอกสาร :</p>
+                                                {responseData.documents?.some(val => val?.url && val?.name) && <p>เอกสาร :</p>}
                                                 <ul className="list-disc ml-4">
-                                                {responseData.documents.map((val, index) => {
-                                                    return (
-                                                    <li key={index}>
-                                                        <a
-                                                        href={val.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-500 underline"
-                                                        >
-                                                        {val.name}
-                                                        </a>
-                                                    </li>
-                                                    );
-                                                })}
+                                                    {responseData.documents
+                                                        .filter(val => val?.url && val?.name)
+                                                        .map((val, index) => (
+                                                            <li key={index}>
+                                                              <a
+                                                                href={val.url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-500 underline"
+                                                              >
+                                                                {val.name}
+                                                              </a>
+                                                            </li>
+                                                    ))}
                                                 </ul>
                                             </div>
                                         </div>
                                     </CardContent>
                                     <CardFooter className="flex flex-row-reverse">
-                                        <Feedback/>
+                                        {feedbackData && <Feedback dataProps={feedbackData} />}
                                     </CardFooter>
                                 </>
                             )}
-
-                            {/* <CardContent>
-                                <CardTitle>ตอบ :</CardTitle>
-                                <>
-                                    <div className="grid grid-cols-1 gap-y-2">
-                                        <div>
-                                            คุณสามารถตรวจสอบสถานะของ ISP Contract ได้โดยใช้ T-Code VA43 ตามขั้นตอนดังนี้:
-                                        </div>
-                                        <div>
-                                            <p>1. เข้า T-Code VA43 (Display Contract: Initial Screen)</p>
-                                            <p>2. กรอกข้อมูลเลขที่สัญญา (Contract No.) ที่คุณต้องการตรวจสอบ</p>
-                                            <p>3. คลิกที่ปุ่มเพื่อแสดงข้อมูลสัญญา</p>
-                                            <p>4. จากนั้นเลือกแท็บ "Status" เพื่อดูสถานะของ ISP Contract</p>
-                                        </div>
-                                        <div>
-                                            <p>หากคุณต้องการตรวจสอบ log การแก้ไขสถานะในแท็บนี้ คุณสามารถทำตามขั้นตอนเพิ่มเติมที่ได้อธิบายไว้ในคำตอบก่อนหน้านี้ได้เช่นกันค่ะ</p>
-                                        </div>
-                                        <div>
-                                            <p>หากคุณมีคำถามเพิ่มเติมหรือพบปัญหาใด ๆ สามารถสอบถามได้เลยค่ะ!</p>
-                                        </div>
-                                        <div>
-                                            <p>เอกสาร :</p>
-                                            <li>
-                                                <a className="text-blue-500">ISP Question and answer for MS-CMF.xlsx,วิธีการตรวจสอบสถานะการสมัคร ISP บนระบบ IT10.docx,UM-ASS-WTY-018 ISP Sales Process.docx,IT10_jira_clarifications5.xlsx</a>
-                                            </li>
-                                            <li>
-                                                <a className="text-blue-500">ISP Question and answer for MS-CMF.xlsx,วิธีการตรวจสอบสถานะการสมัคร ISP บนระบบ IT10.docx,UM-ASS-WTY-018 ISP Sales Process.docx,IT10_jira_clarifications5.xlsx</a>
-                                            </li>
-                                        </div>
-                                    </div>
-                                </>
-                            </CardContent>
-                            <CardFooter className="flex flex-row-reverse">
-                                <Feedback/>
-                            </CardFooter> */}
                         </Card>
                     )}
                     </div>

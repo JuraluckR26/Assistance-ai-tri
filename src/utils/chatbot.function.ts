@@ -1,6 +1,6 @@
 import { MappedSearchResponse, ResponseSearchChat } from "@/types/chatbot.type";
 
-export function mapSearchChatResponse(data: ResponseSearchChat): MappedSearchResponse {
+export function setFormatFromSearchChat(data: ResponseSearchChat): MappedSearchResponse {
     const { Response, SearchDocument, SearchDocumentLocation } = data;
     const nameDoc = SearchDocument.split("||");
     const urlDoc = SearchDocumentLocation.split("||");
@@ -10,8 +10,10 @@ export function mapSearchChatResponse(data: ResponseSearchChat): MappedSearchRes
         url: urlDoc[index],
     }));
 
+    const formattedResponse = Response.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
     return {
-        response: Response,
+        response: formattedResponse,
         documents,
     };
 

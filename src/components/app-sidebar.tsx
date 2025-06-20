@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   AudioWaveform,
+  BotMessageSquare,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -66,25 +67,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         // icon: <FontAwesomeIcon icon={faHeadset} className="w-4 h-4" />,
         icon: MessageCircleMore
       },
-      // {
-      //   title: "Chat bot",
-      //   url: "/chatbot",
-      //   icon: BotMessageSquare,
-      //   items: [
-      //     {
-      //       title: "Genesis",
-      //       url: "#",
-      //     },
-      //     {
-      //       title: "Explorer",
-      //       url: "#",
-      //     },
-      //     {
-      //       title: "Quantum",
-      //       url: "#",
-      //     },
-      //   ],
-      // },
+      {
+        title: "Chat bot",
+        url: "/chatbot",
+        icon: BotMessageSquare,
+        items: [
+          {
+            title: "Genesis",
+            url: "#",
+          },
+          {
+            title: "Explorer",
+            url: "#",
+          },
+          {
+            title: "Quantum",
+            url: "#",
+          },
+        ],
+      },
     ],
     projects: [
       {
@@ -134,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 transition={{ duration: 0.25 }}
                 className="text-xl font-bold text-[hsl(var(--sidebar-foreground))] whitespace-nowrap overflow-hidden"
               >
-                Ai-Desk
+                AI-Desk
               </motion.span>
             </div>
           </div>

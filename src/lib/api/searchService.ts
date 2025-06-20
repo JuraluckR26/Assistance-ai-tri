@@ -1,19 +1,6 @@
 import httpClient from "./httpClient";
-import { RequestFeedback, RequestSearch, ResponseResent } from "@/types/search.type";
+import { RequestFeedback, RequestSearch, ResponseResent, ResponseSearch } from "@/types/search.type";
 import { handleAxiosError } from "@/utils/handleAxiosError";
-
-export interface RawResponse {
-  Response: string;
-  SearchDocument: string;
-  SearchDocumentLocation: string;
-}
-
-export interface ResentResponse {
-  Date: string;
-  Response: string;
-  SearchDocument: string;
-  SearchDocumentLocation: string;
-}
 
 // export async function fetchSearchDocument(question: string) {
 //   try {
@@ -31,14 +18,17 @@ export interface ResentResponse {
   
 // }
 
-export async function searchWithUserId(value: RequestSearch) {
+export async function searchWithUserId(value: RequestSearch): Promise<ResponseSearch | string> {
   try {
     const data = await httpClient.post("SearchSpeKJDDocument", {
       searchContent: value.searchContent,
       loginId: value.loginId
     });
+    
     const res = data?.data;
-    if (!res) return [];
+
+    if (!res) return { Response: "", SearchDocument: "", SearchDocumentLocation: "" };
+
     return res
 
   } catch (err: unknown) {
@@ -73,7 +63,6 @@ export async function sendFeedback(value: RequestFeedback) {
     return data
 
   } catch (err) {
-    console.error("sendFeedback error", err);
     return { Response: "fail" };
   }
 }
@@ -83,7 +72,9 @@ export async function getResent(): Promise<ResponseResent | string> {
     const { data } = await httpClient.post("SearchRecentDocument", {
       searchContent: "",
     });
+
     return data
+    
   } catch (err: unknown) {
     const res = handleAxiosError(err);
     return res.message

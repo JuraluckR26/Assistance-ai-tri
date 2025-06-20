@@ -1,7 +1,7 @@
 import { DocumentItem, ResponseResent, ResponseSearch } from "@/types/search.type"
 import { formatThaiDate } from "@/utils/main.funcion"
   
-export function mapSearchResponse(raw: ResponseSearch): DocumentItem[] {
+export function setFormatFromSearch(raw: ResponseSearch): DocumentItem[] {
   const titles = raw.SearchDocument.split("||")
   const descriptions = raw.Response.split("||")
   const links = raw.SearchDocumentLocation.split("||")
@@ -15,7 +15,7 @@ export function mapSearchResponse(raw: ResponseSearch): DocumentItem[] {
   return result
 }
 
-export function mapResentResponse(raw: ResponseResent): DocumentItem[] {
+export function setFormatFromResent(raw: ResponseResent): DocumentItem[] {
   const titles = raw.SearchDocument.split("||");
   const links = raw.SearchDocumentLocation.split("||");
   const descriptions = raw.Response.split("||");

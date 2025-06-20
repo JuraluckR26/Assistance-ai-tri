@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  ChevronsUpDown,
   LogOut,
 } from "lucide-react"
 
@@ -15,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
   SidebarMenu,
@@ -22,6 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import useLogout from "./logout"
 
 function renderUserAvatar(user: { avatar?: string; icon?: React.ElementType; name: string }) {
   if (user.icon) {
@@ -57,7 +60,7 @@ export function NavUser({
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
-          {/* <DropdownMenuTrigger asChild> */} 
+          <DropdownMenuTrigger asChild> 
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -71,9 +74,9 @@ export function NavUser({
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
-              {/* <ChevronsUpDown className="ml-auto size-4" /> */}
+              <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
-          {/* </DropdownMenuTrigger> */}
+          </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -94,7 +97,7 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={useLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -15,7 +15,7 @@ interface FeedbackProps {
 }
 
 export default function Feedback({ dataProps }: FeedbackProps) {
-    const [feedback, setFeedback] = useState<string | undefined>(undefined);
+    const [feedback, setFeedback] = useState<string>("");
     const [isDialogOpen, setIsDialogOpen] = useState(false); 
     const [selectedReason, setSelectedReason] = useState<string>();
     const [customReason, setCustomReason] = useState<string>("");
@@ -71,14 +71,14 @@ export default function Feedback({ dataProps }: FeedbackProps) {
                 onValueChange={handleFeedback}
             >
                 <ToggleGroupItem 
-                    className="bg-lime-100 border-1 border-lime-200 hover:bg-lime-600 data-[state=on]:bg-lime-600 data-[state=on]:text-white" 
+                    className="bg-lime-100 border-1 border-lime-200 hover:bg-lime-600 data-[state=on]:bg-lime-600 data-[state=on]:text-white cursor-pointer" 
                     value="Good"
                     aria-label="Toggle bold"
                 >
                     <ThumbsUp className="h-4 w-4" />
                 </ToggleGroupItem>
                 <ToggleGroupItem 
-                    className="bg-gray-100 border-1 border-gray-200 hover:bg-gray-500 data-[state=on]:bg-gray-500 data-[state=on]:text-white" 
+                    className="bg-gray-100 border-1 border-gray-200 hover:bg-gray-500 data-[state=on]:bg-gray-500 data-[state=on]:text-white cursor-pointer" 
                     value="Bad"
                     aria-label="Toggle italic"
                 >
@@ -125,6 +125,7 @@ export default function Feedback({ dataProps }: FeedbackProps) {
                             disabled={!selectedReason}
                             variant="outline"
                             onClick={handleBadFeedbackSubmit}
+                            className="cursor-pointer"
                         >
                             ส่งคำติชม
                         </Button>

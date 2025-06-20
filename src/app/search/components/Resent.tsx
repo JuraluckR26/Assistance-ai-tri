@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { getResent } from "@/lib/api/searchService";
 import { DocumentItem, ResponseResent } from "@/types/search.type";
-import { mapResentResponse } from "@/utils/search.function";
+import { setFormatFromResent } from "@/utils/search.function";
 import { Loader, Newspaper } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,7 +34,7 @@ export default function Resent() {
                 if (typeof data === "string") {
                     setEmptyView(true);
                 } else if (checkResponse(data)) {
-                    const result = mapResentResponse(data);
+                    const result = setFormatFromResent(data);
                     setRecent(result);
                     setEmptyView(result.length === 0);
                 } else {
