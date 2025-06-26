@@ -8,13 +8,19 @@ import { usePathname } from "next/navigation";
 
 export default function HeaderPage() {
     const pathname = usePathname();
-    
+
+    const hiddenRoutes = ["/login"];
+    const isHidden = hiddenRoutes.some(route => pathname.startsWith(route));
+    if (isHidden) return null
+
     const menuMap: Record<string, string> = {
         "/search": "Ask Khun Jai Dee (ธุรกิจหลังการขาย, เทเลเทค)",
         "/chatbot": "Chat bot",
+        "/history": "History",
     }
       
-    const pageTitle = menuMap[pathname] || "หน้าแรก"
+    const matchedPath = Object.keys(menuMap).find(key => pathname.startsWith(key));
+    const pageTitle = (matchedPath && menuMap[matchedPath]) || "หน้าแรก";
 
     return (
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -24,7 +30,7 @@ export default function HeaderPage() {
                 <Breadcrumb>
                     <BreadcrumbList>
                     <BreadcrumbItem className="hidden md:block">
-                        <BreadcrumbLink href="#"><Home size={14}/></BreadcrumbLink>
+                        <Home size={14}/>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>

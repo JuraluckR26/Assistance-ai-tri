@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   AudioWaveform,
   BotMessageSquare,
+  Clock3,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -71,20 +72,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Chat bot",
         url: "/chatbot",
         icon: BotMessageSquare,
-        items: [
-          {
-            title: "Genesis",
-            url: "#",
-          },
-          {
-            title: "Explorer",
-            url: "#",
-          },
-          {
-            title: "Quantum",
-            url: "#",
-          },
-        ],
+      },
+      {
+        title: "History",
+        url: "/history",
+        icon: Clock3,
       },
     ],
     projects: [
