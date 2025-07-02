@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { ChevronDown, ChevronUp, PackageSearch, Send } from "lucide-react";
 import { FAQButton } from "./FAQ";
 import { useEffect, useRef, useState } from "react";
 import { searchKhunJaiDee } from "@/lib/api/searchService";
@@ -12,6 +12,7 @@ import { setFormatFromSearch } from "@/utils/formatting";
 import { useAuth } from "@/context/auth-context";
 import { FcReading } from "react-icons/fc";
 import Feedback from "@/components/shared/Feedback";
+import { Separator } from "@/components/ui/separator";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -23,6 +24,7 @@ export default function InputSearch() {
     const [emptyView, setEmptyView] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null);
     const { loginId } = useAuth()
+    const [openDocList, setOpenDocList] = useState<boolean>(false)
 
     function checkEmptyResponse(data: {Response?: string; SearchDocument?: string; SearchDocumentLocation?: string;}): boolean {
         return (
@@ -40,6 +42,7 @@ export default function InputSearch() {
         setEmptyView(false);
         setResult([]);      
         setFeedbackData(undefined);
+        setOpenDocList(false)
 
         try {
             // const data = await fetchSearchDocument(question)
@@ -47,27 +50,40 @@ export default function InputSearch() {
                 searchContent: question,
                 loginId: loginId
             };
-            const data = await searchKhunJaiDee(payload)
 
-            if(typeof data === "string") return
-
-            if(checkEmptyResponse(data))
-            {
-                setEmptyView(true);
-                return;
-            } else {
-                setResult(setFormatFromSearch(data))
-                setYourQuestion(question)
-
-                const feedbackObj: RequestFeedback = {
-                    sender: loginId,
-                    searchText: question,
-                    resultText: data.Response,
-                    document: data.SearchDocument,
-                    documentLocation: data.SearchDocumentLocation,
+            setResult([
+                {
+                    "title": "TIS-ASA 020-2025 การเปลี่ยนแปลงราคาอะไหล่ประจำปี 2568 มีผลตั้งแต่วันที่ 7 เมษายน 2568.pdf",
+                    "description": "แนวทางการออกบริการนอกสถานที่สำหรับศูนย์บริการ ISUZU มีจุดมุ่งหมายเพื่อกำหนดขอบเขตและเตรียมความพร้อมในการบริการแก่ลูกค้า รวมถึงการจัดการงานซ่อม การวางแผนการให้บริการ และการดูแลความปลอดภัย เพื่อสร้างความพึงพอใจให้กับลูกค้า",
+                    "link": "https://stgaiassistantv1.blob.core.windows.net/blob-khun-jai-dee-asg/ASG/TIS-ASA%20020-2025%20%E0%B8%81%E0%B8%B2_377df232-9286-48ee-b187-db39c4ed8742.pdf"
+                },
+                {
+                    "title": "TIS-ASA 019-2025 การเปลี่ยนแปลงราคาอะไหล่ประจำปี 2568 มีผลตั้งแต่วันที่ 7 เมษายน 2568.pdf",
+                    "description": "แนวทางการบริการนอกสถานที่ของศูนย์บริการจะตั้งอยู่บนการกำหนดรูปแบบบริการ ลูกค้า เป้าหมายและประเภทงานซ่อม นอกจากนี้ ยังมีหน้าที่ที่ชัดเจนของพนักงานในการเตรียมพร้อมก่อนการบริการเพื่อให้มีประสิทธิภาพ",
+                    "link": "https://stgaiassistantv1.blob.core.windows.net/blob-khun-jai-dee-asg/ASG/TIS-ASA%20019-2025%20%E0%B8%81%E0%B8%B2_5df11d0e-70f4-406f-aebd-428d5d0d6539.pdf"
                 }
-                setFeedbackData(feedbackObj)
-            }
+            ])
+            // const data = await searchKhunJaiDee(payload)
+
+            // if(typeof data === "string") return
+
+            // if(checkEmptyResponse(data))
+            // {
+            //     setEmptyView(true);
+            //     return;
+            // } else {
+            //     setResult(setFormatFromSearch(data))
+            //     setYourQuestion(question)
+
+            //     const feedbackObj: RequestFeedback = {
+            //         sender: loginId,
+            //         searchText: question,
+            //         resultText: data.Response,
+            //         document: data.SearchDocument,
+            //         documentLocation: data.SearchDocumentLocation,
+            //     }
+            //     setFeedbackData(feedbackObj)
+            // }
             
         } catch (err: unknown) {
             if (err instanceof Error) {
@@ -81,6 +97,8 @@ export default function InputSearch() {
         }
     }
 
+    const handleOpenDoc = () => setOpenDocList(prev => !prev)
+    
     useEffect(() => {
     }, [result])
 
@@ -159,22 +177,46 @@ export default function InputSearch() {
                                         <CardContent>
                                             <CardTitle className="pb-3">ตอบ :</CardTitle>
                                             <CardDescription>
-                                            {result.map((item, index) => (
-                                                <div key={item.link ?? index} className="flex flex-col ...">
-                                                    <div className="mb-2">
-                                                        <a 
-                                                            href={item.link}
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer"
-                                                            className="text-blue-600 font-semibold hover:underline"
-                                                        >
-                                                            {index + 1}. {item.title}
-                                                        </a>
-                                                        <p className="line-clamp-2">{item.description}</p>
+                                                {result.map((item, index) => (
+                                                    <div key={item.link ?? index} className="flex flex-col ...">
+                                                        <div className="mb-2">
+                                                            <a 
+                                                                href={item.link}
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 font-semibold hover:underline"
+                                                            >
+                                                                {index + 1}. {item.title}
+                                                            </a>
+                                                            <p className="line-clamp-2">{item.description}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))}
                                             </CardDescription>
+                                            <Separator className="my-4" />
+                                            <Button 
+                                                className="rounded-full cursor-pointer bg-[#4D77FF]/20 text-[#4D77FF] hover:bg-[#4D77FF]/20 mb-3"
+                                                onClick={handleOpenDoc}
+                                            >
+                                                <PackageSearch/> เอกสารที่อาจเกี่ยวข้อง {!openDocList? <ChevronUp/> : <ChevronDown/>}
+                                            </Button>
+                                            {openDocList && <CardDescription>
+                                                {result.map((item, index) => (
+                                                    <div key={item.link ?? index} className="flex flex-col ...">
+                                                        <div className="mb-2">
+                                                            <a 
+                                                                href={item.link}
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 font-semibold hover:underline"
+                                                            >
+                                                                {index + 1}. {item.title}
+                                                            </a>
+                                                            <p className="line-clamp-2">{item.description}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </CardDescription>}
                                         </CardContent>
                                         <CardFooter className="flex flex-row-reverse ...">
                                             {feedbackData && <Feedback dataProps={feedbackData} />}
