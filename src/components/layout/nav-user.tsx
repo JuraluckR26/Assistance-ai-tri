@@ -24,7 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import useLogout from "./logout"
+import useLogout from "../forms/logout"
 
 function renderUserAvatar(user: { avatar?: string; icon?: React.ElementType; name: string }) {
   if (user.icon) {

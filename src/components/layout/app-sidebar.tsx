@@ -14,8 +14,8 @@ import {
   UserRound,
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/layout/nav-main"
+import { NavUser } from "@/components/layout/nav-user"
 import {
   Sidebar,
   SidebarContent,
@@ -25,10 +25,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import Image from "next/image"
-import { Separator } from "./ui/separator"
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
+import { Separator } from "../ui/separator"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open } = useSidebar()

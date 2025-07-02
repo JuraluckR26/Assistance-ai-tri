@@ -1,5 +1,5 @@
 import { RequestLogin } from "@/types/auth.type";
-import httpClient from "./httpClient";
+import axios from "axios";
 
 export type AuthResult = {
     IsAuthenticated: boolean;
@@ -8,8 +8,9 @@ export type AuthResult = {
 
 export async function checkAuthenticateByToken(token: string): Promise<AuthResult> {
     try {
-        const response = await httpClient.post<AuthResult>("GetMiraiAuthenByTokenId", token); 
+        const response = await axios.post<AuthResult>("/api/auth/token", {token}); 
         const res = response?.data; 
+
         return res;
     }
     catch (err: unknown) {
@@ -21,8 +22,7 @@ export async function checkAuthenticateByToken(token: string): Promise<AuthResul
 
 export async function checkAuthenticateByLoginId(loginId: string): Promise<AuthResult> {
     try {
-        const response = await httpClient.post<AuthResult>("GetMiraiAuthenByLoginId", loginId);
-
+        const response = await axios.post<AuthResult>("/api/auth/loginId", {loginId});
         const res = response?.data;
 
         return res;
@@ -33,17 +33,34 @@ export async function checkAuthenticateByLoginId(loginId: string): Promise<AuthR
     }
 }
 
-export async function checkLoginAuthenByUserPW(data: RequestLogin): Promise<AuthResult> {
+export async function checkLoginAuthenByUserPW(data: RequestLogin) {
     try {
-        const response = await httpClient.post<AuthResult>("GetAuthenByLogin", {
-            userName: data.username,
-            passWord: data.password,
+        const response = await axios.post<AuthResult>("/api/auth/userpw", {
+            data
         });
 
         return response?.data;
+        // const res = await fetch("/api/auth/userpw", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({ data }),
+        // });
+    
+        // return await res.json();
     }
     catch (err: unknown) {
         console.error('checkLoginAuthenByUserPW error', err);
         return { IsAuthenticated: false, LoginId: '' };
     }
+}
+
+export async function checkLoginAuthenByEmail(email: string) {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+    const res = await fetch(`${baseUrl}/api/auth/gmail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+    });
+
+    return await res.json();
 }

@@ -1,6 +1,8 @@
+import { MappedSearchResponse, ResponseSearchChat } from "@/types/chatbot.type"
 import { DocumentItem, ResponseResent, ResponseSearch } from "@/types/search.type"
-import { formatThaiDate } from "@/utils/main.funcion"
+import { formatThaiDate } from "@/utils/helpers"
   
+// Search content
 export function setFormatFromSearch(raw: ResponseSearch): DocumentItem[] {
   const titles = raw.SearchDocument.split("||")
   const descriptions = raw.Response.split("||")
@@ -29,5 +31,25 @@ export function setFormatFromResent(raw: ResponseResent): DocumentItem[] {
   }));
 
   return result;
+}
+
+// Chatbot content
+export function setFormatFromSearchChat(data: ResponseSearchChat): MappedSearchResponse {
+    const { Response, SearchDocument, SearchDocumentLocation } = data;
+    const nameDoc = SearchDocument.split("||");
+    const urlDoc = SearchDocumentLocation.split("||");
+    
+    const documents = nameDoc.map((name, index) => ({
+        name,
+        url: urlDoc[index],
+    }));
+
+    const formattedResponse = Response.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+    return {
+        response: formattedResponse,
+        documents,
+    };
+
 }
   

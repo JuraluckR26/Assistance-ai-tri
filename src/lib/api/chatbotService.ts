@@ -8,9 +8,11 @@ export async function searchChat(val: RequestSearchChat): Promise<ResponseSearch
         assistantName: val.assistantName,
         question: val.question,
       });
-      console.log("res chat : ", data)
+
       const res = data?.data;
+
       if (!res) return { Response: "", SearchDocument: "", SearchDocumentLocation: "" };
+      
       return res
   
     } catch (err: unknown) {

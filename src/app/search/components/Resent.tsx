@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { getResent } from "@/lib/api/searchService";
 import { DocumentItem, ResponseResent } from "@/types/search.type";
-import { setFormatFromResent } from "@/utils/search.function";
+import { setFormatFromResent } from "@/utils/formatting";
 import { Loader, Newspaper } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

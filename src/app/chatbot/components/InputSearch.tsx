@@ -10,12 +10,12 @@ import FAQButton from "./FAQ";
 import { searchChat } from "@/lib/api/chatbotService";
 import { MappedSearchResponse, RequestSearchChat } from "@/types/chatbot.type";
 import { assistantList } from "@/lib/data";
-import { setFormatFromSearchChat } from "@/utils/chatbot.function";
+import { setFormatFromSearchChat } from "@/utils/formatting";
 import { BsChatDotsFill } from "react-icons/bs";
 import { RequestFeedback } from "@/types/search.type";
 import { useAuth } from "@/context/auth-context";
-import Feedback from "@/components/Feedback";
-import Loader from "@/components/loading";
+import Feedback from "@/components/shared/Feedback";
+import Loader from "@/components/shared/loading";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")

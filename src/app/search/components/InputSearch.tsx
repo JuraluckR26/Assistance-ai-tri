@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import { FAQButton } from "./FAQ";
 import { useEffect, useRef, useState } from "react";
-import { searchWithUserId } from "@/lib/api/searchService";
+import { searchKhunJaiDee } from "@/lib/api/searchService";
 import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
-import Loader from "@/components/loading";
-import { setFormatFromSearch } from "@/utils/search.function";
+import Loader from "@/components/shared/loading";
+import { setFormatFromSearch } from "@/utils/formatting";
 import { useAuth } from "@/context/auth-context";
 import { FcReading } from "react-icons/fc";
-import Feedback from "@/components/Feedback";
+import Feedback from "@/components/shared/Feedback";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -47,7 +47,7 @@ export default function InputSearch() {
                 searchContent: question,
                 loginId: loginId
             };
-            const data = await searchWithUserId(payload)
+            const data = await searchKhunJaiDee(payload)
 
             if(typeof data === "string") return
 

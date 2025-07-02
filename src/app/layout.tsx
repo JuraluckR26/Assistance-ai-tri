@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
 import "@/lib/fontawesome";
 import { Toaster } from 'sonner';
 import { Geist, Geist_Mono } from 'next/font/google';
-import AuthTokenGuard from "@/components/AuthTokenGuard";
-import HeaderPage from "@/components/Header";
+import AuthTokenGuard from "@/components/layout/AuthTokenGuard";
+import HeaderPage from "@/components/layout/Header";
 import { AppProviders } from "@/context/AppProviders";
 
 export const metadata: Metadata = {

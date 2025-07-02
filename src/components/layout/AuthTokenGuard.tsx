@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { checkAuthenticateByLoginId, checkAuthenticateByToken } from '@/lib/api/authenService';
+import { checkAuthenticateByLoginId, checkAuthenticateByToken, checkLoginAuthenByEmail } from '@/lib/api/authenService';
 import { useAuth } from '@/context/auth-context';
 
 interface Props {
@@ -17,12 +17,11 @@ export default function AuthTokenGuard({ children }: Props) {
 
   useEffect(() => {
     const checkToken = async () => {
-        // const token = new URLSearchParams(window.location.search).get('token');
-        const urlParams = new URLSearchParams(window.location.search)
-        const queryToken = urlParams.get('token')
+        const queryToken = new URLSearchParams(window.location.search).get('token');
 
         if (queryToken) {
             const result = await checkAuthenticateByToken(queryToken); 
+
             if(result?.IsAuthenticated){
               localStorage.setItem('auth_token', queryToken)
               localStorage.setItem('loginId', result.LoginId)
@@ -31,15 +30,38 @@ export default function AuthTokenGuard({ children }: Props) {
               router.replace(pathname)
               return
             }
+
         } else {
           const loginId = localStorage.getItem("loginId");
 
           if(loginId){
             const result = await checkAuthenticateByLoginId(loginId); 
+
             if(result?.IsAuthenticated){
               setLoginId(result.LoginId)
               setIsAuthenticated(true)
               return
+            }
+
+          } 
+          else {
+            try {
+              const res = await fetch('/api/auth/session');
+              const data = await res.json();
+              const email = data?.email ?? null;
+
+              if(email){
+                const result = await checkLoginAuthenByEmail(email);
+                
+                if (result?.IsAuthenticated) {
+                  setLoginId(result.LoginId);
+                  setIsAuthenticated(true);
+                  return;
+                }
+              }
+
+            } catch (e) {
+              console.error('Failed to fetch session email:', e);
             }
           }
 

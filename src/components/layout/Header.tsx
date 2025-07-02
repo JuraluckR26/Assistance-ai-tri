@@ -1,8 +1,8 @@
 "use client"
 
 import { Separator } from "@radix-ui/react-separator";
-import { SidebarTrigger } from "./ui/sidebar";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "./ui/breadcrumb";
+import { SidebarTrigger } from "../ui/sidebar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
 import { Home } from "lucide-react";
 import { usePathname } from "next/navigation";
 
