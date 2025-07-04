@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { checkAuthenticateByLoginId, checkAuthenticateByToken, checkLoginAuthenByEmail } from '@/lib/api/authenService';
 import { useAuth } from '@/context/auth-context';
 
@@ -15,8 +15,11 @@ export default function AuthTokenGuard({ children }: Props) {
   const { setLoginId } = useAuth();
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkToken = async () => {
         const queryToken = new URLSearchParams(window.location.search).get('token');
+        const localLoginId = localStorage.getItem('loginId');
 
         if (queryToken) {
             const result = await checkAuthenticateByToken(queryToken); 
@@ -24,21 +27,24 @@ export default function AuthTokenGuard({ children }: Props) {
             if(result?.IsAuthenticated){
               localStorage.setItem('auth_token', queryToken)
               localStorage.setItem('loginId', result.LoginId)
-              setLoginId(result.LoginId)
-              setIsAuthenticated(true)
-              router.replace(pathname)
+              if (isMounted) {
+                setLoginId(result.LoginId);
+                setIsAuthenticated(true);
+                router.replace(pathname);
+              }
               return
             }
 
         } else {
-          const loginId = localStorage.getItem("loginId");
 
-          if(loginId){
-            const result = await checkAuthenticateByLoginId(loginId); 
+          if(localLoginId){
+            const result = await checkAuthenticateByLoginId(localLoginId); 
 
             if(result?.IsAuthenticated){
-              setLoginId(result.LoginId)
-              setIsAuthenticated(true)
+              if (isMounted) {
+                setLoginId(result.LoginId);
+                setIsAuthenticated(true);
+              }
               return
             }
 
@@ -51,10 +57,12 @@ export default function AuthTokenGuard({ children }: Props) {
 
               if(email){
                 const result = await checkLoginAuthenByEmail(email);
-                
                 if (result?.IsAuthenticated) {
-                  setLoginId(result.LoginId);
-                  setIsAuthenticated(true);
+                  localStorage.setItem('loginId', result.LoginId)
+                  if (isMounted) {
+                    setLoginId(result.LoginId);
+                    setIsAuthenticated(true);
+                  }
                   return;
                 }
               }
@@ -73,6 +81,8 @@ export default function AuthTokenGuard({ children }: Props) {
   }, [router, pathname, setLoginId]);
 
   if (pathname.startsWith('/login')) return <>{children}</>;
+
+  if (isAuthenticated === null) return <div>Loading...</div>;
 
   return <>{isAuthenticated && children}</>
 }
