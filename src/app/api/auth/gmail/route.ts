@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
+import httpClient from '@/lib/api/httpClient';
 
 export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
     
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/GetAuthenByEmail`,
-      { email },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
+    const response = await httpClient.post("GetAuthenByEmail", {email});
 
     return NextResponse.json(response.data);
 

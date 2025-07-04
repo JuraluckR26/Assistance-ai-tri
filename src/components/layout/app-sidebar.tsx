@@ -68,11 +68,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         // icon: <FontAwesomeIcon icon={faHeadset} className="w-4 h-4" />,
         icon: MessageCircleMore
       },
-      {
-        title: "Chat bot",
-        url: "/chatbot",
-        icon: BotMessageSquare,
-      },
+      // {
+      //   title: "Chat bot",
+      //   url: "/chatbot",
+      //   icon: BotMessageSquare,
+      // },
       // {
       //   title: "History",
       //   url: "/history",

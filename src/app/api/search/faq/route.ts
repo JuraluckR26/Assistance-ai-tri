@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
+import httpClient from '@/lib/api/httpClient';
 
 export async function POST(req: NextRequest) {
   try {
     const { getKeyword } = await req.json();
 
-    const { data } = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/GetCosmosDb`,
-      { getKeyword },
-      { headers: { 'Content-Type': 'application/json' } }
-    );
+    const { data } = await httpClient.post("GetCosmosDb", {getKeyword});
 
     return NextResponse.json(data);
     

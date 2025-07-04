@@ -3,18 +3,31 @@ import { DocumentItem, ResponseResent, ResponseSearch } from "@/types/search.typ
 import { formatThaiDate } from "@/utils/helpers"
   
 // Search content
-export function setFormatFromSearch(raw: ResponseSearch): DocumentItem[] {
-  const titles = raw.SearchDocument.split("||")
-  const descriptions = raw.Response.split("||")
-  const links = raw.SearchDocumentLocation.split("||")
+export function setFormatFromSearch(raw: ResponseSearch): {
+  primary: DocumentItem[];
+  related: DocumentItem[];
+} {
+  const primaryTitles = raw.SearchDocument?.split("||") || [];
+  const primaryDescriptions = raw.Response?.split("||") || [];
+  const primaryLinks = raw.SearchDocumentLocation?.split("||") || [];
 
-  const result: DocumentItem[] = titles.map((title, index) => ({
+  const relatedTitles = raw.SearchDocument_Other?.split("||") || [];
+  const relatedDescriptions = raw.Response_Other?.split("||") || [];
+  const relatedLinks = raw.SearchDocumentLocation_Other?.split("||") || [];
+
+  const primary: DocumentItem[] = primaryTitles.map((title, index) => ({
     title: title.trim(),
-    description: descriptions[index]?.trim() || "",
-    link: links[index]?.trim() || "#",
-  }))
+    description: primaryDescriptions[index]?.trim() || "",
+    link: primaryLinks[index]?.trim() || "#",
+  }));
 
-  return result
+  const related: DocumentItem[] = relatedTitles.map((title, index) => ({
+    title: title.trim(),
+    description: relatedDescriptions[index]?.trim() || "",
+    link: relatedLinks[index]?.trim() || "#",
+  }));
+
+  return { primary, related };
 }
 
 export function setFormatFromResent(raw: ResponseResent): DocumentItem[] {

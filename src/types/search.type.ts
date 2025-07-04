@@ -9,6 +9,9 @@ export type ResponseSearch = {
     Response: string
     SearchDocument: string
     SearchDocumentLocation: string
+    Response_Other?: string
+    SearchDocumentLocation_Other?: string
+    SearchDocument_Other?: string
 }
 
 export interface FAQResponse {

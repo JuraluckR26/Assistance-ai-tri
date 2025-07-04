@@ -35,7 +35,9 @@ export function LoginForm({
                 username: username,
                 password: password
             };
+
             const data = await checkLoginAuthenByUserPW(payload)
+            
             if (data?.IsAuthenticated) {
                 localStorage.setItem("loginId", data.LoginId);
                 setLoginId(data.LoginId)

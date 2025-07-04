@@ -1,4 +1,3 @@
-import httpClient from "./httpClient";
 import { RequestFeedback, RequestSearch, ResponseResent, ResponseSearch } from "@/types/search.type";
 import { handleAxiosError } from "@/utils/handleAxiosError";
 import axios from "axios";
@@ -11,8 +10,8 @@ export async function searchKhunJaiDee(value: RequestSearch): Promise<ResponseSe
     });
 
     const res = data?.data;
-
-    if (!res) return { Response: "", SearchDocument: "", SearchDocumentLocation: "" };
+    
+    if (!res) return { Response: "", SearchDocument: "", SearchDocumentLocation: "", Response_Other: "", SearchDocument_Other: "", SearchDocumentLocation_Other: "" };
 
     return res
 

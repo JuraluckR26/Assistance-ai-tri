@@ -8,7 +8,6 @@ interface Props {
     children: React.ReactNode;
 }
 
-
 export default function AuthTokenGuard({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
