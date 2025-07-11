@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getAssistants, searchChat } from "@/lib/api/chatbotService";
+import { searchChat } from "@/lib/api/chatbotService";
 import { MappedSearchResponse, RequestSearchChat } from "@/types/chatbot.type";
 import { setFormatAssistant, setFormatFromSearchChat } from "@/utils/formatting";
 import { BsChatDotsFill } from "react-icons/bs";
@@ -14,6 +14,7 @@ import { RequestFeedback } from "@/types/search.type";
 import { useAuth } from "@/context/auth-context";
 import Feedback from "@/components/shared/Feedback";
 import Loader from "@/components/shared/loading";
+import { useAssistant } from "@/context/assistant-context";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -24,7 +25,8 @@ export default function InputSearch() {
     const [yourQuestion, setYourQuestion] = useState<string>("")
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
     const { loginId } = useAuth()
-    const [assistanceList, setAssistanceList] = useState<string[]>([])
+    const [assistantAready, setAssistantAready] = useState<string[]>([])
+    const { assistantList } = useAssistant();
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
@@ -75,22 +77,16 @@ export default function InputSearch() {
 
     useEffect(() => {
         setIsLoading(true);
-        const fetchData = async () => {
-            try {
-                const data = await getAssistants(loginId);
 
-                if(typeof data === "boolean") return null
-                setAssistanceList(setFormatAssistant(data))
-
-            } catch(error) {
-                console.error("Error fetching assistant list:", error);
-            } finally {
-                setIsLoading(false);
-            }
-            
-        };
-        fetchData();
-    }, [loginId]);
+        try {
+            if(!assistantList) return
+            setAssistantAready(setFormatAssistant(assistantList))
+        } catch(error) {
+            console.error("Error fetching assistant list:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [assistantList]);
 
     return (
         <div>
@@ -123,7 +119,7 @@ export default function InputSearch() {
                             <SelectValue placeholder="Assistance name" />
                         </SelectTrigger>
                         <SelectContent>
-                            {assistanceList.map((val, index) => (
+                            {assistantAready.map((val, index) => (
                                 <SelectItem 
                                     key={index} 
                                     value={val}

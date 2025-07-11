@@ -22,20 +22,22 @@ export async function searchChat(val: RequestSearchChat): Promise<ResponseSearch
     
 }
 
-export async function getAssistants(id: string): Promise<string | boolean> {
+export async function getAssistants(id: string): Promise<ResponseAssistant> {
   try {
     const data = await axios.post("/api/chatbot/assistants", {
       loginId: id
     });
+
     const res: ResponseAssistant = data?.data;
-    
-    if(!res.IsCanChat) return res.IsCanChat
-    
-    return res.AssistantList
+
+    if(!res.IsCanChat) return { IsCanChat: false, AssistantList: ""}
+
+    return res
 
   } catch (err: unknown) {
     const res = handleAxiosError(err);
-    return res.message
+    console.error("Get Assistants error", res);
+    return { IsCanChat: false, AssistantList: ""}
   }
   
 }

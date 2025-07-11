@@ -28,6 +28,7 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
 import { Separator } from "../ui/separator"
+import { useAssistant } from "@/context/assistant-context"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open } = useSidebar()
@@ -35,6 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const hiddenRoutes = ["/login"];
   const isHidden = hiddenRoutes.some(route => pathname.startsWith(route));
   const { loginId } = useAuth()
+  const { isCanChat } = useAssistant();
 
   if (isHidden || !loginId) return null
 
@@ -67,11 +69,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         // icon: <FontAwesomeIcon icon={faHeadset} className="w-4 h-4" />,
         icon: MessageCircleMore
       },
-      {
+      ...(isCanChat ? [{
         title: "Chat bot",
         url: "/chatbot",
         icon: BotMessageSquare,
-      },
+      }] : [])
       // {
       //   title: "History",
       //   url: "/history",

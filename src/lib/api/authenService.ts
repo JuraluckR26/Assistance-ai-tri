@@ -40,13 +40,6 @@ export async function checkLoginAuthenByUserPW(data: RequestLogin) {
         });
 
         return response?.data;
-        // const res = await fetch("/api/auth/userpw", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({ data }),
-        // });
-    
-        // return await res.json();
     }
     catch (err: unknown) {
         console.error('checkLoginAuthenByUserPW error', err);

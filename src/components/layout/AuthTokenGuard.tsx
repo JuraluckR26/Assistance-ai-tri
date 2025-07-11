@@ -48,8 +48,7 @@ export default function AuthTokenGuard({ children }: Props) {
               return
             }
 
-          } 
-          else {
+          } else {
             try {
               const res = await fetch('/api/auth/session');
               const data = await res.json();
@@ -82,7 +81,7 @@ export default function AuthTokenGuard({ children }: Props) {
 
   if (pathname.startsWith('/login')) return <>{children}</>;
 
-  if (!isAuthenticated) return <div className="flex items-center justify-center h-screen text-xl">กำลังโหลดหน้า...</div>;
+  if (!isAuthenticated) return <div className="flex items-center justify-center h-screen text-xl text-gray-500">กำลังโหลดหน้า...</div>;
 
   return <>{isAuthenticated && children}</>
 }
