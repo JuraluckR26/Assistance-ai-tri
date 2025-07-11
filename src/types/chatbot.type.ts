@@ -13,3 +13,8 @@ export interface MappedSearchResponse {
     response: string;
     documents: { name: string; url: string }[];
 }
+
+export interface ResponseAssistant {
+    AssistantList: string
+    IsCanChat: boolean
+}

@@ -66,3 +66,9 @@ export function setFormatFromSearchChat(data: ResponseSearchChat): MappedSearchR
 
 }
   
+export function setFormatAssistant(input: string): string[] {
+  return input
+    .split(',')
+    .map(val => val.trim())
+    .filter(val => val !== "");
+}

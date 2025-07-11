@@ -1,10 +1,10 @@
 import { handleAxiosError } from "@/utils/handleAxiosError";
-import httpClient from "./httpClient";
-import { RequestSearchChat, ResponseSearchChat } from "@/types/chatbot.type";
+import { RequestSearchChat, ResponseAssistant, ResponseSearchChat } from "@/types/chatbot.type";
+import axios from "axios";
 
 export async function searchChat(val: RequestSearchChat): Promise<ResponseSearchChat | string> {
     try {
-      const data = await httpClient.post("ChatCompletion", {
+      const data = await axios.post("/api/chatbot/search", {
         assistantName: val.assistantName,
         question: val.question,
       });
@@ -20,4 +20,22 @@ export async function searchChat(val: RequestSearchChat): Promise<ResponseSearch
       return res.message
     }
     
+}
+
+export async function getAssistants(id: string): Promise<string | boolean> {
+  try {
+    const data = await axios.post("/api/chatbot/assistants", {
+      loginId: id
+    });
+    const res: ResponseAssistant = data?.data;
+    
+    if(!res.IsCanChat) return res.IsCanChat
+    
+    return res.AssistantList
+
+  } catch (err: unknown) {
+    const res = handleAxiosError(err);
+    return res.message
+  }
+  
 }

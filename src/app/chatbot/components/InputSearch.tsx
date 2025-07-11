@@ -5,12 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowUpRight } from "lucide-react";
-import { useState } from "react";
-import FAQButton from "./FAQ";
-import { searchChat } from "@/lib/api/chatbotService";
+import { useEffect, useState } from "react";
+import { getAssistants, searchChat } from "@/lib/api/chatbotService";
 import { MappedSearchResponse, RequestSearchChat } from "@/types/chatbot.type";
-import { assistantList } from "@/lib/data";
-import { setFormatFromSearchChat } from "@/utils/formatting";
+import { setFormatAssistant, setFormatFromSearchChat } from "@/utils/formatting";
 import { BsChatDotsFill } from "react-icons/bs";
 import { RequestFeedback } from "@/types/search.type";
 import { useAuth } from "@/context/auth-context";
@@ -26,6 +24,7 @@ export default function InputSearch() {
     const [yourQuestion, setYourQuestion] = useState<string>("")
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
     const { loginId } = useAuth()
+    const [assistanceList, setAssistanceList] = useState<string[]>([])
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
@@ -74,6 +73,25 @@ export default function InputSearch() {
         }
     }
 
+    useEffect(() => {
+        setIsLoading(true);
+        const fetchData = async () => {
+            try {
+                const data = await getAssistants(loginId);
+
+                if(typeof data === "boolean") return null
+                setAssistanceList(setFormatAssistant(data))
+
+            } catch(error) {
+                console.error("Error fetching assistant list:", error);
+            } finally {
+                setIsLoading(false);
+            }
+            
+        };
+        fetchData();
+    }, [loginId]);
+
     return (
         <div>
             {!isSubmitted && (
@@ -105,18 +123,18 @@ export default function InputSearch() {
                             <SelectValue placeholder="Assistance name" />
                         </SelectTrigger>
                         <SelectContent>
-                            {assistantList.map((val) => (
+                            {assistanceList.map((val, index) => (
                                 <SelectItem 
-                                    key={val.key} 
-                                    value={val.text}
-                                    onClick={() => setAssistance(val.text)}
-                                >{val.text}</SelectItem>
+                                    key={index} 
+                                    value={val}
+                                    onClick={() => setAssistance(val.trim())}
+                                >{val.trim()}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
 
                     <div className="flex gap-2 items-center">
-                        <FAQButton/>
+                        {/* <FAQButton/> */}
 
                         <div
                             className="flex rounded-full mx-auto bg-gradient-to-r from-[#1E90FF] via-[#1E90FF] to-[#125699] p-1"

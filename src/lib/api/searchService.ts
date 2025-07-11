@@ -48,6 +48,7 @@ export async function sendFeedback(value: RequestFeedback) {
     return data.data
 
   } catch (err) {
+    console.error("Get FAQ error", err);
     return { Response: "fail" };
   }
 }

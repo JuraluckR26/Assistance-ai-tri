@@ -13,13 +13,12 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, FileDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, FileDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 // import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -36,7 +35,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ButtonFilter } from "./ButtonFilter"
-// import { ButtonFilter } from "./ButtonFilter"
 
 const data: Payment[] = [
   {

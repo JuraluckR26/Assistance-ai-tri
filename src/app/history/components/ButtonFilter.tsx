@@ -11,19 +11,12 @@ import {
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { assistantList } from "@/lib/data"
 import { useState } from "react"
-import { Calendar22 } from "./DatePicker"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import { format } from "date-fns"
-import { Label } from "@/components/ui/label"
 
 export function ButtonFilter() {
     const [open, setOpen] = useState(false) 
     const [assistance, setAssistance] = useState<string>("")
     const [dateOption, setDateOption] = useState("Today")
-    const [dateFrom, setDateFrom] = useState<Date | undefined>(new Date())
-    const [dateTo, setDateTo] = useState<Date | undefined>(new Date())
+    
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { checkAuthenticateByLoginId, checkAuthenticateByToken, checkLoginAuthenByEmail } from '@/lib/api/authenService';
 import { useAuth } from '@/context/auth-context';
 
@@ -11,11 +11,11 @@ interface Props {
 export default function AuthTokenGuard({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const { setLoginId } = useAuth();
 
   useEffect(() => {
-    let isMounted = true;
+    const isMounted = true;
 
     const checkToken = async () => {
         const queryToken = new URLSearchParams(window.location.search).get('token');
@@ -82,7 +82,7 @@ export default function AuthTokenGuard({ children }: Props) {
 
   if (pathname.startsWith('/login')) return <>{children}</>;
 
-  if (isAuthenticated === null) return <div>Loading...</div>;
+  if (!isAuthenticated) return <div className="flex items-center justify-center h-screen text-xl">กำลังโหลดหน้า...</div>;
 
   return <>{isAuthenticated && children}</>
 }
