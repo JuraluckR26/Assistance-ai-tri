@@ -8,8 +8,6 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import AuthTokenGuard from "@/components/layout/AuthTokenGuard";
 import HeaderPage from "@/components/layout/Header";
 import { AppProviders } from "@/context/AppProviders";
-import { AssistantProvider } from "@/context/assistant-context";
-import AssistantGate from "@/components/layout/AssistantGate";
 
 export const metadata: Metadata = {
   title: "AI-Desk",
@@ -39,29 +37,25 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AppProviders>
           <AuthTokenGuard>
-            <AssistantProvider>
-              <AssistantGate>
-                <SidebarProvider>
-                  <AppSidebar />
-                  <SidebarInset>
-                    <header>
-                      <HeaderPage/>
-                    </header>
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
+                <header>
+                  <HeaderPage/>
+                </header>
 
-                    <main className="flex-1 min-h-screen overflow-auto">
-                      <div className="px-0">
-                        <>
-                          {children}
-                        </>
-                      </div>
-                    </main>
+                <main className="flex-1 min-h-screen overflow-auto">
+                  <div className="px-0">
+                    <>
+                      {children}
+                    </>
+                  </div>
+                </main>
 
-                  </SidebarInset>
-                </SidebarProvider>
+              </SidebarInset>
+            </SidebarProvider>
 
-                <Toaster richColors position="top-right" />
-              </AssistantGate>
-            </AssistantProvider>
+            <Toaster richColors position="top-right" />
           </AuthTokenGuard>
         </AppProviders>
       </body>

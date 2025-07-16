@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation"
 import { RequestLogin } from "@/types/auth.type"
 import { useAuth } from "@/context/auth-context"
 import { FcGoogle } from "react-icons/fc"
+import { getAssistants } from "@/lib/api/chatbotService"
 
 export function LoginForm({
   className,
@@ -39,6 +40,11 @@ export function LoginForm({
             const data = await checkLoginAuthenByUserPW(payload)
             
             if (data?.IsAuthenticated) {
+                const assistantVal = await getAssistants(data.LoginId);
+                if (assistantVal?.IsCanChat !== undefined) {
+                    localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
+                }
+
                 localStorage.setItem("loginId", data.LoginId);
                 setLoginId(data.LoginId)
                 router.replace('/search')

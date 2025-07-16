@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
   const redirectDestination = new URL('/', baseUrl);
   const response = NextResponse.redirect(redirectDestination);
 
-  response.cookies.set('email', email, { path: '/', maxAge: 60 * 5, httpOnly: true });
+  response.cookies.set('email', email, { path: '/', maxAge: 60 * 5, httpOnly: false });
 
   return response
 }

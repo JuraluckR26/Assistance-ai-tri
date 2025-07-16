@@ -1,8 +1,8 @@
 
 export default function useLogout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('loginId');
-    localStorage.removeItem('userId');
-  
-    window.location.href = '/login';
+    if (typeof window !== "undefined") {
+        window.localStorage.clear();
+        document.cookie = "email=; path=/; max-age=0";
+        window.location.href = "/login";
+    }
 }

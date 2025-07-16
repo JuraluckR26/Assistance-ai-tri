@@ -14,7 +14,6 @@ import { RequestFeedback } from "@/types/search.type";
 import { useAuth } from "@/context/auth-context";
 import Feedback from "@/components/shared/Feedback";
 import Loader from "@/components/shared/loading";
-import { useAssistant } from "@/context/assistant-context";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -26,7 +25,7 @@ export default function InputSearch() {
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
     const { loginId } = useAuth()
     const [assistantAready, setAssistantAready] = useState<string[]>([])
-    const { assistantList } = useAssistant();
+    const assistantList = localStorage.getItem('assistant_list');
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
