@@ -24,12 +24,13 @@ export default function AuthTokenGuard({ children }: Props) {
 
         if (queryToken) return await authenticateWithToken(queryToken);
         if (localLoginId) return await authenticateWithLoginId(localLoginId);
-        return await authenticateWithSessionEmail();
+        return authenticateWithSessionEmail();
 
         async function authenticateWithToken(token: string) {
           const result = await checkAuthenticateByToken(token);
           if (!result?.IsAuthenticated) return redirectToLogin();
 
+          await settingValueToStorage(result.LoginId)
           await handleAuthSuccess(result.LoginId);
           localStorage.setItem('loginId', token);
         }
@@ -55,6 +56,7 @@ export default function AuthTokenGuard({ children }: Props) {
             const result = await checkLoginAuthenByEmail(email);
             if (!result?.IsAuthenticated) return redirectToLogin();
   
+            await settingValueToStorage(result.LoginId)
             await handleAuthSuccess(result.LoginId);
           } catch (e) {
             console.error('Session email fetch failed:', e);
@@ -62,14 +64,16 @@ export default function AuthTokenGuard({ children }: Props) {
           }
         }
 
-        async function handleAuthSuccess(loginId: string) {
-            if (!isMounted) return;
-    
-            const assistantVal = await getAssistants(loginId);
+        async function settingValueToStorage(loginId: string) {
+          const assistantVal = await getAssistants(loginId);
             if (assistantVal?.IsCanChat) {
               localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
               localStorage.setItem('assistant_list', assistantVal.AssistantList);
             }
+        }
+
+        async function handleAuthSuccess(loginId: string) {
+            if (!isMounted) return;
 
             setLoginId(loginId);
             setIsAuthenticated(true);

@@ -43,6 +43,7 @@ export function LoginForm({
                 const assistantVal = await getAssistants(data.LoginId);
                 if (assistantVal?.IsCanChat !== undefined) {
                     localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
+                    localStorage.setItem('assistant_list', assistantVal.AssistantList);
                 }
 
                 localStorage.setItem("loginId", data.LoginId);
