@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { checkAuthenticateByLoginId, checkAuthenticateByToken, checkLoginAuthenByEmail } from '@/lib/api/authenService';
-import { useAuth } from '@/context/auth-context';
 import { getAssistants } from '@/lib/api/chatbotService';
 
 interface Props {
@@ -13,7 +12,6 @@ export default function AuthTokenGuard({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const { setLoginId } = useAuth();
 
   useEffect(() => {
     let isMounted = true;
@@ -32,7 +30,6 @@ export default function AuthTokenGuard({ children }: Props) {
 
           await settingValueToStorage(result.LoginId)
           await handleAuthSuccess(result.LoginId);
-          localStorage.setItem('loginId', token);
         }
 
         async function authenticateWithLoginId(loginId: string) {
@@ -66,18 +63,17 @@ export default function AuthTokenGuard({ children }: Props) {
 
         async function settingValueToStorage(loginId: string) {
           const assistantVal = await getAssistants(loginId);
-            if (assistantVal?.IsCanChat) {
-              localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
-              localStorage.setItem('assistant_list', assistantVal.AssistantList);
-            }
+          if (assistantVal?.IsCanChat) {
+            localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
+            localStorage.setItem('assistant_list', assistantVal.AssistantList);
+          }
         }
 
         async function handleAuthSuccess(loginId: string) {
             if (!isMounted) return;
 
-            setLoginId(loginId);
-            setIsAuthenticated(true);
             localStorage.setItem('loginId', loginId);
+            setIsAuthenticated(true);
     
             if (pathname === '/login') {
               router.replace('/search');
@@ -102,7 +98,7 @@ export default function AuthTokenGuard({ children }: Props) {
       isMounted = false;
     };
 
-  }, [router, pathname, setLoginId]);
+  }, [router, pathname]);
 
   if (pathname.startsWith('/login')) return <>{children}</>;
 

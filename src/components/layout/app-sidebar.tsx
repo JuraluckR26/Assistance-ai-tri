@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   AudioWaveform,
   BotMessageSquare,
+  Clock3,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -26,7 +27,6 @@ import {
 import Image from "next/image"
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation"
-import { useAuth } from "@/context/auth-context"
 import { Separator } from "../ui/separator"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -34,29 +34,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const hiddenRoutes = ["/login"];
   const isHidden = hiddenRoutes.some(route => pathname.startsWith(route));
-  const { loginId } = useAuth()
   const [isCanChat, setIsCanChat] = React.useState(false)
-
-  let status: string | null = null
-  try {
-    if (typeof window !== "undefined") {
-      status = localStorage.getItem("status_chat")
-    }
-  } catch (e) {
-    console.warn("localStorage error:", e)
-  }
+  const [isloginId, setIsLoginId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if(status === 'true'){
-      setIsCanChat(true)
-    }
-  }, [status]);
+    const storedChat = localStorage.getItem('status_chat') === 'true';
+    const localLoginId = localStorage.getItem('loginId');
 
-  if (isHidden || !loginId) return null;
+    setIsCanChat(storedChat);
+    setIsLoginId(localLoginId);
+
+  }, [pathname]);
+
+  if (isHidden || !isloginId) return null;
 
   const data = {
     user: {
-      name: loginId,
+      name: isloginId,
       icon: UserRound
     },
     teams: [
@@ -87,12 +81,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Chat bot",
         url: "/chatbot",
         icon: BotMessageSquare,
-      }] : [])
-      // {
-      //   title: "History",
-      //   url: "/history",
-      //   icon: Clock3,
-      // },
+      }] : []),
+      {
+        title: "History",
+        url: "/history",
+        icon: Clock3,
+      },
     ],
     projects: [
       {

@@ -15,7 +15,6 @@ import { useState } from "react"
 import { checkLoginAuthenByUserPW } from "@/lib/api/authenService"
 import { useRouter } from "next/navigation"
 import { RequestLogin } from "@/types/auth.type"
-import { useAuth } from "@/context/auth-context"
 import { FcGoogle } from "react-icons/fc"
 import { getAssistants } from "@/lib/api/chatbotService"
 
@@ -26,7 +25,6 @@ export function LoginForm({
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const router = useRouter();
-    const { setLoginId } = useAuth()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -40,6 +38,8 @@ export function LoginForm({
             const data = await checkLoginAuthenByUserPW(payload)
             
             if (data?.IsAuthenticated) {
+                // await settingValueToStorage(data.LoginId)
+                // await handleAuthSuccess(data.LoginId);
                 const assistantVal = await getAssistants(data.LoginId);
                 if (assistantVal?.IsCanChat !== undefined) {
                     localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
@@ -47,7 +47,6 @@ export function LoginForm({
                 }
 
                 localStorage.setItem("loginId", data.LoginId);
-                setLoginId(data.LoginId)
                 router.replace('/search')
             } else {
                 alert("ลงชื่อเข้าใช้ไม่สำเร็จ username หรือ password ไม่ถูกต้อง");
@@ -60,6 +59,19 @@ export function LoginForm({
                 console.error("Unknown error from login", err)
             }
         }
+    }
+
+    async function settingValueToStorage(loginId: string) {
+        const assistantVal = await getAssistants(loginId);
+        if (assistantVal?.IsCanChat) {
+          localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
+          localStorage.setItem('assistant_list', assistantVal.AssistantList);
+        }
+    }
+
+    async function handleAuthSuccess(loginId: string) {
+        localStorage.setItem('loginId', loginId);
+        router.replace('/search')
     }
 
     const handleLogin = (e: React.FormEvent) => {

@@ -9,7 +9,6 @@ import { searchKhunJaiDee } from "@/lib/api/searchService";
 import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
 import Loader from "@/components/shared/loading";
 import { setFormatFromSearch } from "@/utils/formatting";
-import { useAuth } from "@/context/auth-context";
 import { FcReading } from "react-icons/fc";
 import Feedback from "@/components/shared/Feedback";
 import { Separator } from "@/components/ui/separator";
@@ -24,9 +23,11 @@ export default function InputSearch() {
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
     const [emptyView, setEmptyView] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null);
-    const { loginId } = useAuth()
     const [openDocList, setOpenDocList] = useState<boolean>(false)
+    const loginId = localStorage.getItem('loginId');
     
+    if(!loginId) return
+
     function checkEmptyResponse(data: {Response?: string; SearchDocument?: string; SearchDocumentLocation?: string;}): boolean {
         return (
             !data.Response?.trim() &&

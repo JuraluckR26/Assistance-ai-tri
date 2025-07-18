@@ -11,7 +11,6 @@ import { MappedSearchResponse, RequestSearchChat } from "@/types/chatbot.type";
 import { setFormatAssistant, setFormatFromSearchChat } from "@/utils/formatting";
 import { BsChatDotsFill } from "react-icons/bs";
 import { RequestFeedback } from "@/types/search.type";
-import { useAuth } from "@/context/auth-context";
 import Feedback from "@/components/shared/Feedback";
 import Loader from "@/components/shared/loading";
 
@@ -23,9 +22,11 @@ export default function InputSearch() {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [yourQuestion, setYourQuestion] = useState<string>("")
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
-    const { loginId } = useAuth()
     const [assistantAready, setAssistantAready] = useState<string[]>([])
     const assistantList = localStorage.getItem('assistant_list');
+    const loginId = localStorage.getItem('loginId');
+    
+    if(!loginId) return
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
