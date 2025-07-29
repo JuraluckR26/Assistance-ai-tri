@@ -15,7 +15,7 @@ export default function HeaderPage() {
 
     const menuMap: Record<string, string> = {
         "/search": "Ask Khun Jai Dee (ธุรกิจหลังการขาย, เทเลเทค)",
-        "/chatbot": "Chat bot",
+        "/assistant": "AI Assistant",
         "/history": "History",
     }
       

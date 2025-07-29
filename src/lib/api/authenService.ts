@@ -4,6 +4,7 @@ import axios from "axios";
 export type AuthResult = {
     IsAuthenticated: boolean;
     LoginId: string;
+    IsCanChat: boolean;
 };
 
 export async function checkAuthenticateByToken(token: string): Promise<AuthResult> {
@@ -15,7 +16,7 @@ export async function checkAuthenticateByToken(token: string): Promise<AuthResul
     }
     catch (err: unknown) {
         console.error('checkAuthenticateByToken error', err);
-        return { IsAuthenticated: false, LoginId: '' };
+        return { IsAuthenticated: false, LoginId: '', IsCanChat: false };
     }
   
 }
@@ -29,11 +30,11 @@ export async function checkAuthenticateByLoginId(loginId: string): Promise<AuthR
     } 
     catch (err: unknown) {
         console.error('checkAuthenticateByLoginId error', err);
-        return { IsAuthenticated: false, LoginId: '' };
+        return { IsAuthenticated: false, LoginId: '', IsCanChat: false };
     }
 }
 
-export async function checkLoginAuthenByUserPW(data: RequestLogin) {
+export async function checkLoginAuthenByUserPW(data: RequestLogin): Promise<AuthResult> {
     try {
         const response = await axios.post<AuthResult>("/api/auth/userpw", {
             data
@@ -43,7 +44,7 @@ export async function checkLoginAuthenByUserPW(data: RequestLogin) {
     }
     catch (err: unknown) {
         console.error('checkLoginAuthenByUserPW error', err);
-        return { IsAuthenticated: false, LoginId: '' };
+        return { IsAuthenticated: false, LoginId: '', IsCanChat: false };
     }
 }
 

@@ -12,11 +12,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { checkLoginAuthenByUserPW } from "@/lib/api/authenService"
+import { checkAuthenticateByLoginId, checkLoginAuthenByUserPW } from "@/lib/api/authenService"
 import { useRouter } from "next/navigation"
 import { RequestLogin } from "@/types/auth.type"
 import { FcGoogle } from "react-icons/fc"
-import { getAssistants } from "@/lib/api/chatbotService"
+import { useAuth } from "@/context/AppProviders"
+import { useAuthStore } from "@/stores/useAuthStore"
+import { set } from "date-fns"
 
 export function LoginForm({
   className,
@@ -25,6 +27,7 @@ export function LoginForm({
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const router = useRouter();
+    const { setLoginData } = useAuthStore();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -36,18 +39,9 @@ export function LoginForm({
             };
 
             const data = await checkLoginAuthenByUserPW(payload)
-            
             if (data?.IsAuthenticated) {
-                // await settingValueToStorage(data.LoginId)
-                // await handleAuthSuccess(data.LoginId);
-                const assistantVal = await getAssistants(data.LoginId);
-                if (assistantVal?.IsCanChat !== undefined) {
-                    localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
-                    localStorage.setItem('assistant_list', assistantVal.AssistantList);
-                }
-
-                localStorage.setItem("loginId", data.LoginId);
-                router.replace('/search')
+                setLoginData(data.LoginId, data.IsCanChat);
+                router.replace('/search');
             } else {
                 alert("ลงชื่อเข้าใช้ไม่สำเร็จ username หรือ password ไม่ถูกต้อง");
             }
@@ -61,23 +55,12 @@ export function LoginForm({
         }
     }
 
-    async function settingValueToStorage(loginId: string) {
-        const assistantVal = await getAssistants(loginId);
-        if (assistantVal?.IsCanChat) {
-          localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
-          localStorage.setItem('assistant_list', assistantVal.AssistantList);
-        }
-    }
-
-    async function handleAuthSuccess(loginId: string) {
-        localStorage.setItem('loginId', loginId);
-        router.replace('/search')
-    }
-
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault()
         window.location.href = '/api/auth/glogin/start'
     }
+    
+    // if (isCheckingLogin) return <div className="flex items-center justify-center h-screen text-xl text-gray-500">กำลังตรวจ Username และ Password...</div>;
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>

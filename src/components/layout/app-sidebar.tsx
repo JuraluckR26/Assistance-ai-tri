@@ -26,31 +26,34 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { motion } from "framer-motion";
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Separator } from "../ui/separator"
+import { useAuth } from "@/context/AppProviders"
+import { useAuthStore } from "@/stores/useAuthStore"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open } = useSidebar()
   const pathname = usePathname();
   const hiddenRoutes = ["/login"];
   const isHidden = hiddenRoutes.some(route => pathname.startsWith(route));
-  const [isCanChat, setIsCanChat] = React.useState(false)
-  const [isloginId, setIsLoginId] = React.useState<string | null>(null);
+  const { isCanChat, loginId } = useAuthStore();
+
+  const router = useRouter();
 
   React.useEffect(() => {
-    const storedChat = localStorage.getItem('status_chat') === 'true';
-    const localLoginId = localStorage.getItem('loginId');
+    // const storedChat = localStorage.getItem('status_chat') === 'true';
+    // const localLoginId = localStorage.getItem('loginId');
 
-    setIsCanChat(storedChat);
-    setIsLoginId(localLoginId);
+    // setIsCanChat(storedChat);
+    // setIsLoginId(localLoginId);
 
-  }, [pathname]);
+  }, [pathname, isCanChat, loginId]);
 
-  if (isHidden || !isloginId) return null;
+  if (isHidden || !loginId) return null;
 
   const data = {
     user: {
-      name: isloginId,
+      name: loginId,
       icon: UserRound
     },
     teams: [
@@ -78,8 +81,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: MessageCircleMore
       },
       ...(isCanChat ? [{
-        title: "Chat bot",
-        url: "/chatbot",
+        title: "AI Assistant",
+        url: "/assistant",
         icon: BotMessageSquare,
       }] : []),
       {

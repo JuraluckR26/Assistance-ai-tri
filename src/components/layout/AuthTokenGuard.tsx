@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { checkAuthenticateByLoginId, checkAuthenticateByToken, checkLoginAuthenByEmail } from '@/lib/api/authenService';
-import { getAssistants } from '@/lib/api/chatbotService';
+import { useAuthStore } from '@/stores/useAuthStore';
+import Loader2 from '../shared/loading2';
 
 interface Props {
     children: React.ReactNode;
@@ -12,97 +13,79 @@ export default function AuthTokenGuard({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { loginId, setLoginData } = useAuthStore();
+  console.log(isAuthenticated)
 
   useEffect(() => {
-    let isMounted = true;
-
-    const checkToken = async () => {
+    const checkAuth = async () => {
+      try {
         const queryToken = new URLSearchParams(window.location.search).get('token');
-        const localLoginId = localStorage.getItem('loginId');
 
+        if (loginId) return await authenticateWithLoginId(loginId);
         if (queryToken) return await authenticateWithToken(queryToken);
-        if (localLoginId) return await authenticateWithLoginId(localLoginId);
         return authenticateWithSessionEmail();
 
-        async function authenticateWithToken(token: string) {
-          const result = await checkAuthenticateByToken(token);
-          if (!result?.IsAuthenticated) return redirectToLogin();
-
-          await settingValueToStorage(result.LoginId)
-          await handleAuthSuccess(result.LoginId);
+        async function authenticateWithLoginId(userId: string) {
+          const result = await checkAuthenticateByLoginId(userId);
+          // if (!result.IsAuthenticated) return redirectToLogin();
+          await handleAuthSuccess();
         }
 
-        async function authenticateWithLoginId(loginId: string) {
-          const result = await checkAuthenticateByLoginId(loginId);
-          if (!result?.IsAuthenticated) {
-            localStorage.removeItem('loginId');
-            return redirectToLogin();
-          }
-  
-          await handleAuthSuccess(result.LoginId);
+        async function authenticateWithToken(userId: string) {
+          const result = await checkAuthenticateByToken(userId);
+          if (!result.IsAuthenticated) return redirectToLogin();
+
+          setLoginData(userId, result.IsCanChat);
+          await handleAuthSuccess();
         }
 
         async function authenticateWithSessionEmail() {
-          try {
-            const res = await fetch('/api/auth/session');
-            const data = await res.json();
-            const email = data?.email;
-  
-            if (!email) return redirectToLogin();
-  
-            const result = await checkLoginAuthenByEmail(email);
-            if (!result?.IsAuthenticated) return redirectToLogin();
-  
-            await settingValueToStorage(result.LoginId)
-            await handleAuthSuccess(result.LoginId);
-          } catch (e) {
-            console.error('Session email fetch failed:', e);
-            redirectToLogin();
+          const sessionEmail = await fetch('/api/auth/session');
+          const data = await sessionEmail.json();
+          const email = data?.email;
+
+          if (!email) {
+            setIsAuthenticated(false);
+            return;
           }
+
+          const result = await checkLoginAuthenByEmail(email);
+          if (!result.IsAuthenticated) return redirectToLogin();
+
+          setLoginData(result.LoginId, result.IsCanChat);
+          handleAuthSuccess();
         }
 
-        async function settingValueToStorage(loginId: string) {
-          const assistantVal = await getAssistants(loginId);
-          if (assistantVal?.IsCanChat) {
-            localStorage.setItem('status_chat', JSON.stringify(assistantVal.IsCanChat));
-            localStorage.setItem('assistant_list', assistantVal.AssistantList);
-          }
-        }
-
-        async function handleAuthSuccess(loginId: string) {
-            if (!isMounted) return;
-
-            localStorage.setItem('loginId', loginId);
-            setIsAuthenticated(true);
-    
-            if (pathname === '/login') {
-              router.replace('/search');
-            } 
-            
+        async function handleAuthSuccess() {
+          setIsAuthenticated(true);
+          if (pathname === '/login') {
+            router.replace('/search');
+          } 
         }
 
         function redirectToLogin() {
-          if (isMounted) {
-            window.localStorage.clear();
-            setTimeout(() => {
-              setIsAuthenticated(false);
-              router.replace('/login');
-            }, 300);
-          }
+          setIsAuthenticated(false);
+          setTimeout(() => {
+            router.replace('/login');
+          }, 300);
         }
-
+        
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      } 
     }
-    checkToken();
+    checkAuth();
 
-    return () => {
-      isMounted = false;
-    };
+  }, [router, pathname, loginId, setLoginData]);
 
-  }, [router, pathname]);
-
-  if (pathname.startsWith('/login')) return <>{children}</>;
-
-  if (isAuthenticated === null) return <div className="flex items-center justify-center h-screen text-xl text-gray-500">กำลังตรวจสอบข้อมูล...</div>;
-
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2/>
+        </div>
+      </div>
+    );
+  }
   return <>{children}</>
 }

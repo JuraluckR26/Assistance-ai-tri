@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const { loginId } = await req.json();
 
-    const response = await httpClient.post("GetMiraiAuthenByLoginId", loginId);
+    const response = await httpClient.post("GetMiraiAuthenByLoginId2", loginId);
 
     return NextResponse.json(response.data);
   } catch (error) {

@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AppProviders>
+        <>
           <AuthTokenGuard>
             <SidebarProvider>
               <AppSidebar />
@@ -57,7 +57,7 @@ export default function RootLayout({
 
             <Toaster richColors position="top-right" />
           </AuthTokenGuard>
-        </AppProviders>
+        </>
       </body>
     </html>
   );

@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const { data } = await req.json();
 
-    const response = await httpClient.post("GetAuthenByLogin", data);
+    const response = await httpClient.post("GetAuthenByLogin2", data);
 
     return NextResponse.json(response.data);
     

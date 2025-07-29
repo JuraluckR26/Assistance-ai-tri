@@ -13,6 +13,7 @@ import { BsChatDotsFill } from "react-icons/bs";
 import { RequestFeedback } from "@/types/search.type";
 import Feedback from "@/components/shared/Feedback";
 import Loader from "@/components/shared/loading";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -24,9 +25,10 @@ export default function InputSearch() {
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
     const [assistantAready, setAssistantAready] = useState<string[]>([])
     const assistantList = localStorage.getItem('assistant_list');
-    const loginId = localStorage.getItem('loginId');
+    // const loginId = localStorage.getItem('loginId');
+    const { loginId } = useAuthStore();
     
-    if(!loginId) return
+    if(!loginId) return null;
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
@@ -106,7 +108,7 @@ export default function InputSearch() {
                     className="border-none rounded-tl-xl rounded-tr-xl"
                     onChange={(e) => setQuestion(e.target.value)}
                     onKeyDown={(e) => {
-                        if (e.key === "Enter") {
+                        if (e.key === "Enter" && !e.shiftKey) {
                             e.preventDefault();
                             handleSubmit();
                         }

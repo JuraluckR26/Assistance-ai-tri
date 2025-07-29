@@ -14,16 +14,24 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Separator } from "@/components/ui/separator"
 import { assistantList } from "@/lib/data"
 import { Filter } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function ButtonFilter() {
     const [open, setOpen] = useState(false) 
     const [assistance, setAssistance] = useState<string>("")
     const [dateOption, setDateOption] = useState("today")
-    
+
+    const panelRef = useRef<HTMLDivElement>(null);
+    const togglePanel = () => setOpen(!open);
+
+    function handleFilter() {
+        console.log("Filter applied with:", { assistance, dateOption });
+        setOpen(false);
+    }
+
     return (
         <>
-            <Menubar>
+            {/* <Menubar>
                 <MenubarMenu>
                     <MenubarTrigger className="flex gap-1"><Filter size={14}/> Filter</MenubarTrigger>
                     <MenubarContent className="bg-gray-100">
@@ -33,7 +41,7 @@ export function ButtonFilter() {
                             <div className="col-start-1 col-end-3"><Label>Assistant</Label></div>
                             <div className="col-span-4 col-end-7">
                                 <Select value={assistance} onValueChange={setAssistance}>
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger className="w-full bg-white">
                                         <SelectValue placeholder="Select assistant" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -72,14 +80,73 @@ export function ButtonFilter() {
                                 <Button variant="outline">Cancel</Button>
                                 <Button type="button" className="bg-blue-600 hover:bg-blue-700">Apply</Button>
                             </div>
-                            {/* <div className="col-span-5 grid grid-col-1 gap-2">
-                                <Button type="button">Save changes</Button>
-                                <Button className="" variant="outline">Cancel</Button>
-                            </div> */}
                         </div>
                     </MenubarContent>
                 </MenubarMenu>
-            </Menubar>
+            </Menubar> */}
+            <div className="relative inline-block text-left">
+                <button
+                    onClick={togglePanel}
+                    className="flex items-center gap-2 px-3 py-1.5 border rounded-md shadow-sm bg-white hover:bg-gray-100 text-sm font-medium"
+                >
+                    <Filter className="w-4 h-4" />
+                    Filter
+                </button>
+
+                {open && (
+                    <div
+                        ref={panelRef}
+                        className="absolute mt-2 w-100 rounded-md border bg-gray-100 shadow-xl z-60 "
+                    >
+                        <div className="p-2 ml-2"><b>Search Filter</b></div>
+                        <Separator/>
+                        <div className="grid grid-cols-6 gap-4 p-4">
+                            <div className="col-start-1 col-end-3"><Label>Assistant</Label></div>
+                            <div className="col-span-4 col-end-7">
+                                <Select value={assistance} onValueChange={setAssistance}>
+                                    <SelectTrigger className="w-full bg-white">
+                                        <SelectValue placeholder="Select assistant" />
+                                    </SelectTrigger>
+                                    <SelectContent className="absolute z-60">
+                                        {assistantList.map((val) => (
+                                            <SelectItem 
+                                                key={val.key} 
+                                                value={val.key}
+                                            >{val.text}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="col-start-1 col-end-3"><Label>Date</Label></div>
+                            <div className="col-span-4">
+                                <Select value={dateOption} onValueChange={setDateOption}>
+                                    <SelectTrigger className="w-[180px] bg-white">
+                                        <SelectValue placeholder="Today" />
+                                    </SelectTrigger>
+                                    <SelectContent className="absolute z-60">
+                                        <SelectGroup>
+                                            <SelectItem value="today">Today</SelectItem>
+                                            <SelectItem value="5days">Last 5 days</SelectItem>
+                                            <SelectItem value="30days">Last 30 days</SelectItem>
+                                            <SelectItem value="custom">Custom</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <Separator/>
+                        <div className="grid grid-cols-6 p-2">
+                            <div className="col-start-1 col-end-3">
+                                <Button variant="outline" onClick={() => { setAssistance(""), setDateOption("today"), setOpen(false) }}>Clear Filter</Button>
+                            </div>
+                            <div className="col-span-4 col-end-7 ml-auto flex gap-2">
+                                <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                                <Button type="button" className="bg-blue-600 hover:bg-blue-700" onClick={handleFilter}>Apply</Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
             {/* <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button variant="outline"><Filter/> Filter</Button>

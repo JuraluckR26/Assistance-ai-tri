@@ -13,7 +13,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDownToLine, ArrowUpDown, FileDown, MoreHorizontal } from "lucide-react"
+import { ArrowDownToLine, ArrowUpDown, FileDown, MoreHorizontal, ThumbsDown, ThumbsUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 // import { Checkbox } from "@/components/ui/checkbox"
@@ -35,135 +35,122 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ButtonFilter } from "./ButtonFilter"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { HoverCard } from "@radix-ui/react-hover-card"
+import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
 const data: Payment[] = [
   {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@example.com",
+    reportDate: "5 มิถุนายน 2568 เวลา 08:30",
+    users: "Usernam1",
+    questions: "อะไหล่รถกระบะ",
+    assistants: "AI Search PMG",
+    feedback: "Like",
+    descriptions: "-",
   },
   {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@example.com",
+    reportDate: "9 มิถุนายน 2568 เวลา 10:45",
+    users: "Usernam3",
+    questions: "อะไหล่รถยนต์",
+    assistants: "IT10 Service desk assistant",
+    feedback: "Like",
+    descriptions: "-",
   },
   {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@example.com",
+    reportDate: "9 มิถุนายน 2568 เวลา 11:11",
+    users: "Usernam2",
+    questions: "learn d คือระบบอะไร",
+    assistants: "AI Search PMG",
+    feedback: "Dislike",
+    descriptions: "คำตอบยังไม่สมบูรณ์",
   },
   {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@example.com",
+    reportDate: "10 มิถุนายน 2568 เวลา 08:35",
+    users: "Usernam12",
+    questions: "น้ำมันเกียร์ 75W-80 ใช้กับรถรุ่น dadsadsadsa",
+    assistants: "GIS assistant",
+    feedback: "Dislike",
+    descriptions: "อื่นๆ",
   },
   {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@example.com",
+    reportDate: "11 มิถุนายน 2568 เวลา 10:30",
+    users: "Usernam5",
+    questions: "เข้าใช้งาน Mirai ไม่ได้",
+    assistants: "MiRai Service desk assistant-new",
+    feedback: "Dislike",
+    descriptions: "ข้อมูลไม่ถูกต้อง",
   },
 ]
 
 export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+  reportDate: string
+  users: string
+  questions: string
+  assistants: string
+  feedback: "Like" | "Dislike"
+  descriptions: string
 }
 
 export const columns: ColumnDef<Payment>[] = [
-//   {
-//     id: "select",
-//     header: ({ table }) => (
-//       <Checkbox
-//         checked={
-//           table.getIsAllPageRowsSelected() ||
-//           (table.getIsSomePageRowsSelected() && "indeterminate")
-//         }
-//         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-//         aria-label="Select all"
-//       />
-//     ),
-//     cell: ({ row }) => (
-//       <Checkbox
-//         checked={row.getIsSelected()}
-//         onCheckedChange={(value) => row.toggleSelected(!!value)}
-//         aria-label="Select row"
-//       />
-//     ),
-//     enableSorting: false,
-//     enableHiding: false,
-//   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "reportDate",
+    header: "Report Date",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">{row.getValue("reportDate")}</div>
     ),
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    accessorKey: "users",
+    header: "Users",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("users")}</div>
+    ),
   },
   {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    accessorKey: "questions",
+    header: "Questions",
+    cell: ({ row }) => (
+      <>
+        <HoverCard>
+          <HoverCardTrigger><div className="capitalize md:max-w-[200px] xl:max-w-[400px] truncate">{row.getValue("questions")}</div></HoverCardTrigger>
+          <HoverCardContent className="w-full">
+            {row.getValue("questions")}
+          </HoverCardContent>
+        </HoverCard>
+      </>
+    ),
+  },
+  {
+    accessorKey: "assistants",
+    header: "Assistants",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("assistants")}</div>
+    ),
+  },
+  {
+    accessorKey: "feedback",
+    header: "Feedback",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"))
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount)
-
-      return <div className="text-right font-medium">{formatted}</div>
+      const feedback = row.original.feedback;
+      return feedback === "Like" ? (
+        <div className="flex items-center gap-2">
+          <Avatar><AvatarFallback className="bg-green-200"><ThumbsUp size={16} className="text-green-600"/></AvatarFallback></Avatar>
+          <div className="text-green-600 font-medium">{feedback}</div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <Avatar><AvatarFallback className="bg-gray-200"><ThumbsDown size={16} className="text-gray-600"/></AvatarFallback></Avatar>
+          <div className="text-gray-500 font-medium">{feedback}</div>
+        </div>
+      )
     },
   },
   {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    accessorKey: "descriptions",
+    header: "Descriptions",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("descriptions")}</div>
+    ),
   },
 ]
 
@@ -175,6 +162,7 @@ export function DataTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [globalFilter, setGlobalFilter] = React.useState("")
 
   const table = useReactTable({
     data,
@@ -192,6 +180,20 @@ export function DataTable() {
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const { users, questions } = row.original
+      const searchValue = filterValue.toLowerCase()
+      return (
+        users.toLowerCase().includes(searchValue) ||
+        questions.toLowerCase().includes(searchValue)
+      )
+
+      // ALL
+      // const values = Object.values(row.original).join(" ").toLowerCase()
+      // return values.includes(filterValue.toLowerCase())
     },
   })
 
@@ -202,24 +204,32 @@ export function DataTable() {
               {/* <FilterModal/> */}
                 <ButtonFilter/>
             </div>
-            <div className="flex flex-row gap-2">
-                <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+            <div className="flex flex-row gap-2 ml-2">
+                {/* <Input
+                    placeholder="Filter users..."
+                    value={(table.getColumn("users")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
+                        table.getColumn("users")?.setFilterValue(event.target.value)
                     }
                     className="max-w-md rounded-full"
+                /> */}
+                <Input
+                  placeholder="Search user or question..."
+                  value={globalFilter}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  className="w-48 md:w-64 xl:w-100 rounded-full"
                 />
+  
                 <Button variant={"outline"}><ArrowDownToLine/>Download</Button>
             </div>
         </div>
         <p className="mb-2">Today</p>
-        <div className="rounded-md border">
-          <Table>
+        <div className="rounded-md border overscroll-x-contain">
+          <Table className="min-w-[800px]">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
+                  <TableHead>No.</TableHead>
                   {headerGroup.headers.map((header) => {
                     return (
                       <TableHead key={header.id}>
@@ -237,11 +247,12 @@ export function DataTable() {
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
+                table.getRowModel().rows.map((row, index) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                   >
+                    <TableCell>{index+1}</TableCell>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(

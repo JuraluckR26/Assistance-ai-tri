@@ -14,42 +14,34 @@ export default function Resent() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [emptyView, setEmptyView] = useState<boolean>(false)
 
-    function checkResponse(data: unknown): data is ResponseResent {
-        return (
-            typeof data === "object" &&
-            data !== null &&
-            "Response" in data &&
-            "SearchDocument" in data &&
-            "SearchDocumentLocation" in data &&
-            "Date" in data
-        );
+    const fetchResent = async () => {
+        setIsLoading(true);
+        try {
+            const data = await getResent();
+            if (data.Response === "" && data.SearchDocument === "" && data.SearchDocumentLocation === "" && data.Date === "") {
+                setEmptyView(true);
+            }
+
+            const result = await setFormatFromResent(data);
+            setRecent(result);
+            localStorage.setItem("resent", JSON.stringify(result));
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Error fetching resent:", error);
+            setEmptyView(true);
+        }
     }
 
     useEffect(() => {
-        setIsLoading(true);
-        const fetchData = async () => {
-            try {
-                const data = await getResent();
-    
-                if (typeof data === "string") {
-                    setEmptyView(true);
-                } else if (checkResponse(data)) {
-                    const result = setFormatFromResent(data);
-                    setRecent(result);
-                    setEmptyView(result.length === 0);
-                } else {
-                    console.warn("Unexpected response format", data);
-                    setEmptyView(true);
-                }
-            } catch(error) {
-                console.error("Error fetching resent:", error);
-                setEmptyView(true);
-            } finally {
-                setIsLoading(false);
-            }
-            
-        };
-        fetchData();
+        const localResent = localStorage.getItem('resent');
+        
+        if (!localResent) {
+            fetchResent();
+        } else {
+            setRecent(JSON.parse(localResent));
+            setIsLoading(false);
+        }
+
     }, []);
 
     return (

@@ -53,7 +53,7 @@ export async function sendFeedback(value: RequestFeedback) {
   }
 }
 
-export async function getResent(): Promise<ResponseResent | string> {
+export async function getResent(): Promise<ResponseResent> {
   try {
     const { data } = await axios.post("/api/search/recent", {
       searchContent: "",
@@ -63,6 +63,7 @@ export async function getResent(): Promise<ResponseResent | string> {
 
   } catch (err: unknown) {
     const res = handleAxiosError(err);
-    return res.message
+    console.error("Error fetching resent:", res.message);
+    return { Response: "", SearchDocument: "", SearchDocumentLocation: "", Date: "" };
   }
 }
