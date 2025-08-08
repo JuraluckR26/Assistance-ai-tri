@@ -5,8 +5,8 @@ export async function POST(req: NextRequest) {
   try {
     const { searchContent, loginId } = await req.json();
 
-    const { data } = await httpClient.post("SearchSpeKJDAll", {searchContent, loginId});
-
+    const { data } = await httpClient.post("SearchSpeKJDAllNew", {searchContent, loginId});
+    
     return NextResponse.json(data);
     
   } catch (error) {

@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/stores/useAuthStore";
 import { RequestFeedback, RequestSearch, ResponseResent, ResponseSearch } from "@/types/search.type";
 import { handleAxiosError } from "@/utils/handleAxiosError";
 import axios from "axios";
@@ -10,6 +11,13 @@ export async function searchKhunJaiDee(value: RequestSearch): Promise<ResponseSe
     });
 
     const res = data?.data;
+    
+    if (res?.isAuthenticated === false) {
+      const { clearAuth } = useAuthStore.getState();
+      await clearAuth();
+      window.location.href = '/login';
+      return { Response: "", SearchDocument: "", SearchDocumentLocation: "", Response_Other: "", SearchDocument_Other: "", SearchDocumentLocation_Other: "" };
+    }
     
     if (!res) return { Response: "", SearchDocument: "", SearchDocumentLocation: "", Response_Other: "", SearchDocument_Other: "", SearchDocumentLocation_Other: "" };
 

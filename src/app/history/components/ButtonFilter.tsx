@@ -1,22 +1,16 @@
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarTrigger } from "@/components/ui/menubar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { assistantList } from "@/lib/data"
 import { Filter } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
-export function ButtonFilter() {
+interface ButtonFilterProps {
+  onApply: (filters: { assistance: string; dateOption: string }) => void;
+}
+
+export function ButtonFilter({ onApply }: ButtonFilterProps) {
     const [open, setOpen] = useState(false) 
     const [assistance, setAssistance] = useState<string>("")
     const [dateOption, setDateOption] = useState("today")
@@ -26,6 +20,7 @@ export function ButtonFilter() {
 
     function handleFilter() {
         console.log("Filter applied with:", { assistance, dateOption });
+        onApply({ assistance, dateOption });
         setOpen(false);
     }
 
@@ -137,7 +132,13 @@ export function ButtonFilter() {
                         <Separator/>
                         <div className="grid grid-cols-6 p-2">
                             <div className="col-start-1 col-end-3">
-                                <Button variant="outline" onClick={() => { setAssistance(""), setDateOption("today"), setOpen(false) }}>Clear Filter</Button>
+                                <Button 
+                                    variant="outline" 
+                                    onClick={() => { 
+                                        setAssistance(""); 
+                                        setDateOption("today"); 
+                                        setOpen(false); 
+                                }}>Clear Filter</Button>
                             </div>
                             <div className="col-span-4 col-end-7 ml-auto flex gap-2">
                                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

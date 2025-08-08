@@ -2,7 +2,7 @@ import InputSearch from "./components/InputSearch";
 
 export default function Page() {
     return (
-        <main className="w-full min-h-screen flex justify-center px-2">
+        <main className="w-full px-2">
             <header>
             </header>
             <div className="w-full py-0 px-0 flex justify-center">

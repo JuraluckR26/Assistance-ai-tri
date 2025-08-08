@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowUpRight } from "lucide-react";
-import { useEffect, useState } from "react";
-import { searchChat } from "@/lib/api/chatbotService";
+import { useCallback, useEffect, useState } from "react";
+import { getAssistants, searchChat } from "@/lib/api/chatbotService";
 import { MappedSearchResponse, RequestSearchChat } from "@/types/chatbot.type";
 import { setFormatAssistant, setFormatFromSearchChat } from "@/utils/formatting";
 import { BsChatDotsFill } from "react-icons/bs";
@@ -14,6 +14,7 @@ import { RequestFeedback } from "@/types/search.type";
 import Feedback from "@/components/shared/Feedback";
 import Loader from "@/components/shared/loading";
 import { useAuthStore } from "@/stores/useAuthStore";
+import Link from "next/link";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -24,11 +25,38 @@ export default function InputSearch() {
     const [yourQuestion, setYourQuestion] = useState<string>("")
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
     const [assistantAready, setAssistantAready] = useState<string[]>([])
-    const assistantList = localStorage.getItem('assistant_list');
-    // const loginId = localStorage.getItem('loginId');
     const { loginId } = useAuthStore();
     
-    if(!loginId) return null;
+    const loadAssistants = useCallback(async () => {
+        if(!loginId) return null;
+        setIsLoading(true);
+        try {
+            const cachedList = localStorage.getItem('assistant_list');
+            const timestamp = localStorage.getItem('assistant_list_timestamp');
+            const now = Date.now();
+            const CACHE_DURATION = 24 * 60 * 60 * 1000;
+
+            if (cachedList && timestamp && (now - parseInt(timestamp) < CACHE_DURATION)) {
+                setAssistantAready(setFormatAssistant(cachedList));
+                return;
+            }
+
+            const result = await getAssistants(loginId);
+            if (result.AssistantList) {
+                setAssistantAready(setFormatAssistant(result.AssistantList));
+            }
+        } catch (error) {
+            console.error("Error loading assistants:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [loginId]);
+
+    useEffect(() => {
+        if (loginId) {
+            loadAssistants();
+        }
+    }, [loginId, loadAssistants]);
 
     const handleSubmit = async () => {
         if (question.trim() === "") return
@@ -57,7 +85,7 @@ export default function InputSearch() {
             setYourQuestion(question)
 
             const feedbackObj: RequestFeedback = {
-                sender: loginId,
+                sender: loginId!,
                 searchText: question,
                 resultText: data.Response,
                 document: data.SearchDocument,
@@ -77,18 +105,7 @@ export default function InputSearch() {
         }
     }
 
-    useEffect(() => {
-        setIsLoading(true);
-
-        try {
-            if(!assistantList) return
-            setAssistantAready(setFormatAssistant(assistantList))
-        } catch(error) {
-            console.error("Error fetching assistant list:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [assistantList]);
+    if(!loginId) return null;
 
     return (
         <div>
@@ -182,14 +199,14 @@ export default function InputSearch() {
                                                         .filter(val => val?.url && val?.name)
                                                         .map((val, index) => (
                                                             <li key={index}>
-                                                              <a
+                                                              <Link
                                                                 href={val.url}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="text-blue-500 underline"
                                                               >
                                                                 {val.name}
-                                                              </a>
+                                                              </Link>
                                                             </li>
                                                     ))}
                                                 </ul>

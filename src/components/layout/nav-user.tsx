@@ -55,6 +55,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { handleLogout, isLoading } = useLogout();
 
   return (
     <SidebarMenu>
@@ -63,7 +64,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild> 
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
               {/* <Avatar className="h-8 w-8 rounded-lg border-2 border-gray-900">
                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -97,10 +98,23 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={useLogout}>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={handleLogout}
+              disabled={isLoading}
+              className="text-red-600 focus:text-red-600 hover:bg-gray-100 cursor-pointer"
+          >
+              {isLoading ? (
+                  <>
+                      {/* <Loader2 className="mr-2 h-4 w-4 animate-spin" /> */}
+                      <span>กำลังออกจากระบบ...</span>
+                  </>
+              ) : (
+                  <>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>ออกจากระบบ</span>
+                  </>
+              )}
+          </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

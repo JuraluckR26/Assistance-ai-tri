@@ -7,7 +7,6 @@ import { Toaster } from 'sonner';
 import { Geist, Geist_Mono } from 'next/font/google';
 import AuthTokenGuard from "@/components/layout/AuthTokenGuard";
 import HeaderPage from "@/components/layout/Header";
-import { AppProviders } from "@/context/AppProviders";
 
 export const metadata: Metadata = {
   title: "AI-Desk",

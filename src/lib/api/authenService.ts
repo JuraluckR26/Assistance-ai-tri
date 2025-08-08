@@ -7,6 +7,12 @@ export type AuthResult = {
     IsCanChat: boolean;
 };
 
+export interface LogoutState {
+    Status: string;
+    StatusMessage: string;
+    Location: string;
+};
+
 export async function checkAuthenticateByToken(token: string): Promise<AuthResult> {
     try {
         const response = await axios.post<AuthResult>("/api/auth/token", {token}); 
@@ -48,7 +54,7 @@ export async function checkLoginAuthenByUserPW(data: RequestLogin): Promise<Auth
     }
 }
 
-export async function checkLoginAuthenByEmail(email: string) {
+export async function checkLoginAuthenByEmail(email: string): Promise<AuthResult> {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     const res = await fetch(`${baseUrl}/api/auth/gmail`, {
         method: "POST",
@@ -57,4 +63,21 @@ export async function checkLoginAuthenByEmail(email: string) {
     });
 
     return await res.json();
+}
+
+export async function logoutByLoginId(loginId: string): Promise<LogoutState> {
+    try {
+        const response = await axios.post<LogoutState>("/api/auth/logout", {loginId});
+        const res = response?.data;
+
+        return res;
+    } 
+    catch (err: unknown) {
+        console.error('logoutByLoginId error', err);
+        return { 
+            Status: "error",
+            StatusMessage: "Logout failed",
+            Location: "/login" 
+        };
+    }
 }

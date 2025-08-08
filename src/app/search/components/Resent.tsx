@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { getResent } from "@/lib/api/searchService";
-import { DocumentItem, ResponseResent } from "@/types/search.type";
+import { DocumentItem } from "@/types/search.type";
 import { setFormatFromResent } from "@/utils/formatting";
 import { Loader, Newspaper } from "lucide-react";
 import Image from "next/image";
@@ -77,11 +77,11 @@ export default function Resent() {
                                 <Card key={item.link || index}>
                                     <CardContent>
                                         <CardTitle className="mb-2">
-                                            <a 
+                                            <Link 
                                                 href={item.link} 
                                                 target="_blank" 
                                                 className="no-underline hover:underline text-blue-600 font-semibold line-clamp-2"
-                                            >{index + 1}. {item.title}</a>
+                                            >{index + 1}. {item.title}</Link>
                                             <p className="font-normal text-gray-400 mt-1">{item.date}</p>
                                         </CardTitle>
                                         <CardDescription>

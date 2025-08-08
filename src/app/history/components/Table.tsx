@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import React, { useEffect, useState } from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,18 +13,10 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDownToLine, ArrowUpDown, FileDown, MoreHorizontal, ThumbsDown, ThumbsUp } from "lucide-react"
+import { ArrowDownToLine, ThumbsDown, ThumbsUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 // import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -38,51 +30,172 @@ import { ButtonFilter } from "./ButtonFilter"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { HoverCard } from "@radix-ui/react-hover-card"
 import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import ModalDetail from "./ModalDetail"
 
-const data: Payment[] = [
+const data: Reports[] = [
   {
-    reportDate: "5 มิถุนายน 2568 เวลา 08:30",
-    users: "Usernam1",
+    reportDate: "2 มิถุนายน 2568 เวลา 09:15",
+    users: "Username7",
     questions: "อะไหล่รถกระบะ",
     assistants: "AI Search PMG",
     feedback: "Like",
-    descriptions: "-",
+    descriptions: "-"
   },
   {
-    reportDate: "9 มิถุนายน 2568 เวลา 10:45",
-    users: "Usernam3",
-    questions: "อะไหล่รถยนต์",
+    reportDate: "3 มิถุนายน 2568 เวลา 10:45",
+    users: "Username14",
+    questions: "ขอคู่มือการใช้งานรถ",
     assistants: "IT10 Service desk assistant",
-    feedback: "Like",
-    descriptions: "-",
+    feedback: "Dislike",
+    descriptions: "คำตอบยังไม่สมบูรณ์"
   },
   {
-    reportDate: "9 มิถุนายน 2568 เวลา 11:11",
-    users: "Usernam2",
-    questions: "learn d คือระบบอะไร",
+    reportDate: "4 มิถุนายน 2568 เวลา 13:20",
+    users: "Username21",
+    questions: "บริการรถยกฉุกเฉิน",
+    assistants: "GIS assistant",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "5 มิถุนายน 2568 เวลา 08:30",
+    users: "Username3",
+    questions: "การเคลมประกันภัย",
+    assistants: "MiRai Service desk assistant-new",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "5 มิถุนายน 2568 เวลา 16:00",
+    users: "Username11",
+    questions: "ตารางคิวซ่อม",
     assistants: "AI Search PMG",
     feedback: "Dislike",
-    descriptions: "คำตอบยังไม่สมบูรณ์",
+    descriptions: "อื่นๆ"
   },
   {
-    reportDate: "10 มิถุนายน 2568 เวลา 08:35",
-    users: "Usernam12",
-    questions: "น้ำมันเกียร์ 75W-80 ใช้กับรถรุ่น dadsadsadsa",
+    reportDate: "6 มิถุนายน 2568 เวลา 09:50",
+    users: "Username25",
+    questions: "บริการตรวจเช็ครถฟรี",
+    assistants: "IT10 Service desk assistant",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "7 มิถุนายน 2568 เวลา 11:05",
+    users: "Username18",
+    questions: "วิธีเปลี่ยนยางอะไหล่",
     assistants: "GIS assistant",
-    feedback: "Dislike",
-    descriptions: "อื่นๆ",
+    feedback: "Like",
+    descriptions: "-"
   },
   {
-    reportDate: "11 มิถุนายน 2568 เวลา 10:30",
-    users: "Usernam5",
-    questions: "เข้าใช้งาน Mirai ไม่ได้",
+    reportDate: "8 มิถุนายน 2568 เวลา 15:25",
+    users: "Username9",
+    questions: "โปรโมชั่นยางรถยนต์",
     assistants: "MiRai Service desk assistant-new",
     feedback: "Dislike",
-    descriptions: "ข้อมูลไม่ถูกต้อง",
+    descriptions: "ข้อมูลไม่ถูกต้อง"
   },
-]
+  {
+    reportDate: "9 มิถุนายน 2568 เวลา 10:40",
+    users: "Username27",
+    questions: "ส่วนลดลูกค้าประจำ",
+    assistants: "AI Search PMG",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "10 มิถุนายน 2568 เวลา 14:10",
+    users: "Username2",
+    questions: "ข้อมูลประกันภัย",
+    assistants: "IT10 Service desk assistant",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "11 มิถุนายน 2568 เวลา 17:35",
+    users: "Username29",
+    questions: "การคืนสินค้าอะไหล่",
+    assistants: "GIS assistant",
+    feedback: "Dislike",
+    descriptions: "-"
+  },
+  {
+    reportDate: "12 มิถุนายน 2568 เวลา 09:00",
+    users: "Username5",
+    questions: "สอบถามวิธีจองคิวซ่อม",
+    assistants: "MiRai Service desk assistant-new",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "13 มิถุนายน 2568 เวลา 10:15",
+    users: "Username15",
+    questions: "ศูนย์บริการใกล้บ้าน",
+    assistants: "AI Search PMG",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "14 มิถุนายน 2568 เวลา 11:55",
+    users: "Username20",
+    questions: "เวลาทำการศูนย์บริการ",
+    assistants: "IT10 Service desk assistant",
+    feedback: "Dislike",
+    descriptions: "-"
+  },
+  {
+    reportDate: "15 มิถุนายน 2568 เวลา 08:45",
+    users: "Username8",
+    questions: "ราคาน้ำมันเครื่อง",
+    assistants: "GIS assistant",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "16 มิถุนายน 2568 เวลา 12:05",
+    users: "Username1",
+    questions: "การผ่อนชำระค่าซ่อม",
+    assistants: "MiRai Service desk assistant-new",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "17 มิถุนายน 2568 เวลา 13:30",
+    users: "Username24",
+    questions: "สอบถามอะไหล่แท้",
+    assistants: "AI Search PMG",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "18 มิถุนายน 2568 เวลา 15:15",
+    users: "Username12",
+    questions: "ระยะทางในการรับประกัน",
+    assistants: "IT10 Service desk assistant",
+    feedback: "Dislike",
+    descriptions: "-"
+  },
+  {
+    reportDate: "19 มิถุนายน 2568 เวลา 16:45",
+    users: "Username30",
+    questions: "ชำระเงินออนไลน์ได้ไหม",
+    assistants: "GIS assistant",
+    feedback: "Like",
+    descriptions: "-"
+  },
+  {
+    reportDate: "20 มิถุนายน 2568 เวลา 09:25",
+    users: "Username17",
+    questions: "ใบเสนอราคารถเก๋ง",
+    assistants: "MiRai Service desk assistant-new",
+    feedback: "Like",
+    descriptions: "-"
+  }
+];
 
-export type Payment = {
+export type Reports = {
   reportDate: string
   users: string
   questions: string
@@ -91,7 +204,7 @@ export type Payment = {
   descriptions: string
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Reports>[] = [
   {
     accessorKey: "reportDate",
     header: "Report Date",
@@ -154,15 +267,41 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ]
 
+// interface DataTableProps {
+//   filterValues: {
+//     assistance: string;
+//     dateOption: string;
+//   };
+// }
+
 export function DataTable() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [globalFilter, setGlobalFilter] = React.useState("")
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
+  const [globalFilter, setGlobalFilter] = useState("")
+  const [openDetail, setOpenDetail] = useState(false)
+  const [selectedData, setSelectedData] = useState<Reports | undefined>()
+  const [filterValues, setFilterValues] = useState<{ assistance: string; dateOption: string }>({
+    assistance: "",
+    dateOption: "today",
+  });
+  const dateLabelMap: Record<string, string> = {
+    "today": "Today",
+    "5days": "Last 5 days",
+    "30days": "Last 30 days",
+    "custom": "Custom date",
+  };
+
+  useEffect(() => {
+    // const filters: ColumnFiltersState = [];
+    
+    if (filterValues.assistance) {
+      setColumnFilters([{ id: "assistants", value: filterValues.assistance }]);
+    } else {
+      setColumnFilters([]);
+    }
+  }, [filterValues]);
 
   const table = useReactTable({
     data,
@@ -202,7 +341,7 @@ export function DataTable() {
         <div className="flex justify-between pb-2 pt-1">
             <div>
               {/* <FilterModal/> */}
-                <ButtonFilter/>
+                <ButtonFilter onApply={setFilterValues}/>
             </div>
             <div className="flex flex-row gap-2 ml-2">
                 {/* <Input
@@ -223,7 +362,9 @@ export function DataTable() {
                 <Button variant={"outline"}><ArrowDownToLine/>Download</Button>
             </div>
         </div>
-        <p className="mb-2">Today</p>
+        <p className="mb-2">
+          {dateLabelMap[filterValues.dateOption] || filterValues.dateOption}
+        </p>
         <div className="rounded-md border overscroll-x-contain">
           <Table className="min-w-[800px]">
             <TableHeader>
@@ -251,6 +392,11 @@ export function DataTable() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    onClick={() => {
+                      setSelectedData(row.original);
+                      setOpenDetail(true);
+                    }}
+                    className="cursor-pointer hover:bg-gray-100"
                   >
                     <TableCell>{index+1}</TableCell>
                     {row.getVisibleCells().map((cell) => (
@@ -276,6 +422,7 @@ export function DataTable() {
             </TableBody>
           </Table>
         </div>
+        <ModalDetail open={openDetail} onOpenChange={setOpenDetail} data={selectedData} />
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="text-muted-foreground flex-1 text-sm">
             {table.getFilteredSelectedRowModel().rows.length} of{" "}

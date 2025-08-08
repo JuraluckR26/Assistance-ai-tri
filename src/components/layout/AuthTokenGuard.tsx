@@ -1,7 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { checkAuthenticateByLoginId, checkAuthenticateByToken, checkLoginAuthenByEmail } from '@/lib/api/authenService';
+import { checkAuthenticateByToken, checkLoginAuthenByEmail } from '@/lib/api/authenService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import Loader2 from '../shared/loading2';
 
@@ -12,80 +12,91 @@ interface Props {
 export default function AuthTokenGuard({ children }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const { loginId, setLoginData } = useAuthStore();
-  console.log(isAuthenticated)
+  const { isAuthenticated, setLoginData, clearAuth } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleAuthSuccess = useCallback(async (loginId: string, isCanChat: boolean) => {
+    setLoginData(loginId, isCanChat);
+    if (pathname === '/login') {
+      await router.replace('/search');
+    }
+  },[setLoginData, pathname, router]);
+
+  const checkTokenAuth = useCallback(async (token: string) => {
+    const result = await checkAuthenticateByToken(token);
+    if (result.IsAuthenticated) {
+      await handleAuthSuccess(result.LoginId, result.IsCanChat);
+      return true;
+    }
+    return false;
+  },[handleAuthSuccess]);
+
+  const checkEmailAuth = useCallback(async (email: string) => {
+    const result = await checkLoginAuthenByEmail(email);
+    if (result.IsAuthenticated) {
+      await handleAuthSuccess(result.LoginId, result.IsCanChat);
+      return true;
+    }
+    return false;
+  }, [handleAuthSuccess]);
+
+  const handleAuthFailure = useCallback(async () => {
+    clearAuth();
+    if (pathname !== '/login') {
+      await router.replace('/login');
+    }
+  }, [clearAuth, pathname, router]);
+
+  useEffect(() => {
+    if (isAuthenticated === true && pathname === '/login') {
+      router.replace('/search');
+    }
+  }, [isAuthenticated, pathname, router]);
 
   useEffect(() => {
     const checkAuth = async () => {
+      if (isAuthenticated === true) return;
+
       try {
+        setIsLoading(true);
+
+        if (isAuthenticated === false) {
+          await handleAuthFailure();
+          return;
+        }
+
         const queryToken = new URLSearchParams(window.location.search).get('token');
-
-        if (loginId) return await authenticateWithLoginId(loginId);
-        if (queryToken) return await authenticateWithToken(queryToken);
-        return authenticateWithSessionEmail();
-
-        async function authenticateWithLoginId(userId: string) {
-          const result = await checkAuthenticateByLoginId(userId);
-          // if (!result.IsAuthenticated) return redirectToLogin();
-          await handleAuthSuccess();
+        if (queryToken && await checkTokenAuth(queryToken)) {
+          return;
         }
 
-        async function authenticateWithToken(userId: string) {
-          const result = await checkAuthenticateByToken(userId);
-          if (!result.IsAuthenticated) return redirectToLogin();
-
-          setLoginData(userId, result.IsCanChat);
-          await handleAuthSuccess();
+        const sessionEmail = await fetch('/api/auth/session');
+        const { email } = await sessionEmail.json();
+        if (email && await checkEmailAuth(email)) {
+          return;
         }
 
-        async function authenticateWithSessionEmail() {
-          const sessionEmail = await fetch('/api/auth/session');
-          const data = await sessionEmail.json();
-          const email = data?.email;
-
-          if (!email) {
-            setIsAuthenticated(false);
-            return;
-          }
-
-          const result = await checkLoginAuthenByEmail(email);
-          if (!result.IsAuthenticated) return redirectToLogin();
-
-          setLoginData(result.LoginId, result.IsCanChat);
-          handleAuthSuccess();
-        }
-
-        async function handleAuthSuccess() {
-          setIsAuthenticated(true);
-          if (pathname === '/login') {
-            router.replace('/search');
-          } 
-        }
-
-        function redirectToLogin() {
-          setIsAuthenticated(false);
-          setTimeout(() => {
-            router.replace('/login');
-          }, 300);
-        }
-        
+        // await handleAuthFailure();
       } catch (error) {
         console.error('Error checking authentication:', error);
-      } 
+        await handleAuthFailure();
+      } finally {
+        setIsLoading(false);
+      }
     }
     checkAuth();
+  }, [isAuthenticated, checkTokenAuth, checkEmailAuth, handleAuthFailure]);
 
-  }, [router, pathname, loginId, setLoginData]);
-
-  if (isAuthenticated === null) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2/>
-        </div>
+  const LoadingState = () => (
+    <div className="flex items-center justify-center h-screen">
+      <div className="flex flex-col items-center gap-2">
+        <Loader2 />
+        <p className="text-sm text-gray-500">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
       </div>
-    );
-  }
+    </div>
+  );
+
+  if (isLoading) return <LoadingState />
+
   return <>{children}</>
 }

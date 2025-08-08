@@ -12,13 +12,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { checkAuthenticateByLoginId, checkLoginAuthenByUserPW } from "@/lib/api/authenService"
+import { checkLoginAuthenByUserPW } from "@/lib/api/authenService"
 import { useRouter } from "next/navigation"
 import { RequestLogin } from "@/types/auth.type"
 import { FcGoogle } from "react-icons/fc"
-import { useAuth } from "@/context/AppProviders"
 import { useAuthStore } from "@/stores/useAuthStore"
-import { set } from "date-fns"
 
 export function LoginForm({
   className,
@@ -41,7 +39,9 @@ export function LoginForm({
             const data = await checkLoginAuthenByUserPW(payload)
             if (data?.IsAuthenticated) {
                 setLoginData(data.LoginId, data.IsCanChat);
-                router.replace('/search');
+                setTimeout(() => {
+                    router.replace('/search');
+                }, 300);
             } else {
                 alert("ลงชื่อเข้าใช้ไม่สำเร็จ username หรือ password ไม่ถูกต้อง");
             }
@@ -59,7 +59,6 @@ export function LoginForm({
         e.preventDefault()
         window.location.href = '/api/auth/glogin/start'
     }
-    
     // if (isCheckingLogin) return <div className="flex items-center justify-center h-screen text-xl text-gray-500">กำลังตรวจ Username และ Password...</div>;
 
     return (

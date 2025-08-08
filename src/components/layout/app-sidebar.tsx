@@ -4,7 +4,6 @@ import * as React from "react"
 import {
   AudioWaveform,
   BotMessageSquare,
-  Clock3,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -26,9 +25,8 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import { motion } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { Separator } from "../ui/separator"
-import { useAuth } from "@/context/AppProviders"
 import { useAuthStore } from "@/stores/useAuthStore"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -37,16 +35,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const hiddenRoutes = ["/login"];
   const isHidden = hiddenRoutes.some(route => pathname.startsWith(route));
   const { isCanChat, loginId } = useAuthStore();
-
-  const router = useRouter();
+  const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
-    // const storedChat = localStorage.getItem('status_chat') === 'true';
-    // const localLoginId = localStorage.getItem('loginId');
-
-    // setIsCanChat(storedChat);
-    // setIsLoginId(localLoginId);
-
+    setIsClient(true);
   }, [pathname, isCanChat, loginId]);
 
   if (isHidden || !loginId) return null;
@@ -85,11 +77,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/assistant",
         icon: BotMessageSquare,
       }] : []),
-      {
-        title: "History",
-        url: "/history",
-        icon: Clock3,
-      },
+      // {
+      //   title: "History",
+      //   url: "/history",
+      //   icon: Clock3,
+      // },
     ],
     projects: [
       {
@@ -109,7 +101,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
     ],
   };
-  
   
   return (
     <>
@@ -144,7 +135,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
           </div>
           <Separator className="my-1" />
-            <NavUser user={data.user} />
+            {isClient && (
+              <NavUser user={data.user} />
+            )}
           <Separator className="my-0" />
 
         </SidebarHeader>

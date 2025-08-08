@@ -12,10 +12,8 @@ import { setFormatFromSearch } from "@/utils/formatting";
 import { FcReading } from "react-icons/fc";
 import Feedback from "@/components/shared/Feedback";
 import { Separator } from "@/components/ui/separator";
-import { checkAuthenticateByLoginId } from "@/lib/api/authenService";
-import httpClient from "@/lib/api/httpClient";
-import axios from "axios";
 import { useAuthStore } from "@/stores/useAuthStore";
+import Link from "next/link";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -28,7 +26,6 @@ export default function InputSearch() {
     const [emptyView, setEmptyView] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null);
     const [openDocList, setOpenDocList] = useState<boolean>(false)
-    // const loginId = localStorage.getItem('loginId');
     const { loginId } = useAuthStore();
     
     useEffect(() => {
@@ -100,38 +97,6 @@ export default function InputSearch() {
 
     const handleOpenDoc = () => setOpenDocList(prev => !prev)
 
-    const handleClick = async () => {
-        try {
-        const res = await axios.post("/api/auth/loginId", {loginId});
-
-        console.log('Response:', res);
-        } catch (error) {
-            console.error('Fetch error:', error);
-        }
-    };
-
-    const handleClick2 = async () => {
-        try {
-            const response = await httpClient.post("GetMiraiAuthenByLoginId2", loginId);
-            console.log('Response:', response);
-        } catch (error) {
-            console.error('Fetch error:', error);
-        }
-    };
-
-    const handleClick3 = async () => {
-        try {
-        const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/GetMiraiAuthenByLoginId`,
-            loginId,
-            { headers: { 'Content-Type': 'application/json' } }
-        );
-
-        console.log('Response:', res);
-        } catch (error) {
-            console.error('Fetch error:', error);
-        }
-    };
     return (
         <>
             <div className="relative w-full md:max-w-4xl xl:max-w-5xl mb-4">
@@ -170,9 +135,6 @@ export default function InputSearch() {
                     </Button>
                 </div>
             </div>
-            {/* <Button onClick={() => handleClick()}>By route</Button>
-            <Button onClick={() => handleClick2()}>By API</Button> */}
-            {/* <Button onClick={() => handleClick3()}>3</Button> */}
 
             {isSubmitted && (
                 <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
@@ -213,14 +175,14 @@ export default function InputSearch() {
                                                 {results.map((item, index) => (
                                                     <div key={item.link ?? index} className="flex flex-col ...">
                                                         <div className="mb-2">
-                                                            <a 
+                                                            <Link 
                                                                 href={item.link}
                                                                 target="_blank" 
                                                                 rel="noopener noreferrer"
                                                                 className="text-blue-600 font-semibold hover:underline"
                                                             >
                                                                 {index + 1}. {item.title}
-                                                            </a>
+                                                            </Link>
                                                             <p className="line-clamp-2">{item.description}</p>
                                                         </div>
                                                     </div>
@@ -241,14 +203,14 @@ export default function InputSearch() {
                                                             {relatedResults.map((item, index) => (
                                                                 <div key={item.title ?? index} className="flex flex-col ...">
                                                                     <div className="mb-2">
-                                                                        <a 
+                                                                        <Link 
                                                                             href={item.link}
                                                                             target="_blank" 
                                                                             rel="noopener noreferrer"
                                                                             className="text-blue-600 font-semibold hover:underline"
                                                                         >
                                                                             {index + 1}. {item.title}
-                                                                        </a>
+                                                                        </Link>
                                                                         <p className="line-clamp-2">{item.description}</p>
                                                                     </div>
                                                                 </div>
