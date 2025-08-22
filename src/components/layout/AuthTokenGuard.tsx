@@ -14,7 +14,6 @@ export default function AuthTokenGuard({ children }: Props) {
   const pathname = usePathname();
   const { isAuthenticated, setLoginData, clearAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
-  console.log(isAuthenticated)
 
   const handleAuthSuccess = useCallback(async (loginId: string, isCanChat: boolean) => {
     setLoginData(loginId, isCanChat);
