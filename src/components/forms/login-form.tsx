@@ -26,10 +26,12 @@ export function LoginForm({
     const [password, setPassword] = useState("")
     const router = useRouter();
     const { setLoginData } = useAuthStore();
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-    
+        setIsLoading(true)
+
         try {
             const payload: RequestLogin = {
                 username: username,
@@ -52,6 +54,8 @@ export function LoginForm({
             } else {
                 console.error("Unknown error from login", err)
             }
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -109,9 +113,10 @@ export function LoginForm({
                                     required 
                                 />
                             </div>
-                            <Button type="submit" className="w-full cursor-pointer">
-                            Login
+                            <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
+                                {isLoading ? "กำลังตรวจสอบ..." : "Login"}
                             </Button>
+
                         </div>
                     </form>
                 </CardContent>

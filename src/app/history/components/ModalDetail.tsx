@@ -15,16 +15,16 @@ export default function ModalDetail({ open, onOpenChange, data }: ModalDetailPro
                 <DialogHeader>
                     <DialogTitle hidden></DialogTitle>
                     <div className="grid gap-2">
-                        <p className="font-bold text-gray-900">รายละเอียด</p>
+                        <p className="font-bold text-gray-900">Questions and Answers</p>
                         <div className="grid grid-cols-6 gap-3">
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">ชื่อผู้ใช้</Label>
+                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Username</Label>
                             <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.users}</Label>
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">คำถาม</Label>
+                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Question</Label>
                             <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.questions}</Label>
                             <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Assistant</Label>
                             <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.assistants}</Label>
                         </div>
-                        <Label className="mt-1 md:text-sm xl:text-base">คำตอบ</Label>
+                        <Label className="mt-1 md:text-sm xl:text-base">Response</Label>
                         <div className="bg-blue-100 p-2 rounded-md md:h-64 xl:h-100 overflow-y-auto">
                             <p className="font-semibold text-blue-600 text-sm">1. PMG-PB-OTB-2024 01 เพิ่ม Fig Key หมวดอะไหล่ Body Parts.pdf</p>
                             <p className="md:text-sm xl:text-base">
@@ -59,13 +59,13 @@ export default function ModalDetail({ open, onOpenChange, data }: ModalDetailPro
                                 บริษัท ตรีเพชรอีซูซุเซลส์ แจ้งจำหน่ายพื้นปูกระบะสำหรับออล-นิว อีซูซุดีแมคซ์ ปี 2020 รุ่นสปาร์ค เริ่มรับคำสั่งซื้อ 6 เม.ย. 2563 และส่งมอบวันที่ 8 เม.ย. 2563 ราคาขายส่ง 3,549 บาท ขายปลีก 5,460 บาท
                             </p>
                         </div>
-                        <p className="font-bold text-gray-900">Feedback</p>
+                        <p className="font-bold text-gray-900">Feedback details</p>
                         <div className="grid grid-cols-6 gap-3">
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">การตอบรับ</Label>
+                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Feedback</Label>
                             {data?.feedback === "Like" ? <Label className="col-span-5 col-end-7 text-green-500 font-semibold md:text-sm xl:text-base">Like</Label> : <Label className="col-span-5 col-end-7 text-red-500 font-semibold md:text-sm xl:text-base">Dislike</Label>}
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">เหตุผล</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.descriptions}</Label>
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">วันที่รายงาน</Label>
+                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Reason</Label>
+                            {data?.descriptions === "อื่นๆ" ? <div className="col-span-5 col-end-7 flex flex-row"><Label className="md:text-sm xl:text-base mr-1">{data?.descriptions} -</Label> <Label className="md:text-sm xl:text-base">คำตอบเพิ่มเติม</Label></div> : <Label className="md:text-sm xl:text-base mr-1">{data?.descriptions}</Label>}
+                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Report date</Label>
                             <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.reportDate}</Label>
                         </div>
                     </div>

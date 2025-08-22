@@ -1,6 +1,7 @@
 export interface RequestSearchChat {
     assistantName: string,
-    question: string
+    question: string,
+    loginId: string | null,
 }
 
 export interface ResponseSearchChat {

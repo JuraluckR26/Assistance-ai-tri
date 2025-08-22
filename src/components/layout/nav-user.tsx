@@ -100,20 +100,10 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={handleLogout}
-              disabled={isLoading}
+              // disabled={isLoading}
               className="text-red-600 focus:text-red-600 hover:bg-gray-100 cursor-pointer"
           >
-              {isLoading ? (
-                  <>
-                      {/* <Loader2 className="mr-2 h-4 w-4 animate-spin" /> */}
-                      <span>กำลังออกจากระบบ...</span>
-                  </>
-              ) : (
-                  <>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>ออกจากระบบ</span>
-                  </>
-              )}
+            <span>ออกจากระบบ</span>
           </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

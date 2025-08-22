@@ -3,9 +3,9 @@ import httpClient from '@/lib/api/httpClient';
 
 export async function POST(req: NextRequest) {
   try {
-    const { assistantName, question } = await req.json();
+    const { assistantName, question, loginId } = await req.json();
 
-    const { data } = await httpClient.post("ChatCompletion", { assistantName, question });
+    const { data } = await httpClient.post("ChatCompletionNew", { assistantName, question, loginId });
 
     return NextResponse.json(data);
   } catch (error) {

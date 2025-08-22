@@ -14,6 +14,7 @@ export default function AuthTokenGuard({ children }: Props) {
   const pathname = usePathname();
   const { isAuthenticated, setLoginData, clearAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
+  console.log(isAuthenticated)
 
   const handleAuthSuccess = useCallback(async (loginId: string, isCanChat: boolean) => {
     setLoginData(loginId, isCanChat);
@@ -55,7 +56,10 @@ export default function AuthTokenGuard({ children }: Props) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (isAuthenticated === true) return;
+      if (isAuthenticated === true) { 
+        setIsLoading(false) 
+        return; 
+      }
 
       try {
         setIsLoading(true);
@@ -76,7 +80,7 @@ export default function AuthTokenGuard({ children }: Props) {
           return;
         }
 
-        // await handleAuthFailure();
+        await handleAuthFailure();
       } catch (error) {
         console.error('Error checking authentication:', error);
         await handleAuthFailure();

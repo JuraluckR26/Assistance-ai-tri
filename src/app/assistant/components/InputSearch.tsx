@@ -73,7 +73,8 @@ export default function InputSearch() {
         try {
             const searchObj: RequestSearchChat = {
                 assistantName: assistance,
-                question: question
+                question: question,
+                loginId: loginId
             }
             const data = await searchChat(searchObj)
 

@@ -31,178 +31,23 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { HoverCard } from "@radix-ui/react-hover-card"
 import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import ModalDetail from "./ModalDetail"
-
-const data: Reports[] = [
-  {
-    reportDate: "2 มิถุนายน 2568 เวลา 09:15",
-    users: "Username7",
-    questions: "อะไหล่รถกระบะ",
-    assistants: "AI Search PMG",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "3 มิถุนายน 2568 เวลา 10:45",
-    users: "Username14",
-    questions: "ขอคู่มือการใช้งานรถ",
-    assistants: "IT10 Service desk assistant",
-    feedback: "Dislike",
-    descriptions: "คำตอบยังไม่สมบูรณ์"
-  },
-  {
-    reportDate: "4 มิถุนายน 2568 เวลา 13:20",
-    users: "Username21",
-    questions: "บริการรถยกฉุกเฉิน",
-    assistants: "GIS assistant",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "5 มิถุนายน 2568 เวลา 08:30",
-    users: "Username3",
-    questions: "การเคลมประกันภัย",
-    assistants: "MiRai Service desk assistant-new",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "5 มิถุนายน 2568 เวลา 16:00",
-    users: "Username11",
-    questions: "ตารางคิวซ่อม",
-    assistants: "AI Search PMG",
-    feedback: "Dislike",
-    descriptions: "อื่นๆ"
-  },
-  {
-    reportDate: "6 มิถุนายน 2568 เวลา 09:50",
-    users: "Username25",
-    questions: "บริการตรวจเช็ครถฟรี",
-    assistants: "IT10 Service desk assistant",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "7 มิถุนายน 2568 เวลา 11:05",
-    users: "Username18",
-    questions: "วิธีเปลี่ยนยางอะไหล่",
-    assistants: "GIS assistant",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "8 มิถุนายน 2568 เวลา 15:25",
-    users: "Username9",
-    questions: "โปรโมชั่นยางรถยนต์",
-    assistants: "MiRai Service desk assistant-new",
-    feedback: "Dislike",
-    descriptions: "ข้อมูลไม่ถูกต้อง"
-  },
-  {
-    reportDate: "9 มิถุนายน 2568 เวลา 10:40",
-    users: "Username27",
-    questions: "ส่วนลดลูกค้าประจำ",
-    assistants: "AI Search PMG",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "10 มิถุนายน 2568 เวลา 14:10",
-    users: "Username2",
-    questions: "ข้อมูลประกันภัย",
-    assistants: "IT10 Service desk assistant",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "11 มิถุนายน 2568 เวลา 17:35",
-    users: "Username29",
-    questions: "การคืนสินค้าอะไหล่",
-    assistants: "GIS assistant",
-    feedback: "Dislike",
-    descriptions: "-"
-  },
-  {
-    reportDate: "12 มิถุนายน 2568 เวลา 09:00",
-    users: "Username5",
-    questions: "สอบถามวิธีจองคิวซ่อม",
-    assistants: "MiRai Service desk assistant-new",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "13 มิถุนายน 2568 เวลา 10:15",
-    users: "Username15",
-    questions: "ศูนย์บริการใกล้บ้าน",
-    assistants: "AI Search PMG",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "14 มิถุนายน 2568 เวลา 11:55",
-    users: "Username20",
-    questions: "เวลาทำการศูนย์บริการ",
-    assistants: "IT10 Service desk assistant",
-    feedback: "Dislike",
-    descriptions: "-"
-  },
-  {
-    reportDate: "15 มิถุนายน 2568 เวลา 08:45",
-    users: "Username8",
-    questions: "ราคาน้ำมันเครื่อง",
-    assistants: "GIS assistant",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "16 มิถุนายน 2568 เวลา 12:05",
-    users: "Username1",
-    questions: "การผ่อนชำระค่าซ่อม",
-    assistants: "MiRai Service desk assistant-new",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "17 มิถุนายน 2568 เวลา 13:30",
-    users: "Username24",
-    questions: "สอบถามอะไหล่แท้",
-    assistants: "AI Search PMG",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "18 มิถุนายน 2568 เวลา 15:15",
-    users: "Username12",
-    questions: "ระยะทางในการรับประกัน",
-    assistants: "IT10 Service desk assistant",
-    feedback: "Dislike",
-    descriptions: "-"
-  },
-  {
-    reportDate: "19 มิถุนายน 2568 เวลา 16:45",
-    users: "Username30",
-    questions: "ชำระเงินออนไลน์ได้ไหม",
-    assistants: "GIS assistant",
-    feedback: "Like",
-    descriptions: "-"
-  },
-  {
-    reportDate: "20 มิถุนายน 2568 เวลา 09:25",
-    users: "Username17",
-    questions: "ใบเสนอราคารถเก๋ง",
-    assistants: "MiRai Service desk assistant-new",
-    feedback: "Like",
-    descriptions: "-"
-  }
-];
+import { exportReportsToCSV } from "./ExportFeedbacksToCSV"
+import { mockReports } from "@/lib/data"
 
 export type Reports = {
   reportDate: string
   users: string
-  questions: string
   assistants: string
+  questions: string
   feedback: "Like" | "Dislike"
   descriptions: string
+  response?: ResponseItem[];
 }
+
+export type ResponseItem = {
+  title: string;
+  description: string;
+};
 
 export const columns: ColumnDef<Reports>[] = [
   {
@@ -292,6 +137,7 @@ export function DataTable() {
     "30days": "Last 30 days",
     "custom": "Custom date",
   };
+  const data = mockReports
 
   useEffect(() => {
     // const filters: ColumnFiltersState = [];
@@ -336,6 +182,15 @@ export function DataTable() {
     },
   })
 
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const rowNoOffset = pageIndex * pageSize;
+
+  const handleExport = () => {
+    exportReportsToCSV(data, "report_table.csv");
+    // const rows = table.getRowModel().rows.map(r => r.original);
+    // exportReportsToCSV(rows, "report_table.csv");
+  };
+
   return (
     <div className="w-full">
         <div className="flex justify-between pb-2 pt-1">
@@ -359,7 +214,7 @@ export function DataTable() {
                   className="w-48 md:w-64 xl:w-100 rounded-full"
                 />
   
-                <Button variant={"outline"}><ArrowDownToLine/>Download</Button>
+                <Button variant={"outline"} onClick={handleExport}><ArrowDownToLine/>Download</Button>
             </div>
         </div>
         <p className="mb-2">
@@ -398,7 +253,7 @@ export function DataTable() {
                     }}
                     className="cursor-pointer hover:bg-gray-100"
                   >
-                    <TableCell>{index+1}</TableCell>
+                    <TableCell>{rowNoOffset + index + 1}</TableCell>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(

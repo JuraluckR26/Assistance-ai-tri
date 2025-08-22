@@ -14,6 +14,7 @@ import Feedback from "@/components/shared/Feedback";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function InputSearch() {
     const [question, setQuestion] = useState<string>("")
@@ -27,6 +28,7 @@ export default function InputSearch() {
     const inputRef = useRef<HTMLInputElement>(null);
     const [openDocList, setOpenDocList] = useState<boolean>(false)
     const { loginId } = useAuthStore();
+    const { clearAuth } = useAuthStore();
     
     useEffect(() => {
     
@@ -60,7 +62,13 @@ export default function InputSearch() {
 
             const data = await searchKhunJaiDee(payload)
 
-            if(typeof data === "string") return
+            if(typeof data === "string") {
+                alert(data);
+                setIsLoading(false);
+                clearAuth();
+                // window.location.href = "/login";
+                return
+            }
 
             if(checkEmptyResponse(data))
             {

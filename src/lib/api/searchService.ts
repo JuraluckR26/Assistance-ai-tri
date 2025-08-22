@@ -9,18 +9,17 @@ export async function searchKhunJaiDee(value: RequestSearch): Promise<ResponseSe
       searchContent: value.searchContent,
       loginId: value.loginId
     });
-
     const res = data?.data;
-    
-    if (res?.isAuthenticated === false) {
+
+    if (!res) return "response is emprty";
+
+    if (!res.IsAuthenticated) {
       const { clearAuth } = useAuthStore.getState();
       await clearAuth();
+      alert("Unauthorized access. Please log in again.\nการลงชื่อเข้าใช้งานหมดอายุ กรุณาลงชื่อเข้าใช้อีกครั้ง");
       window.location.href = '/login';
-      return { Response: "", SearchDocument: "", SearchDocumentLocation: "", Response_Other: "", SearchDocument_Other: "", SearchDocumentLocation_Other: "" };
     }
-    
-    if (!res) return { Response: "", SearchDocument: "", SearchDocumentLocation: "", Response_Other: "", SearchDocument_Other: "", SearchDocumentLocation_Other: "" };
-
+  
     return res
 
   } catch (err: unknown) {

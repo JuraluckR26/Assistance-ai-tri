@@ -8,18 +8,18 @@ export async function searchChat(val: RequestSearchChat): Promise<ResponseSearch
       const data = await axios.post("/api/chatbot/search", {
         assistantName: val.assistantName,
         question: val.question,
+        loginId: val.loginId
       });
-
       const res = data?.data;
 
-      if (res?.IsAuthenticated === false) {
+      if (!res) return "response is emprty";
+
+      if (!res.IsAuthenticated) {
         const { clearAuth } = useAuthStore.getState();
         await clearAuth();
+        alert("Unauthorized access. Please log in again.\nการลงชื่อเข้าใช้งานหมดอายุ กรุณาลงชื่อเข้าใช้อีกครั้ง");
         window.location.href = '/login';
-        return { Response: "", SearchDocument: "", SearchDocumentLocation: "" };
-      }
-
-      if (!res) return { Response: "", SearchDocument: "", SearchDocumentLocation: "" };
+      }    
       
       return res
   

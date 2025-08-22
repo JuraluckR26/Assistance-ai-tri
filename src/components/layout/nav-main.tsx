@@ -45,12 +45,6 @@ export function NavMain({
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
-                {/* <SidebarMenuButton asChild isActive={isActive}>
-                  <a href={item.url}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                  </a>
-                </SidebarMenuButton> */}
               </SidebarMenuItem>
             );
           })}

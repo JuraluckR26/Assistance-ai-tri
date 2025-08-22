@@ -1,25 +1,34 @@
-"use client";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface AuthState {
-  loginId: string | null;
-  isCanChat: boolean;
-  isAuthenticated: boolean | null;
-}
-
-interface AuthActions {
-  setLoginData: (loginId: string, isCanChat: boolean) => void;
-  setIsAuthenticated: (val: boolean) => void;
-  initializeAuth: () => void;
-  clearAuth: () => void;
-}
-
-const initialState: AuthState = {
+let initialStateFromStorage = {
   loginId: null,
   isCanChat: false,
   isAuthenticated: null,
 };
+
+type AuthStore = {
+  loginId: string | null;
+  isCanChat: boolean;
+  isAuthenticated: boolean | null;
+  setLoginData: (loginId: string, isCanChat: boolean) => void;
+  logout: () => void;
+  clearAuth: () => void;
+};
+
+if (typeof window !== "undefined") {
+  try {
+    const stored = localStorage.getItem("auth-storage");
+    if (stored) {
+      const parsed = JSON.parse(stored).state;
+      if (parsed) {
+        initialStateFromStorage = parsed;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to parse persisted auth state:", error);
+  }
+}
 
 const clearAuthData = () => {
   localStorage.clear();
@@ -30,38 +39,20 @@ const clearAuthData = () => {
   sessionStorage.clear();
 };
 
-export const useAuthStore = create<AuthState & AuthActions>()(
-    persist(
-        (set) => ({
-            ...initialState,
-
-            setLoginData: (loginId, isCanChat) => set({ loginId, isCanChat, isAuthenticated: true }),
-            setIsAuthenticated: (val) => set({ isAuthenticated: val }),
-            initializeAuth: () => {
-                if (typeof window === "undefined") return;
-                try {
-                    const stored = localStorage.getItem("auth-storage");
-                    if (stored) {
-                        const { state } = JSON.parse(stored);
-                        set(state);
-                    }
-                } catch (error) {
-                    console.error("Failed to initialize auth:", error);
-                    set(initialState);
-                }
-            },
-            clearAuth: () => {
-                clearAuthData();
-                set(initialState);
-            },
-        }),
-        {
-            name: "auth-storage",
-            partialize: (state) => ({
-                loginId: state.loginId,
-                isCanChat: state.isCanChat,
-                isAuthenticated: state.isAuthenticated,
-            }),
-        }
-    )
-)
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    (set) => ({
+      loginId: null,
+      isCanChat: false,
+      isAuthenticated: initialStateFromStorage.isAuthenticated ? initialStateFromStorage.isAuthenticated : null,
+      setLoginData: (loginId, isCanChat) => set({ loginId, isCanChat, isAuthenticated: true }),
+      logout: () => set({ loginId: null, isAuthenticated: false }),
+      clearAuth: () => {
+          clearAuthData();
+      },
+    }),
+    {
+      name: "auth-storage",
+    }
+  )
+);

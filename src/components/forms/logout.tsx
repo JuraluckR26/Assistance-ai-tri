@@ -11,7 +11,7 @@ export default function useLogout() {
         if (!loginId) return;
 
         try {
-            setIsLoading(true);
+            // setIsLoading(true);
             const result = await logoutByLoginId(loginId);
             
             if (result.Status === "error") {
@@ -35,7 +35,7 @@ export default function useLogout() {
             // await clearAuth();
             // router.replace("/login");
         } finally {
-            setIsLoading(false);
+            // setIsLoading(false);
         }
     };
 

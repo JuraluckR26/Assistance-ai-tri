@@ -6,7 +6,6 @@ interface LoaderProps {
 }
   
 const Loader2: React.FC<LoaderProps> = ({ className }) => {
-  console.log(className)
   return (
     <StyledWrapper className="loader">
         <div>
