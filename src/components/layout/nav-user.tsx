@@ -2,7 +2,6 @@
 
 import {
   ChevronsUpDown,
-  LogOut,
 } from "lucide-react"
 
 import {
@@ -55,7 +54,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { handleLogout, isLoading } = useLogout();
+  const { handleLogout } = useLogout();
 
   return (
     <SidebarMenu>

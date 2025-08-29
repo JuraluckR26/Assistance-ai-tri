@@ -1,34 +1,54 @@
 "use client"
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { getFAQ } from "@/lib/api/searchService";
-import { useRef, useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface FAQButtonProps {
     onSelect: (text: string) => void
     inputRef?: React.RefObject<HTMLInputElement | null>;
+    sharedFAQList?: string[];
 }
 
-function FAQButton({ onSelect, inputRef }: FAQButtonProps) {
-    const [faqList, setFaqList] = useState<string[]>([]);
-    const [loading, setLoading] = useState(false);
-    const triggerRef = useRef<HTMLButtonElement>(null);
+const STORAGE_KEY = "faqList";
 
-    const fetchFAQ = async () => {
-        setLoading(true);
-        try {
-          const data = await getFAQ("FAQKJD");
-          setFaqList(data);
-        } catch (err) {
-          console.error("FAQ fetch error", err);
-        } finally {
-          setLoading(false);
-        }
-    };
+function readLocalFAQ(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.map((s) => (typeof s === "string" ? s.trim() : "")).filter(Boolean)
+      : [];
+  } catch (e) {
+    console.error("faqList parse error", e);
+    return [];
+  }
+}
+
+function dedupe(arr: string[]) {
+  return Array.from(new Set(arr.map((s) => s.trim()))).filter(Boolean);
+}
+
+function FAQButton({ onSelect, inputRef, sharedFAQList }: FAQButtonProps) {
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const [localFAQ, setLocalFAQ] = useState<string[]>([]);
+    
+    useEffect(() => {
+        if (sharedFAQList?.length) return;
+        setLocalFAQ(readLocalFAQ());
+    }, [sharedFAQList]);
+
+    const faqList = useMemo(
+        () => dedupe(sharedFAQList?.length ? sharedFAQList : localFAQ),
+        [sharedFAQList, localFAQ]
+    );
+
+    if (!faqList.length) return null;
 
     return (
         <>
-            <DropdownMenu onOpenChange={(open) => open && fetchFAQ()}>
+            <DropdownMenu onOpenChange={(open) => open}>
                 <DropdownMenuTrigger asChild>
                     <Button 
                         ref={triggerRef} 
@@ -44,9 +64,6 @@ function FAQButton({ onSelect, inputRef }: FAQButtonProps) {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                {loading ? (
-                    <DropdownMenuLabel>Loading...</DropdownMenuLabel>
-                ) : (
                     <>
                         {/* <DropdownMenuLabel>คำค้นหาที่แนะนำ</DropdownMenuLabel>
                         <DropdownMenuSeparator /> */}
@@ -67,10 +84,8 @@ function FAQButton({ onSelect, inputRef }: FAQButtonProps) {
                             </DropdownMenuItem>
                         ))}
                     </>
-                )}
                 </DropdownMenuContent>
             </DropdownMenu>
-
         </>
     )
 }

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronDown, ChevronUp, PackageSearch, Send } from "lucide-react";
 import { FAQButton } from "./FAQ";
 import { useEffect, useRef, useState } from "react";
-import { searchKhunJaiDee } from "@/lib/api/searchService";
+import { getFAQ, searchKhunJaiDee } from "@/lib/api/searchService";
 import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
 import Loader from "@/components/shared/loading";
 import { setFormatFromSearch } from "@/utils/formatting";
@@ -14,9 +14,10 @@ import Feedback from "@/components/shared/Feedback";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function InputSearch() {
+    const { loginId, clearAuth } = useAuthStore();
+
     const [question, setQuestion] = useState<string>("")
     const [results, setResults] = useState<DocumentItem[]>([])
     const [relatedResults, setRelatedResults] = useState<DocumentItem[]>([])
@@ -27,11 +28,75 @@ export default function InputSearch() {
     const [emptyView, setEmptyView] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null);
     const [openDocList, setOpenDocList] = useState<boolean>(false)
-    const { loginId } = useAuthStore();
-    const { clearAuth } = useAuthStore();
+    const handleOpenDoc = () => setOpenDocList(prev => !prev)
     
+    const suggestionsRef = useRef<HTMLDivElement>(null);
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [showSuggest, setShowSuggest] = useState(false);
+
+    const [faqList, setFaqList] = useState<string[]>(() => {
+        const localFAQ = localStorage.getItem('faqList');
+        if (localFAQ) {
+            return JSON.parse(localFAQ);
+        }
+        return [];
+    });
+
     useEffect(() => {
-    
+        const fetchAndSetFAQ = async () => {
+            try {
+                if (faqList.length > 0) return;
+
+                const data = await getFAQ("FAQKJD");
+                if (data && data.length > 0) {
+                    setFaqList(data);
+                    localStorage.setItem("faqList", JSON.stringify(data));
+                }
+            } catch (error) {
+                console.error("Error fetching FAQ:", error);
+            }
+        };
+
+        fetchAndSetFAQ();
+    }, [faqList.length]);
+
+    function scoreMatch(q: string, t: string) {
+        if (!q) return 0;
+        if (t.startsWith(q)) return 3;
+        if (t.includes(q)) return 2;
+        return 0;
+    }
+
+    useEffect(() => {
+        const q = question.trim().toLowerCase();
+        if (!q) {
+            setSuggestions([]);
+            setShowSuggest(false);
+            return;
+        }
+
+        const isExactMatch = faqList.some(
+            (t) => t.trim().toLowerCase() === q
+        );
+        if (isExactMatch) {
+            setSuggestions([]);
+            setShowSuggest(false);
+            return;
+        }
+
+        const ranked = faqList
+            .map((text) => ({ text, score: scoreMatch(q, text.toLowerCase()) }))
+            .filter((x) => x.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 8)
+            .map((x) => x.text);
+
+        setSuggestions(ranked);
+        setShowSuggest(ranked.length > 0);
+    },[question, faqList])
+
+    useEffect(() => {
+        
     }, [results, relatedResults])
     
     if(!loginId) return null;
@@ -66,7 +131,6 @@ export default function InputSearch() {
                 alert(data);
                 setIsLoading(false);
                 clearAuth();
-                // window.location.href = "/login";
                 return
             }
 
@@ -103,16 +167,16 @@ export default function InputSearch() {
         }
     }
 
-    const handleOpenDoc = () => setOpenDocList(prev => !prev)
-
     return (
         <>
-            <div className="relative w-full md:max-w-4xl xl:max-w-5xl mb-4">
+            <div className="relative w-full md:max-w-4xl xl:max-w-5xl mb-0">
                 <Input
                     type="text"
                     placeholder="ระบุคำค้นหา..."
                     value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
+                    onChange={(e) => { 
+                        setQuestion(e.target.value)
+                    }}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             e.preventDefault();
@@ -133,6 +197,7 @@ export default function InputSearch() {
                             }
                         }}
                         inputRef={inputRef}
+                        sharedFAQList={faqList}
                     />
                     <Button
                         size="icon"
@@ -143,9 +208,33 @@ export default function InputSearch() {
                     </Button>
                 </div>
             </div>
+            <div className="relative w-full md:max-w-4xl xl:max-w-5xl mb-0">
+                <div className="">
+                    {showSuggest && (
+                        <div
+                            ref={suggestionsRef} 
+                            className="absolute z-10 mt-1 md:w-80 bg-white border border-gray-300 rounded-md shadow-lg h-auto overflow-y-auto">
+                            {suggestions.map((item) => (
+                                <div
+                                    key={item}
+                                    className={`px-4 py-2 cursor-pointer hover:bg-[#EEF5FF] text-sm`}
+                                    onClick={() => {
+                                        setQuestion(item);
+                                        setShowSuggest(false);
+                                        setSuggestions([]);
+                                        inputRef.current?.focus();
+                                    }}
+                                >
+                                    <div className="flex row">💡 {item}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
 
             {isSubmitted && (
-                <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
+                <div className="relative w-full md:max-w-4xl xl:max-w-5xl mt-4">
                     <div className="p-2 bg-[#F5F5F5] rounded-md">
                         {isLoading ? (
                             <>

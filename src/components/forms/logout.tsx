@@ -1,17 +1,14 @@
-import { useState } from 'react';
 import { logoutByLoginId } from "@/lib/api/authenService";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { toast } from 'sonner';
 
 export default function useLogout() {
     const { loginId } = useAuthStore();
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogout = async () => {
         if (!loginId) return;
 
         try {
-            // setIsLoading(true);
             const result = await logoutByLoginId(loginId);
             
             if (result.Status === "error") {
@@ -19,8 +16,6 @@ export default function useLogout() {
                 localStorage.clear();
                 document.cookie = "email=; path=/; max-age=0";
                 window.location.href = "/login";
-                // await clearAuth();
-                // router.replace("/login");
                 return;
             }
             localStorage.clear();
@@ -32,12 +27,8 @@ export default function useLogout() {
             localStorage.clear();
             document.cookie = "email=; path=/; max-age=0";
             window.location.href = "/login";
-            // await clearAuth();
-            // router.replace("/login");
-        } finally {
-            // setIsLoading(false);
         }
     };
 
-    return { handleLogout, isLoading };
+    return { handleLogout };
 }

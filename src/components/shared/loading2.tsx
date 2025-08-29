@@ -7,9 +7,9 @@ interface LoaderProps {
   
 const Loader2: React.FC<LoaderProps> = ({ className }) => {
   return (
-    <StyledWrapper className="loader">
+    <StyledWrapper className={className}>
         <div>
-        <svg height="108px" width="108px" viewBox="0 0 128 128" className="loader">
+        <svg height="108px" width="108px" viewBox="0 0 128 128" className={className}>
             <defs>
             <clipPath id="loader-eyes">
                 <circle transform="rotate(-40,64,64) translate(0,-56)" r="8" cy="64" cx="64" className="loader__eye1"></circle>

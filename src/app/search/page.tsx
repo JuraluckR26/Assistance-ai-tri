@@ -1,4 +1,4 @@
-import InputSearch from "./components/InputSearch";
+import InputSearchClient from "./components/InputSearchClient";
 import Resent from "./components/Resent";
 
 export default function Page() {
@@ -10,7 +10,7 @@ export default function Page() {
                 <h1 className="text-lg md:text-2xl lg:text-3xl font-semibold text-center mb-6 bg-gradient-to-r from-[#EC221F] via-[#9053A1] to-[#4D77FF] bg-clip-text text-transparent">
                     สวัสดี :D ให้ฉันช่วยอะไรคุณดี?
                 </h1>
-                <InputSearch/>
+                <InputSearchClient/>
                 <Resent/>
             </div>
         </main>
