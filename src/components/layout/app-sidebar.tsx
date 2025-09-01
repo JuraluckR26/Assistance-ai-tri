@@ -78,11 +78,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/assistant",
         icon: BotMessageSquare,
       }] : []),
-      // {
-      //   title: "History",
-      //   url: "/history",
-      //   icon: Clock3,
-      // },
+      {
+        title: "History",
+        url: "/history",
+        icon: Clock3,
+      },
     ],
     projects: [
       {

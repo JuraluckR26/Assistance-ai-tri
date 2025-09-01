@@ -1,5 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogOverlayTransparent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pen, X } from "lucide-react";
 
 type ModalDetailProps = {
   open: boolean;
@@ -10,67 +12,141 @@ type ModalDetailProps = {
 export default function ModalDetail({ open, onOpenChange, data }: ModalDetailProps) {
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-white md:max-w-4xl xl:max-w-5xl">
-                <DialogHeader>
-                    <DialogTitle hidden></DialogTitle>
-                    <div className="grid gap-2">
-                        <p className="font-bold text-gray-900">Questions and Answers</p>
-                        <div className="grid grid-cols-6 gap-3">
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Username</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.users}</Label>
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Question</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.questions}</Label>
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Assistant</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.assistants}</Label>
+        <>
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent 
+                    className="bg-[#EEEEEE]/40 backdrop-blur-xl shadow-2xl rounded-2xl md:max-w-5xl xl:max-w-5xl"
+                    // overlay="transparent"
+                >
+                    <div className="flex flex-row gap-4">
+                        <div className="basis-1/2">
+                            <DialogHeader className="mb-2">
+                                <DialogTitle className="text-base">
+                                    <div className="flex justify-between items-center">
+                                        <div>Feedback details</div>
+                                        <div className="bg-stone-400 px-1 py-1 rounded-sm"><Pen size={12} className="text-gray-600"/></div>
+                                    </div>
+                                </DialogTitle>
+                            </DialogHeader>
+                            <div className="text-sm">
+                                <div className="column-2">
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Feedback</Label></div>
+                                        <div className="basis-2/3">{data?.feedback}</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Reason</Label></div>
+                                        <div className="basis-2/3">{data?.descriptions}</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Report date</Label></div>
+                                        <div className="basis-2/3">{data?.reportDate}</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>System</Label></div>
+                                        <div className="basis-2/3">-</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Module</Label></div>
+                                        <div className="basis-2/3">-</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Function</Label></div>
+                                        <div className="basis-2/3">-</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Ticket</Label></div>
+                                        <div className="basis-2/3">-</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>AI Result</Label></div>
+                                        <div className="basis-2/3">-</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Custom 1</Label></div>
+                                        <div className="basis-2/3">
+                                            <Input className="bg-white"/>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Custom 2</Label></div>
+                                        <div className="basis-2/3">
+                                            <Input className="bg-white"/>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/3 font-medium"><Label>Custom 3</Label></div>
+                                        <div className="basis-2/3">
+                                            <Input className="bg-white"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <button
+                                        className="bg-stone-300 text-neutral-700 font-meduim px-3 py-1 rounded-sm"
+                                        onClick={() => onOpenChange(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        className="bg-gradient-to-b from-[#5BAEFF] to-[#1f7dff] text-white px-4 py-1 rounded-sm shadow-[inset_1px_0_2px_rgba(0,0,0,0.25)]"
+                                        >
+                                        Save
+                                    </button>
+                                </DialogFooter>
+                            </div>
                         </div>
-                        <Label className="mt-1 md:text-sm xl:text-base">Response</Label>
-                        <div className="bg-blue-100 p-2 rounded-md md:h-64 xl:h-100 overflow-y-auto">
-                            <p className="font-semibold text-blue-600 text-sm">1. PMG-PB-OTB-2024 01 เพิ่ม Fig Key หมวดอะไหล่ Body Parts.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัทตรีเพชรอีซูซุเซลส์เพิ่ม Fig Key ในหมวด Body Parts จำนวน 12 รายการ (รวมเป็น 51 รายการ) โดยมีการปรับเปลี่ยนรายละเอียดให้ชัดเจนขึ้น อัปเดตในระบบมิไร 29 มกราคม 2567
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">2. TIS-PMG 001-2024แจ้งจำหน่ายชุดประดับยนต์ตรีเพชร สำหรับ All new Isuzu D-Max 2020-ปัจจุบัน.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์แจ้งจำหน่ายชุดประดับยนต์ใหม่สำหรับ Isuzu D-Max พร้อมรับคำสั่งซื้อเริ่มตั้งแต่ 18 มกราคม 2567 สินค้าได้แก่ชุดผ่อนแรงและชุดล็อคฝาท้ายกระบะโดยมีราคาขายมากกว่า 1,300 บาท                        
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">3. TIS-PMG 030-2024_แคมเพจน์ส่วนลดพิเศษ 40-90% สำหรับอะไหล่แท้_CDR TISCO AUTEC.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ จัดแคมเพจ๋นลดราคาสำหรับอะไหล่แท้ 40%-90% ตั้งแต่ 1 ก.ค.-31 ส.ค.2567 ผู้จำหน่ายสามารถสั่งซื้อตั้งแต่วันนี้ โดยไม่สามารถคืนสินค้า และยอดสั่งซื้อไม่รวมเงินรางวัลอื่นๆ                     
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">5. 1) TIS-PMG 014-2023 การรับคืนอะไหล่เป็นกรณีพิเศษ - Copy.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ จำกัด ประกาศรับคืนอะไหล่ในกรณีพิเศษ ตั้งแต่ 18 เม.ย. - 17 มิ.ย. 66 โดยมีค่าธรรมเนียม 5% ของราคาขายส่ง ผู้จำหน่ายต้องทำตามขั้นตอน กำหนดกลุ่มอะไหล่ที่คืน โดยต้องอยู่ในสภาพสมบูรณ์ หากไม่แน่ใจ สามารถสอบถามข้อมูลเพิ่มเติมได้ค่ะ
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">6. PMG-PB-PIB-2023 09 การเพิ่ม สายการผลิต [ชุบผิวโลหะกันสนิม _ EDP _Electro Deposition Painting].pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                มีการเพิ่มสายการผลิตชุบผิวโลหะกันสนิม EDP สำหรับชิ้นส่วนอะไหล่ตัวถัง ในกลุ่มแผงข้างกระบะท้าย โดยสีผิวงานจะเป็นสีเทาเข้ม เริ่มจัดส่งตั้งแต่ 19 ตุลาคม 2566 โดยมีทั้งชิ้นส่วนสีเทาและสีเทาเข้มพร้อมกัน
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">7. TIS-PMG 101-2021 แจ้งจำหน่ายชุดแต่งมาตรฐาน  ALL-NEW D-MAX รุ่น V-Cross 4 ปรตู รุ่นปี 2022 (ฉบับแก้ไข).pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัทตรีเพชรอีซูซุเซลส์แจ้งการจำหน่ายชุดแต่งมาตรฐานสำหรับรถ All-NEW ISUZU D-MAX รุ่น V-Cross 4 ประตู ปี 2022 รวมอะไหล่และราคา ชุดเสริมขอบกระบะมีหลายสี ราคาขายยังไม่รวมภาษีมูลค่าเพิ่ม และอาจมีการเปลี่ยนแปลงราคาได้
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">8. TIS-PMG 006-2020 แจ้งจำหน่าย พื้นปูกระบะ_Spark ปี 2020.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ แจ้งจำหน่ายพื้นปูกระบะรุ่นสปาร์คปี 2020 พร้อมอุปกรณ์ติดตั้ง ผู้จำหน่ายสามารถสั่งซื้อได้ตั้งแต่บัดนี้ ราคา 4,333 บาท (ขายส่ง) ไม่รวมภาษีมูลค่าเพิ่ม 7% ขอบคุณผู้สนับสนุน
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">9. TIS-PMG 033-2020 แจ้งจำหน่าย พื้นปูกระบะตรีเพชร รุ่น Spark 2020.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ แจ้งจำหน่ายพื้นปูกระบะสำหรับออล-นิว อีซูซุดีแมคซ์ ปี 2020 รุ่นสปาร์ค เริ่มรับคำสั่งซื้อ 6 เม.ย. 2563 และส่งมอบวันที่ 8 เม.ย. 2563 ราคาขายส่ง 3,549 บาท ขายปลีก 5,460 บาท
-                            </p>
-                        </div>
-                        <p className="font-bold text-gray-900">Feedback details</p>
-                        <div className="grid grid-cols-6 gap-3">
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Feedback</Label>
-                            {data?.feedback === "Like" ? <Label className="col-span-5 col-end-7 text-green-500 font-semibold md:text-sm xl:text-base">Like</Label> : <Label className="col-span-5 col-end-7 text-red-500 font-semibold md:text-sm xl:text-base">Dislike</Label>}
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Reason</Label>
-                            {data?.descriptions === "อื่นๆ" ? <div className="col-span-5 col-end-7 flex flex-row"><Label className="md:text-sm xl:text-base mr-1">{data?.descriptions} -</Label> <Label className="md:text-sm xl:text-base">คำตอบเพิ่มเติม</Label></div> : <Label className="md:text-sm xl:text-base mr-1">{data?.descriptions}</Label>}
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Report date</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.reportDate}</Label>
+                        <div className="basis-2/3">
+                            <DialogHeader className="mb-2">
+                                <DialogTitle className="text-base">
+                                    <div>Question and answer</div>
+                                </DialogTitle>
+                            </DialogHeader>
+                            <div className="text-sm">
+                                <div className="column-2">
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/5 font-medium"><Label>Username</Label></div>
+                                        <div className="basis-2/3">{data?.users}</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/5 font-medium"><Label>Question</Label></div>
+                                        <div className="basis-2/3">{data?.questions}</div>
+                                    </div>
+                                    <div className="flex flex-row mb-2">
+                                        <div className="basis-1/5 font-medium"><Label>Assistant</Label></div>
+                                        <div className="basis-2/3">{data?.assistants}</div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <div className="basis-1/3 font-medium"><Label>Response</Label></div>
+                                    <div className="basis-2/3">
+                                        <div className="bg-[#4D77FF]/20 w-full h-full p-3 rounded-sm flex flex-col gap-2">
+                                            <div>
+                                                <p className="font-semibold text-blue-700">1. TIS-PMG 037-2024 แจ้งจำหน่ายชุดไฟราวหลังคารถบรรทุกอีซูซุ ปี 2024.pdf</p>
+                                                <p className="line-clamp-2">บริษัท ตรีเพชรอีซูซุเซลส์ จำกัด ขอแจ้งจำหน่ายชุดไฟราวหลังคา LED สำหรับรถบรรทุกอีซูซุ ปี 2024 ตั้งแต่ 24 กรกฎาคม 2567 โดยมีราคาขายปลีกตั้งแต่ 10,200-10,400 บาท สินค้าใช้สำหรับรุ่นปี 2008-ปัจจุบัน โปรดตรวจสอบราคาที่จุดขาย</p>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-blue-700">2. โปรแกรมการขยายการรับประกันอีซูซุสมาร์ทโพรเทคชั่น (ISP).pdf</p>
+                                                <p className="line-clamp-2">สื่อส่งเสริมการตลาดหลังการขายช่วยให้ลูกค้ารู้สึกมีคุณค่าและสร้างความสัมพันธ์ที่ดีต่อเนื่อง ซึ่งสามารถเพิ่มความพึงพอใจและการซื้อซ้ำ</p>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-blue-700 line-clamp-1">3. TIS-AMK 016_2025 แคมเพจ์น “ยิ่งใช้นาน ยิ่งเฮ อีซูซุเปย์ 4 ต่อ” (ลูกค้าทั่วไป) R.2.pdf</p>
+                                                <p className="line-clamp-2">บริษัท ตรีเพชรอีซูซุเซลส์จัดแคมเปญ "ยิ่งใช้นานยิ่งเฮ! อีซูซุเปย์ 4 ต่อ!" ตั้งแต่ 17 เม.ย.-31 ส.ค. 68 สำหรับรถเล็กและใหญ่ โดยเสนอส่วนลดและบริการพิเศษต่าง ๆ เพื่อส่งเสริมการติดตามลูกค้าเข้าศูนย์บริการ</p>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-blue-700">4. TIS-AMK 017_2025 แคมเพจ์น “โปรร้อน เดือดสุดขีด!” (ลูกค้าขาดหาย).pdf</p>
+                                                <p className="line-clamp-2">บริษัท ตรีเพชรอีซูซุเซลส์ จำกัด เปิดแคมเปญ "โปรร้อน เดือดสุดขีด!" ตั้งแต่ 17 เม.ย. ถึง 31 ส.ค. 68 เน้นดึงลูกค้าที่ขาดหายกลับเข้าบริการพร้อมส่วนลดและแพ็กเกจหลากหลาย เพื่อเพิ่มประสิทธิภาพในการส่งเสริมการตลาดหลังการขาย</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </DialogHeader>
-            </DialogContent>
-        </Dialog>
+                </DialogContent>
+            </Dialog>
+
+
+        </>
     )
 }

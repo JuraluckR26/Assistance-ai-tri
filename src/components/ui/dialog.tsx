@@ -46,17 +46,38 @@ function DialogOverlay({
   )
 }
 
+function DialogOverlayTransparent({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+  return (
+    <DialogPrimitive.Overlay
+      data-slot="dialog-overlay-transparent"
+      className={cn(
+        "fixed inset-0 z-50 bg-transparent backdrop-blur-0",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  overlay = 'default',
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  overlay?: "default" | "transparent" | "none"
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      {overlay === "default" && <DialogOverlay />}
+      {overlay === "transparent" && <DialogOverlayTransparent />}
+      {overlay === "none" && null}
+      {/* <DialogOverlay /> */}
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
@@ -137,6 +158,7 @@ export {
   DialogFooter,
   DialogHeader,
   DialogOverlay,
+  DialogOverlayTransparent,
   DialogPortal,
   DialogTitle,
   DialogTrigger,

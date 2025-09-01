@@ -57,14 +57,7 @@ export const columns: ColumnDef<Reports>[] = [
       <div className="capitalize">{row.getValue("reportDate")}</div>
     ),
   },
-  {
-    accessorKey: "users",
-    header: "Users",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("users")}</div>
-    ),
-  },
-  {
+   {
     accessorKey: "questions",
     header: "Questions",
     cell: ({ row }) => (
@@ -83,6 +76,13 @@ export const columns: ColumnDef<Reports>[] = [
     header: "Assistants",
     cell: ({ row }) => (
       <div className="capitalize">{row.getValue("assistants")}</div>
+    ),
+  },
+  {
+    accessorKey: "users",
+    header: "Users",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("users")}</div>
     ),
   },
   {
