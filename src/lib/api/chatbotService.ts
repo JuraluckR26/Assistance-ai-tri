@@ -41,7 +41,6 @@ export async function getAssistants(id: string): Promise<ResponseAssistant> {
     if(!res.IsCanChat) return { IsCanChat: false, AssistantList: ""}
 
     localStorage.setItem("assistant_list", res.AssistantList);
-    localStorage.setItem("assistant_list_timestamp", Date.now().toString());
 
     return res
 
@@ -51,4 +50,24 @@ export async function getAssistants(id: string): Promise<ResponseAssistant> {
     return { IsCanChat: false, AssistantList: ""}
   }
   
+}
+
+export async function getFAQList(key: string, assistant: string) {
+  try {
+    const data = await axios.post("/api/chatbot/faq", {
+      getKeyword: key,
+      assistantName: assistant
+    });
+
+    const res = data?.data;
+    
+    if (!res?.ResString) return [];
+
+    return res.ResString.split(",").map((s: string) => s.trim());
+
+  } catch (err: unknown) {
+    const res = handleAxiosError(err);
+    console.error("Get FAQ List error", res);
+    return []
+  }
 }
