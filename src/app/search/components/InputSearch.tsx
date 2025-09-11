@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { ChevronDown, ChevronUp, PackageSearch, Send } from "lucide-react";
 import { FAQButton } from "./FAQ";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getFAQ, searchKhunJaiDee } from "@/lib/api/searchService";
 import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
 import Loader from "@/components/shared/loading";
@@ -14,6 +14,7 @@ import Feedback from "@/components/shared/Feedback";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function InputSearch() {
     const { loginId, clearAuth } = useAuthStore();
@@ -33,6 +34,11 @@ export default function InputSearch() {
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [showSuggest, setShowSuggest] = useState(false);
+    
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [focusedValue, setFocusedValue] = useState<string>("");
+    const [previewValue, setPreviewValue] = useState<string>("");
+    const [shouldSubmit, setShouldSubmit] = useState(false);
 
     const [faqList, setFaqList] = useState<string[]>(() => {
         const localFAQ = localStorage.getItem('faqList');
@@ -41,6 +47,19 @@ export default function InputSearch() {
         }
         return [];
     });
+
+    useEffect(() => {
+        if (suggestions.length > 0 && activeIndex >= 0 && activeIndex < suggestions.length) {
+            setFocusedValue(suggestions[activeIndex]);
+        }
+    }, [activeIndex, suggestions]);
+    
+    useEffect(() => {
+        setActiveIndex(0);
+        setFocusedValue(suggestions[0] || "");
+        setPreviewValue("");
+    }, [suggestions]);
+
 
     useEffect(() => {
         const fetchAndSetFAQ = async () => {
@@ -62,22 +81,24 @@ export default function InputSearch() {
 
     function scoreMatch(q: string, t: string) {
         if (!q) return 0;
-        if (t.startsWith(q)) return 3;
-        if (t.includes(q)) return 2;
+        
+        const index = t.indexOf(q);
+        if (index === 0) return 3;
+        if (index > 0) return 2;
         return 0;
     }
 
     useEffect(() => {
         const q = question.trim().toLowerCase();
-        if (!q) {
+        if (!q || q.length < 2) {
             setSuggestions([]);
             setShowSuggest(false);
+            setActiveIndex(0)
+            setFocusedValue("")
             return;
         }
 
-        const isExactMatch = faqList.some(
-            (t) => t.trim().toLowerCase() === q
-        );
+        const isExactMatch = faqList.some((t) => t.trim().toLowerCase() === q);
         if (isExactMatch) {
             setSuggestions([]);
             setShowSuggest(false);
@@ -95,11 +116,43 @@ export default function InputSearch() {
         setShowSuggest(ranked.length > 0);
     },[question, faqList])
 
-    useEffect(() => {
-        
-    }, [results, relatedResults])
-    
-    if(!loginId) return null;
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!showSuggest || suggestions.length === 0) return;
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                setActiveIndex((prev) => {
+                    const newIndex = prev < suggestions.length - 1 ? prev + 1 : 0;
+                    const newFocusedValue = suggestions[newIndex];
+                    setPreviewValue(newFocusedValue);
+                    return newIndex;
+                });
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                setActiveIndex((prev) => {
+                    const newIndex = prev > 0 ? prev - 1 : suggestions.length - 1;
+                    const newFocusedValue = suggestions[newIndex];
+                    setPreviewValue(newFocusedValue);
+                    return newIndex;
+                });
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (focusedValue) {
+                    setQuestion(focusedValue);
+                    setShowSuggest(false);
+                    setPreviewValue("");
+                    setShouldSubmit(true);
+                }
+                break;
+            case 'Escape':
+                setShowSuggest(false);
+                setPreviewValue("");
+                break;
+        }
+    };
 
     function checkEmptyResponse(data: {Response?: string; SearchDocument?: string; SearchDocumentLocation?: string;}): boolean {
         return (
@@ -109,7 +162,7 @@ export default function InputSearch() {
         );
     }
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         if (question.trim() === "") return
 
         setIsLoading(true)
@@ -122,7 +175,7 @@ export default function InputSearch() {
         try {
             const payload: RequestSearch = {
                 searchContent: question,
-                loginId: loginId
+                loginId: loginId!
             };
 
             const data = await searchKhunJaiDee(payload)
@@ -146,7 +199,7 @@ export default function InputSearch() {
                 setYourQuestion(question)
 
                 const feedbackObj: RequestFeedback = {
-                    sender: loginId,
+                    sender: loginId!,
                     searchText: question,
                     resultText: data.Response,
                     document: data.SearchDocument,
@@ -165,26 +218,45 @@ export default function InputSearch() {
             setQuestion("")
             setIsLoading(false)
         }
-    }
+    }, [question, loginId, clearAuth]);
+
+    useEffect(() => {
+        if (shouldSubmit && question.trim() !== "") {
+            setShouldSubmit(false);
+            handleSubmit();
+        }
+    }, [question, shouldSubmit, handleSubmit]);
+
+    useEffect(() => {
+        
+    }, [results, relatedResults])
+    
+    if(!loginId) return null;
 
     return (
         <>
-            <div className="relative w-full md:max-w-4xl xl:max-w-5xl mb-0">
+            <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
                 <Input
                     type="text"
                     placeholder="ระบุคำค้นหา..."
-                    value={question}
+                    value={previewValue || question}
                     onChange={(e) => { 
-                        setQuestion(e.target.value)
+                        setQuestion(e.target.value);
+                        setPreviewValue("");
                     }}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             e.preventDefault();
-                            handleSubmit();
+                            handleKeyDown(e);
+                            if (!showSuggest || suggestions.length === 0) {
+                                handleSubmit();
+                            }
+                        } else {
+                            handleKeyDown(e);
                         }
                     }}
                     ref={inputRef}
-                    className="w-full py-6 px-6 pr-40 md:pr-40 xl:pr-40 rounded-full bg-white border border-[#D9D9D9] shadow-lg shadow-blue-200/50"
+                    className="text-sm w-full py-6 px-6 pr-40 md:pr-40 xl:pr-40 rounded-full bg-white border border-[#D9D9D9] shadow-lg shadow-blue-200/50"
                 />
                 <div className="absolute inset-y-0 right-2 bottom-0 flex items-center gap-2">
                     <div onKeyDown={(e) => e.stopPropagation()}>
@@ -208,21 +280,32 @@ export default function InputSearch() {
                     </Button>
                 </div>
             </div>
-            <div className="relative w-full md:max-w-4xl xl:max-w-5xl mb-0">
+            <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
                 <div className="">
                     {showSuggest && (
                         <div
                             ref={suggestionsRef} 
-                            className="absolute z-10 mt-1 md:w-80 bg-white border border-gray-300 rounded-md shadow-lg h-auto overflow-y-auto">
-                            {suggestions.map((item) => (
+                            className="absolute z-10 mt-1 md:w-80 bg-white border border-gray-300 rounded-md shadow-lg h-auto overflow-y-auto p-2"
+                        >
+                            {suggestions.map((item, index) => (
                                 <div
-                                    key={item}
-                                    className={`px-4 py-2 cursor-pointer hover:bg-[#EEF5FF] text-sm`}
+                                    key={`${item}-${index}`}
+                                    className={cn(
+                                        "px-1 py-2 cursor-pointer text-sm rounded-sm transition-colors",
+                                        index === activeIndex 
+                                            ? "bg-[#EEF5FF] text-blue-600" 
+                                            : "hover:bg-[#EEF5FF]"
+                                    )}
                                     onClick={() => {
                                         setQuestion(item);
                                         setShowSuggest(false);
                                         setSuggestions([]);
+                                        setShouldSubmit(true);
                                         inputRef.current?.focus();
+                                    }}
+                                    onMouseEnter={() => {
+                                        setActiveIndex(index);
+                                        setPreviewValue(item);
                                     }}
                                 >
                                     <div className="flex row">💡 {item}</div>
@@ -289,7 +372,7 @@ export default function InputSearch() {
                                                 <>
                                                     <Separator className="my-4" />
                                                     <Button 
-                                                        className="rounded-full cursor-pointer bg-[#4D77FF]/20 text-[#4D77FF] hover:bg-[#4D77FF]/20 mb-3"
+                                                        className="rounded-full cursor-pointer bg-[#4D77FF]/20 text-[#4D77FF] hover:bg-[#4D77FF]/20"
                                                         onClick={handleOpenDoc}
                                                         >
                                                         <PackageSearch /> เอกสารเพิ่มเติมที่อาจเกี่ยวข้องกับสิ่งที่คุณสนใจ {!openDocList ? <ChevronUp /> : <ChevronDown />}
@@ -298,7 +381,7 @@ export default function InputSearch() {
                                                     {openDocList && (
                                                         <CardDescription>
                                                             {relatedResults.map((item, index) => (
-                                                                <div key={item.title ?? index} className="flex flex-col ...">
+                                                                <div key={item.title ?? index} className="flex flex-col mt-3">
                                                                     <div className="mb-2">
                                                                         <Link 
                                                                             href={item.link}
