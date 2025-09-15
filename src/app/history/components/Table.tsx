@@ -1,6 +1,5 @@
 "use client"
-
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,10 +12,17 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDownToLine, ThumbsDown, ThumbsUp } from "lucide-react"
-
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-// import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -26,107 +32,117 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ResponseHistory } from "@/types/history.type"
 import { ButtonFilter } from "./ButtonFilter"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { HoverCard } from "@radix-ui/react-hover-card"
-import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import ModalDetail from "./ModalDetail"
-import { exportReportsToCSV } from "./ExportFeedbacksToCSV"
-import { mockReports } from "@/lib/data"
-
-export type Reports = {
-  reportDate: string
-  users: string
-  assistants: string
-  questions: string
-  feedback: "Like" | "Dislike"
-  descriptions: string
-  response?: ResponseItem[];
+const data: Payment[] = [
+  {
+    id: "m5gr84i9",
+    amount: 316,
+    status: "success",
+    email: "ken99@example.com",
+  },
+  {
+    id: "3u1reuv4",
+    amount: 242,
+    status: "success",
+    email: "Abe45@example.com",
+  },
+  {
+    id: "derv1ws0",
+    amount: 837,
+    status: "processing",
+    email: "Monserrat44@example.com",
+  },
+  {
+    id: "5kma53ae",
+    amount: 874,
+    status: "success",
+    email: "Silas22@example.com",
+  },
+  {
+    id: "bhqecj4p",
+    amount: 721,
+    status: "failed",
+    email: "carmella@example.com",
+  },
+]
+export type Payment = {
+  id: string
+  amount: number
+  status: "pending" | "processing" | "success" | "failed"
+  email: string
 }
-
-export type ResponseItem = {
-  title: string;
-  description: string;
-};
-
-export const columns: ColumnDef<Reports>[] = [
+export const columns: ColumnDef<Payment>[] = [
   {
-    accessorKey: "reportDate",
-    header: "Report Date",
+    accessorKey: "status",
+    header: "Status",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("reportDate")}</div>
-    ),
-  },
-   {
-    accessorKey: "questions",
-    header: "Questions",
-    cell: ({ row }) => (
-      <>
-        <HoverCard>
-          <HoverCardTrigger><div className="capitalize md:max-w-[200px] xl:max-w-[400px] truncate">{row.getValue("questions")}</div></HoverCardTrigger>
-          <HoverCardContent className="w-full">
-            {row.getValue("questions")}
-          </HoverCardContent>
-        </HoverCard>
-      </>
+      <div className="capitalize">{row.getValue("status")}</div>
     ),
   },
   {
-    accessorKey: "assistants",
-    header: "Assistants",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("assistants")}</div>
-    ),
-  },
-  {
-    accessorKey: "users",
-    header: "Users",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("users")}</div>
-    ),
-  },
-  {
-    accessorKey: "feedback",
-    header: "Feedback",
-    cell: ({ row }) => {
-      const feedback = row.original.feedback;
-      return feedback === "Like" ? (
-        <div className="flex items-center gap-2">
-          <Avatar><AvatarFallback className="bg-green-200"><ThumbsUp size={16} className="text-green-600"/></AvatarFallback></Avatar>
-          <div className="text-green-600 font-medium">{feedback}</div>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <Avatar><AvatarFallback className="bg-gray-200"><ThumbsDown size={16} className="text-gray-600"/></AvatarFallback></Avatar>
-          <div className="text-gray-500 font-medium">{feedback}</div>
-        </div>
+    accessorKey: "email",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Email
+          <ArrowUpDown />
+        </Button>
       )
+    },
+    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+  },
+  {
+    accessorKey: "amount",
+    header: () => <div className="text-right">Amount</div>,
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("amount"))
+      // Format the amount as a dollar amount
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(amount)
+      return <div className="text-right font-medium">{formatted}</div>
     },
   },
   {
-    accessorKey: "descriptions",
-    header: "Descriptions",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("descriptions")}</div>
-    ),
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const payment = row.original
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(payment.id)}
+            >
+              Copy payment ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>View customer</DropdownMenuItem>
+            <DropdownMenuItem>View payment details</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
   },
 ]
-
-// interface DataTableProps {
-//   filterValues: {
-//     assistance: string;
-//     dateOption: string;
-//   };
-// }
-
 export function DataTable() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
-  const [globalFilter, setGlobalFilter] = useState("")
-  const [openDetail, setOpenDetail] = useState(false)
-  const [selectedData, setSelectedData] = useState<Reports | undefined>()
+  const [historyData, setHistoryData] = useState<ResponseHistory | null>(null);
   const [filterValues, setFilterValues] = useState<{ assistance: string; dateOption: string }>({
     assistance: "",
     dateOption: "today",
@@ -137,17 +153,11 @@ export function DataTable() {
     "30days": "Last 30 days",
     "custom": "Custom date",
   };
-  const data = mockReports
+  console.log(historyData)
 
-  useEffect(() => {
-    // const filters: ColumnFiltersState = [];
-    
-    if (filterValues.assistance) {
-      setColumnFilters([{ id: "assistants", value: filterValues.assistance }]);
-    } else {
-      setColumnFilters([]);
-    }
-  }, [filterValues]);
+  const handleHistoryData = (data: ResponseHistory | null) => {
+    setHistoryData(data);
+  };
 
   const table = useReactTable({
     data,
@@ -165,143 +175,131 @@ export function DataTable() {
       columnFilters,
       columnVisibility,
       rowSelection,
-      globalFilter,
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-      const { users, questions } = row.original
-      const searchValue = filterValue.toLowerCase()
-      return (
-        users.toLowerCase().includes(searchValue) ||
-        questions.toLowerCase().includes(searchValue)
-      )
-
-      // ALL
-      // const values = Object.values(row.original).join(" ").toLowerCase()
-      // return values.includes(filterValue.toLowerCase())
     },
   })
-
-  const { pageIndex, pageSize } = table.getState().pagination;
-  const rowNoOffset = pageIndex * pageSize;
-
-  const handleExport = () => {
-    exportReportsToCSV(data, "report_table.csv");
-    // const rows = table.getRowModel().rows.map(r => r.original);
-    // exportReportsToCSV(rows, "report_table.csv");
-  };
-
   return (
     <div className="w-full">
-        <div className="flex justify-between pb-2 pt-1">
-            <div>
-              {/* <FilterModal/> */}
-                <ButtonFilter onApply={setFilterValues}/>
-            </div>
-            <div className="flex flex-row gap-2 ml-2">
-                {/* <Input
-                    placeholder="Filter users..."
-                    value={(table.getColumn("users")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("users")?.setFilterValue(event.target.value)
+      <div className="flex items-center py-2">
+        <ButtonFilter 
+          onApply={setFilterValues} 
+          onHistoryData={handleHistoryData}
+        />
+        <div className="relative">
+          <div className="absolute inset-x-0 right-0 h-16 ...">02</div>
+          {/* <Input
+            placeholder="Filter emails..."
+            value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("email")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm ml-2"
+          /> */}
+        </div>
+        
+        {/* <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
                     }
-                    className="max-w-md rounded-full"
-                /> */}
-                <Input
-                  placeholder="Search user or question..."
-                  value={globalFilter}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
-                  className="w-48 md:w-64 xl:w-100 rounded-full"
-                />
-  
-                <Button variant={"outline"} onClick={handleExport}><ArrowDownToLine/>Download</Button>
-            </div>
-        </div>
-        <p className="mb-2">
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu> */}
+      </div>
+      <p className="mb-2">
           {dateLabelMap[filterValues.dateOption] || filterValues.dateOption}
-        </p>
-        <div className="rounded-md border overscroll-x-contain">
-          <Table className="min-w-[800px]">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  <TableHead>No.</TableHead>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    )
-                  })}
+      </p>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row, index) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={() => {
-                      setSelectedData(row.original);
-                      setOpenDetail(true);
-                    }}
-                    className="cursor-pointer hover:bg-gray-100"
-                  >
-                    <TableCell>{rowNoOffset + index + 1}</TableCell>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="text-muted-foreground flex-1 text-sm">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <ModalDetail open={openDetail} onOpenChange={setOpenDetail} data={selectedData} />
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="text-muted-foreground flex-1 text-sm">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
         </div>
+      </div>
     </div>
   )
 }

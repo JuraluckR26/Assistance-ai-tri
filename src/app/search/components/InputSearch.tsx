@@ -262,7 +262,7 @@ export default function InputSearch() {
                     <div onKeyDown={(e) => e.stopPropagation()}>
                         
                     </div>
-                    <FAQButton 
+                    {/* <FAQButton 
                         onSelect={(value) => {
                             if (!isLoading) {
                                 setQuestion(value);
@@ -270,7 +270,7 @@ export default function InputSearch() {
                         }}
                         inputRef={inputRef}
                         sharedFAQList={faqList}
-                    />
+                    /> */}
                     <Button
                         size="icon"
                         onClick={handleSubmit}

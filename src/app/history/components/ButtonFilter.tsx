@@ -2,26 +2,51 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { getHistory } from "@/lib/api/historyService"
 import { assistantList } from "@/lib/data"
+import { RequestSearchHistory, ResponseHistory } from "@/types/history.type"
 import { Filter } from "lucide-react"
-import { useRef, useState } from "react"
+import { cache, useRef, useState } from "react"
 
 interface ButtonFilterProps {
   onApply: (filters: { assistance: string; dateOption: string }) => void;
+  onHistoryData: (historyData: ResponseHistory | null) => void;
 }
 
-export function ButtonFilter({ onApply }: ButtonFilterProps) {
+export function ButtonFilter({ onApply, onHistoryData }: ButtonFilterProps) {
     const [open, setOpen] = useState(false) 
     const [assistance, setAssistance] = useState<string>("")
     const [dateOption, setDateOption] = useState("today")
+    const [historyList, setHistoryList] = useState<ResponseHistory | null>()
+    // console.log(historyList)
 
     const panelRef = useRef<HTMLDivElement>(null);
     const togglePanel = () => setOpen(!open);
 
-    function handleFilter() {
-        console.log("Filter applied with:", { assistance, dateOption });
-        onApply({ assistance, dateOption });
-        setOpen(false);
+    const handleFilter = async (value: RequestSearchHistory) => {
+        try {
+            const result = await getHistory(value)
+            if(result) {
+                setHistoryList(result)
+                onHistoryData(result)
+            } else {
+
+            }
+        } catch {
+            
+        }
+
+        // console.log("Filter applied with:", { assistance, dateOption });
+        // onApply({ assistance, dateOption });
+        
+    }
+
+    const test: RequestSearchHistory = {
+        assistantName: "",
+        date: {
+            start: "2025-09-03T01:08:04.2969057",
+            end: "2025-09-03T11:08:04.2969057"
+        }
     }
 
     return (
@@ -142,7 +167,7 @@ export function ButtonFilter({ onApply }: ButtonFilterProps) {
                             </div>
                             <div className="col-span-4 col-end-7 ml-auto flex gap-2">
                                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                                <Button type="button" className="bg-blue-600 hover:bg-blue-700" onClick={handleFilter}>Apply</Button>
+                                <Button type="button" className="bg-blue-600 hover:bg-blue-700" onClick={() => { handleFilter(test); setOpen(false); }}>Apply</Button>
                             </div>
                         </div>
                     </div>

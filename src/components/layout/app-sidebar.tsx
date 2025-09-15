@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   AudioWaveform,
   BotMessageSquare,
+  Clock3,
   Command,
   Frame,
   GalleryVerticalEnd,

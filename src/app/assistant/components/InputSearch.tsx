@@ -334,7 +334,7 @@ export default function InputSearch() {
                             {showSuggest && suggestions.length > 0 && (
                                  <div
                                      className={cn(
-                                         "absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto w-90 p-2",
+                                         "absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto p-2",
                                          dropUp ? "bottom-full mb-1" : "top-full mt-1"
                                      )}
                                  >
