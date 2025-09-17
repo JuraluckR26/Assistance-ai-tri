@@ -300,7 +300,7 @@ export default function InputSearch() {
                                         setQuestion(item);
                                         setShowSuggest(false);
                                         setSuggestions([]);
-                                        setShouldSubmit(true);
+                                        // setShouldSubmit(true);
                                         inputRef.current?.focus();
                                     }}
                                     onMouseEnter={() => {

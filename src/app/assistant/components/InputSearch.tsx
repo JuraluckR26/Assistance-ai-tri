@@ -346,7 +346,7 @@ export default function InputSearch() {
                                                 onClick={() => {
                                                     setQuestion(item);
                                                     setShowSuggest(false);
-                                                    setShouldSubmit(true);
+                                                    // setShouldSubmit(true);
                                                 }}
                                                 className={cn(
                                                     "w-full text-left px-1 py-2 cursor-pointer text-sm rounded-sm transition-colors",
