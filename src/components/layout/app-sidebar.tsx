@@ -79,6 +79,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: BotMessageSquare,
       }] : []),
       {
+        title: "Dealer center",
+        url: "/dealer-assistant",
+        icon: BotMessageSquare,
+      },
+      {
         title: "History",
         url: "/history",
         icon: Clock3,
