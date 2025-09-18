@@ -12,7 +12,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { ArrowDownToLine, ArrowUpDown, ChevronDown, MoreHorizontal, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -34,109 +34,149 @@ import {
 } from "@/components/ui/table"
 import { ResponseHistory } from "@/types/history.type"
 import { ButtonFilter } from "./ButtonFilter"
-const data: Payment[] = [
-  {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@example.com",
-  },
-  {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@example.com",
-  },
-  {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@example.com",
-  },
-  {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@example.com",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@example.com",
-  },
-]
+import { exportReportsToCSV } from "./ExportFeedbacksToCSV"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+
+// const data: Payment[] = [
+//   {
+//     id: "m5gr84i9",
+//     amount: 316,
+//     status: "success",
+//     email: "ken99@example.com",
+//   },
+//   {
+//     id: "3u1reuv4",
+//     amount: 242,
+//     status: "success",
+//     email: "Abe45@example.com",
+//   },
+//   {
+//     id: "derv1ws0",
+//     amount: 837,
+//     status: "processing",
+//     email: "Monserrat44@example.com",
+//   },
+//   {
+//     id: "5kma53ae",
+//     amount: 874,
+//     status: "success",
+//     email: "Silas22@example.com",
+//   },
+//   {
+//     id: "bhqecj4p",
+//     amount: 721,
+//     status: "failed",
+//     email: "carmella@example.com",
+//   },
+// ]
+
+export type Reports = {
+  reportDate: string
+  users: string
+  assistants: string
+  questions: string
+  feedback: "Like" | "Dislike" | "No feedback"
+  descriptions: string
+  response?: ResponseItem[];
+}
+
+export type ResponseItem = {
+  title: string;
+  description: string;
+};
+
 export type Payment = {
   id: string
   amount: number
   status: "pending" | "processing" | "success" | "failed"
   email: string
 }
-export const columns: ColumnDef<Payment>[] = [
+
+export const columns: ColumnDef<Reports>[] = [
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "reportDate",
+    header: "Report Date",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">{row.getValue("reportDate")}</div>
     ),
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    accessorKey: "questions",
+    header: "Questions",
+    cell: ({ row }) => (
+      <>
+        <HoverCard>
+          <HoverCardTrigger><div className="capitalize md:max-w-[200px] xl:max-w-[400px] truncate">{row.getValue("questions")}</div></HoverCardTrigger>
+          <HoverCardContent className="w-full">
+            {row.getValue("questions")}
+          </HoverCardContent>
+        </HoverCard>
+      </>
+    ),
   },
   {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    accessorKey: "assistants",
+    header: "Assistants",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("assistants")}</div>
+    ),
+  },
+  {
+    accessorKey: "users",
+    header: "Users",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("users")}</div>
+    ),
+  },
+  {
+    accessorKey: "feedback",
+    header: "Feedback",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"))
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount)
-      return <div className="text-right font-medium">{formatted}</div>
+      const feedback = row.original.feedback;
+      return feedback === "Like" ? (
+        <div className="flex items-center gap-2">
+          <Avatar><AvatarFallback className="bg-green-200"><ThumbsUp size={16} className="text-green-600"/></AvatarFallback></Avatar>
+          <div className="text-green-600 font-medium">{feedback}</div>
+        </div>
+      ) : feedback === "Dislike" ? (
+        <div className="flex items-center gap-2">
+          <Avatar><AvatarFallback className="bg-red-200"><ThumbsDown size={16} className="text-red-600"/></AvatarFallback></Avatar>
+          <div className="text-red-600 font-medium">{feedback}</div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <Avatar><AvatarFallback className="bg-gray-200"><ThumbsDown size={16} className="text-gray-600"/></AvatarFallback></Avatar>
+          <div className="text-gray-500 font-medium">{feedback}</div>
+        </div>
+      )
     },
   },
   {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    accessorKey: "descriptions",
+    header: "Descriptions",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("descriptions")}</div>
+    ),
   },
 ]
+// Function to convert ResponseHistory to Reports array
+const convertHistoryToReports = (historyData: ResponseHistory | null): Reports[] => {
+  if (!historyData || !historyData.result_history) {
+    return [];
+  }
+
+  return historyData.result_history.map((item) => ({
+    reportDate: new Date(item.createdDate).toLocaleDateString('th-TH'),
+    users: item.createdBy || item.loginId || '-',
+    assistants: item.assistantName || '-',
+    questions: item.searchText || '-',
+    feedback: item.feedback === 'Like' ? 'Like' : item.feedback === 'Dislike' ? 'Dislike' : 'No feedback',
+    descriptions: item.resultText || item.feedbackDetail || '-',
+    response: item.aiResult ? [{ title: 'AI Response', description: item.aiResult }] : undefined
+  }));
+};
+
 export function DataTable() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -153,7 +193,11 @@ export function DataTable() {
     "30days": "Last 30 days",
     "custom": "Custom date",
   };
-  console.log(historyData)
+  
+  // Convert history data to table format
+  const data = convertHistoryToReports(historyData);
+  console.log('History data:', historyData);
+  console.log('Converted data:', data);
 
   const handleHistoryData = (data: ResponseHistory | null) => {
     setHistoryData(data);
@@ -177,23 +221,31 @@ export function DataTable() {
       rowSelection,
     },
   })
+
+  const handleExport = () => {
+    const rows = table.getRowModel().rows.map(r => r.original);
+    exportReportsToCSV(rows, "report_table.csv");
+  };
+
   return (
     <div className="w-full">
-      <div className="flex items-center py-2">
-        <ButtonFilter 
-          onApply={setFilterValues} 
-          onHistoryData={handleHistoryData}
-        />
-        <div className="relative">
-          <div className="absolute inset-x-0 right-0 h-16 ...">02</div>
-          {/* <Input
-            placeholder="Filter emails..."
-            value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+      <div className="flex justify-between pb-2 pt-1">
+        <div>
+          <ButtonFilter 
+            onApply={setFilterValues} 
+            onHistoryData={handleHistoryData}
+          />
+        </div>
+        <div className="flex flex-row gap-2 ml-2">
+          <Input
+            placeholder="Filter questions..."
+            value={(table.getColumn("questions")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("email")?.setFilterValue(event.target.value)
+              table.getColumn("questions")?.setFilterValue(event.target.value)
             }
-            className="max-w-sm ml-2"
-          /> */}
+            className="w-48 md:w-64 xl:w-100 rounded-full"
+          />
+          <Button variant={"outline"} onClick={handleExport}><ArrowDownToLine/>Download</Button>
         </div>
         
         {/* <DropdownMenu>

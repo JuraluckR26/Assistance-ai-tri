@@ -23,29 +23,47 @@ export function ButtonFilter({ onApply, onHistoryData }: ButtonFilterProps) {
     const panelRef = useRef<HTMLDivElement>(null);
     const togglePanel = () => setOpen(!open);
 
-    const handleFilter = async (value: RequestSearchHistory) => {
+    const handleFilter = async () => {
         try {
-            const result = await getHistory(value)
+            // Create date range based on selected option
+            const now = new Date();
+            let startDate: string;
+            let endDate: string;
+
+            switch (dateOption) {
+                case "today":
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+                    break;
+                case "5days":
+                    startDate = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString();
+                    endDate = now.toISOString();
+                    break;
+                case "30days":
+                    startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+                    endDate = now.toISOString();
+                    break;
+                default:
+                    startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+                    endDate = now.toISOString();
+            }
+
+            const requestData: RequestSearchHistory = {
+                assistantName: assistance,
+                date: {
+                    start: startDate,
+                    end: endDate
+                }
+            };
+
+            const result = await getHistory(requestData)
             if(result) {
                 setHistoryList(result)
                 onHistoryData(result)
-            } else {
-
+                onApply({ assistance, dateOption });
             }
-        } catch {
-            
-        }
-
-        // console.log("Filter applied with:", { assistance, dateOption });
-        // onApply({ assistance, dateOption });
-        
-    }
-
-    const test: RequestSearchHistory = {
-        assistantName: "",
-        date: {
-            start: "2025-09-03T01:08:04.2969057",
-            end: "2025-09-03T11:08:04.2969057"
+        } catch (error) {
+            console.error("Error fetching history:", error);
         }
     }
 
@@ -167,7 +185,7 @@ export function ButtonFilter({ onApply, onHistoryData }: ButtonFilterProps) {
                             </div>
                             <div className="col-span-4 col-end-7 ml-auto flex gap-2">
                                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                                <Button type="button" className="bg-blue-600 hover:bg-blue-700" onClick={() => { handleFilter(test); setOpen(false); }}>Apply</Button>
+                                <Button type="button" className="bg-blue-600 hover:bg-blue-700" onClick={() => { handleFilter(); setOpen(false); }}>Apply</Button>
                             </div>
                         </div>
                     </div>
