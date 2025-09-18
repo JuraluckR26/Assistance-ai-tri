@@ -77,11 +77,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/assistant",
         icon: BotMessageSquare,
       }] : []),
-      {
+      ...(!isCanChat ? [{
         title: "Dealer center",
         url: "/dealer-assistant",
         icon: BotMessageSquare,
-      }
+      }] : []),
       // {
       //   title: "History",
       //   url: "/history",
