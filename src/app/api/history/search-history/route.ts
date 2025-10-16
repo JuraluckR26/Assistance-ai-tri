@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import httpClient from '@/lib/api/httpClient';
-import { RequestSearchHistory, ResponseHistory } from '@/types/history.type';
-import { validateHistoryRequest, sanitizeHistoryRequest } from '@/utils/historyValidation';
+import { ResponseHistory } from '@/types/history.type';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,18 +12,19 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(historyData, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GetHistory error:", error);
     
-    if (error.response) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response: { status?: number; data?: { message?: string } } };
       return NextResponse.json(
         { 
           message: "External API error", 
-          details: error.response.data?.message || "Unknown API error" 
+          details: axiosError.response.data?.message || "Unknown API error" 
         },
-        { status: error.response.status || 500 }
+        { status: axiosError.response.status || 500 }
       );
-    } else if (error.request) {
+    } else if (error && typeof error === 'object' && 'request' in error) {
       return NextResponse.json(
         { message: "Network error - unable to reach external API" },
         { status: 503 }

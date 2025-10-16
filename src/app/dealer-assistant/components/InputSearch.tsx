@@ -1,7 +1,9 @@
 
 "use client"
 import Feedback from "@/components/shared/Feedback";
+// import ReadAloudButton from "@/components/shared/ListenButton";
 import Loader from "@/components/shared/loading";
+import { AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +41,8 @@ export default function InputSearch() {
     const [activeIndex, setActiveIndex] = useState(0);
     const [focusedValue, setFocusedValue] = useState<string>("");
     const [previewValue, setPreviewValue] = useState<string>("");
+    const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+    const [shouldSubmit, setShouldSubmit] = useState(false);
 
     // Combined effect for suggestions and focused value management
     useEffect(() => {
@@ -80,31 +84,6 @@ export default function InputSearch() {
     useEffect(() => {
         fetchFAQ(assistantName);
     }, []);
-
-    // Effect for popup placement calculation
-    useEffect(() => {
-        const updatePlacement = () => {
-            const el = anchorRef.current;
-
-            if (!el) return;
-            
-            const rect = el.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-
-            const estimatedPopupH = Math.min(240, suggestions.length * 40 + 16);
-
-            setDropUp(spaceBelow < estimatedPopupH && spaceAbove > spaceBelow);
-        };
-
-        updatePlacement();
-        window.addEventListener("resize", updatePlacement);
-        window.addEventListener("scroll", updatePlacement, true);
-        return () => {
-            window.removeEventListener("resize", updatePlacement);
-            window.removeEventListener("scroll", updatePlacement, true);
-        };
-    }, [showSuggest, suggestions.length, isSubmitted]);
 
     function normalize(s: string) {
         return s.normalize("NFC").toLocaleLowerCase("th-TH");
@@ -205,7 +184,7 @@ export default function InputSearch() {
                     setQuestion(focusedValue);
                     setShowSuggest(false);
                     setPreviewValue("");
-                    handleSubmit();
+                    // setShouldSubmit(true);
                 }
                 break;
             case 'Escape':
@@ -214,6 +193,16 @@ export default function InputSearch() {
                 break;
         }
     };
+
+    // Effect to scroll active item into view
+    useEffect(() => {
+        if (suggestionRefs.current[activeIndex]) {
+            suggestionRefs.current[activeIndex]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            });
+        }
+    }, [activeIndex]);
 
     const handleSubmit = useCallback(async () => {
         if (question.trim() === "") return
@@ -239,13 +228,11 @@ export default function InputSearch() {
             setYourQuestion(question)
 
             const feedbackObj: RequestFeedback = {
-                sender: loginId!,
-                searchText: question,
-                resultText: data.Response,
-                document: data.SearchDocument,
-                documentLocation: data.SearchDocumentLocation,
+                id: data.Id,
+                loginId: loginId!
             }
             setFeedbackData(feedbackObj)
+            setDropUp(false)
 
         } catch (err: unknown) {
             if (err instanceof Error) {
@@ -259,152 +246,174 @@ export default function InputSearch() {
         }
     }, [question, assistantName, loginId]);
 
+    useEffect(() => {
+        if (shouldSubmit && question.trim() !== "") {
+            setShouldSubmit(false);
+            handleSubmit();
+        }
+    }, [question, shouldSubmit, handleSubmit]);
 
     return (
-        <>
+        <div className="h-full flex flex-col pb-2 gap-2">
             {!isSubmitted && (
-                <>
-                    <p className="text-lg md:text-2xl lg:text-3xl font-semibold text-center pb-2 bg-gradient-to-r from-[#723881] to-[#007AFF] bg-clip-text text-transparent">
+                <div>
+                    <p className="text-lg md:text-2xl lg:text-3xl font-semibold text-center bg-gradient-to-r from-[#723881] to-[#007AFF] bg-clip-text text-transparent">
                         เริ่มสร้างแชทใหม่ของคุณได้เลย
                     </p>
-                    <p className="text-sm text-slate-400 text-center">กรุณาระบุคำถามของคุณให้ชัดเจน เพื่อการตอบคำถามได้อย่างถูกต้องตรงประเด็น</p>
-                    <BsChatDotsFill size={250} color="#1d8ffe" className="py-6 mx-auto opacity-20 w-auto h-auto"/>
-                </>
+                    <p className="text-sm text-slate-400 text-center">อย่าลืมเลือก Assistance เพื่อการตอบคำถามได้อย่างถูกต้องตรงประเด็น</p>
+                     <BsChatDotsFill 
+                         size={250} 
+                         color="#1d8ffe" 
+                         className="mx-auto opacity-20 w-32 h-32 sm:w-48 sm:h-48 md:w-50 md:h-50 lg:w-60 lg:h-60 xl:w-100 xl:h-100"
+                     />
+                </div>
             )}
+            <div className="flex-1 flex flex-col justify-center">
+                <div className="relative" ref={anchorRef}>
+                    <div className="bg-white rounded-3xl shadow-md shadow-blue-200/50 p-3 flex flex-col gap-2 w-full border border-gray-200">
 
-            <div className="relative" ref={anchorRef}>
-                <div className="bg-white rounded-3xl shadow-md shadow-blue-200/50 p-3 flex flex-col gap-2 w-full border border-gray-200">
-
-                    <>
-                        {showSuggest && suggestions.length > 0 && (
-                            <div
-                                className={cn(
-                                    "absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto w-90 p-2",
-                                    dropUp ? "bottom-full mb-1" : "top-full mt-1"
-                                )}
-                            >
-                                <ul className="overflow-y-auto">
-                                    {suggestions.map((item, index) => (
-                                    <li key={item} className="list-none">
-                                        <button
-                                        type="button"
-                                        onClick={() => {
-                                            setQuestion(item);
-                                            setShowSuggest(false);
+                        <>
+                            {showSuggest && suggestions.length > 0 && (
+                                <div
+                                    className={cn(
+                                        "absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden py-2 px-2",
+                                        "w-full sm:w-96 md:w-[500px] lg:w-[450px] xl:w-[500px]",
+                                        dropUp ? "bottom-full mb-1" : "top-20 mt-1"
+                                    )}
+                                >
+                                    <div className="max-h-60 overflow-y-auto">
+                                        <ul>
+                                            {suggestions.map((item, index) => (
+                                            <li key={item} className="list-none">
+                                                <button
+                                                    ref={(el) => { suggestionRefs.current[index] = el; }}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setQuestion(item);
+                                                        setShowSuggest(false);
+                                                        setPreviewValue("");
+                                                        // setShouldSubmit(true);
+                                                    }}
+                                                    className={cn(
+                                                        "w-full text-left px-2 py-2 cursor-pointer text-sm rounded-sm transition-colors",
+                                                        index === activeIndex 
+                                                            ? "bg-[#EEF5FF] text-blue-600" 
+                                                            : "hover:bg-[#EEF5FF]"
+                                                    )}
+                                                    onMouseEnter={() => {
+                                                        setActiveIndex(index);
+                                                        setPreviewValue(item);
+                                                    }}
+                                                >
+                                                    💡 {item}
+                                                </button>
+                                            </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+                            <Textarea
+                                value={previewValue || question}
+                                placeholder={!isReady ? "กำลังโหลดข้อมูล..." : "พิมพ์คำถามของคุณที่นี่..."} 
+                                className="border border-1 rounded-tl-xl rounded-tr-xl text-sm"
+                                disabled={!isReady}
+                                autoFocus
+                                onChange={(e) => {
+                                    setQuestion(e.target.value);
+                                    setPreviewValue("");
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleKeyDown(e);
+                                        if (!showSuggest || suggestions.length === 0) {
                                             handleSubmit();
-                                        }}
-                                        className={cn(
-                                            "w-full text-left px-1 py-2 cursor-pointer text-sm rounded-sm transition-colors",
-                                            index === activeIndex 
-                                                ? "bg-[#EEF5FF] text-blue-600" 
-                                                : "hover:bg-[#EEF5FF]"
+                                        }
+                                    } else {
+                                        handleKeyDown(e);
+                                    }
+                                }}
+                            />
+                        </>
+
+                        <div className="flex justify-between items-center">
+                            <Badge variant={"secondary"} className="bg-blue-100 text-blue-600 rounded-sm px-3 py-1">
+                                Mirai, my-ISUZU, OMO
+                            </Badge>
+
+                            <div className="flex gap-2 items-center">
+
+                                <div
+                                    className="flex rounded-full mx-auto bg-gradient-to-r from-[#1E90FF] via-[#1E90FF] to-[#125699] p-1"
+                                >
+                                    <Button
+                                        onClick={handleSubmit}
+                                        className="rounded-full bg-white hover:bg-white py-1 flex items-center gap-1 h-auto cursor-pointer"
+                                    >
+                                        <span className="text-[#1E90FF] font-bold">สอบถาม</span> <ArrowUpRight className="!w-5 !h-5 text-[#1E90FF]" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {isSubmitted && (
+                            <div className="pt-2">
+                                <div className="p-2 bg-[#F5F5F5] rounded-md">
+                                {isLoading ? (
+                                        <>
+                                            <div className="relative w-full min-h-[80px]">
+                                                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                                                    <Loader />
+                                                </div>
+                                            </div>
+                                        </>
+
+                                    ) : (
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>คำถาม : {yourQuestion}</CardTitle>
+                                        </CardHeader>
+                                        {responseData && (
+                                            <>
+                                                <CardContent>
+                                                    <CardTitle>ตอบ :</CardTitle>
+                                                    <div className="whitespace-pre-line">
+                                                        <div dangerouslySetInnerHTML={{ __html: responseData.response }} />
+                                                    </div>
+                                                </CardContent>
+                                                <CardFooter className="flex ml-auto gap-2">
+                                                    {/* <ReadAloudButton
+                                                        onClick={() => console.log("เริ่มอ่านเอกสาร")}
+                                                        label="อ่านเอกสารให้ฟัง"
+                                                        // iconSrc="/icons/microphone.png"
+                                                        size={28}
+                                                    /> */}
+                                                    {feedbackData && <Feedback dataProps={feedbackData} />}
+                                                </CardFooter>
+                                            </>
                                         )}
-                                        onMouseEnter={() => {
-                                            setActiveIndex(index);
-                                            setPreviewValue(item);
-                                        }}
-                                        >
-                                        💡 {item}
-                                        </button>
-                                    </li>
-                                    ))}
-                                </ul>
+                                    </Card>
+                                )}
+                                </div>
                             </div>
                         )}
-                        <Textarea
-                            value={previewValue || question}
-                            placeholder={!isReady ? "กำลังโหลดข้อมูล..." : "พิมพ์คำถามของคุณที่นี่..."} 
-                            className="border border-1 rounded-tl-xl rounded-tr-xl text-sm"
-                            disabled={!isReady}
-                            autoFocus
-                            onChange={(e) => {
-                                setQuestion(e.target.value);
-                                setPreviewValue("");
-                            }}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleKeyDown(e);
-                                    if (!showSuggest || suggestions.length === 0) {
-                                        handleSubmit();
-                                    }
-                                } else {
-                                    handleKeyDown(e);
-                                }
-                            }}
-                        />
-                    </>
-
-                    <div className="flex justify-between items-center">
-                        <Badge variant={"secondary"} className="bg-blue-100 text-blue-600 rounded-sm px-3 py-1">
-                            {assistantName}
-                        </Badge>
-                        {/* <Select value={assistantName} onValueChange={(v) => setAssistantName(v.trim())}>
-                            <SelectTrigger className="rounded-full px-4 border text-gray-700 cursor-pointer">
-                                <SelectValue placeholder={assistantList.length === 1 ? assistantName : "Assistance name"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {assistantList.map((val, index) => (
-                                    <SelectItem 
-                                        key={index} 
-                                        value={val.trim()}
-                                    >{val.trim()}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select> */}
-
-                        <div className="flex gap-2 items-center">
-
-                            <div
-                                className="flex rounded-full mx-auto bg-gradient-to-r from-[#1E90FF] via-[#1E90FF] to-[#125699] p-1"
-                            >
-                                <Button
-                                    onClick={handleSubmit}
-                                    className="rounded-full bg-white hover:bg-white py-1 flex items-center gap-1 h-auto cursor-pointer"
-                                >
-                                    <span className="text-[#1E90FF] font-bold">สอบถาม</span> <ArrowUpRight className="!w-5 !h-5 text-[#1E90FF]" />
-                                </Button>
-                            </div>
-                        </div>
                     </div>
-
-                    {isSubmitted && (
-                        <div className="pt-2">
-                            <div className="p-2 bg-[#F5F5F5] rounded-md">
-                            {isLoading ? (
-                                    <>
-                                        <div className="relative w-full min-h-[80px]">
-                                            <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                                                <Loader />
-                                            </div>
-                                        </div>
-                                    </>
-
-                                ) : (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>คำถาม : {yourQuestion}</CardTitle>
-                                    </CardHeader>
-                                    {responseData && (
-                                        <>
-                                            <CardContent>
-                                                <CardTitle>ตอบ :</CardTitle>
-                                                <div className="whitespace-pre-line">
-                                                    <div dangerouslySetInnerHTML={{ __html: responseData.response }} />
-                                                </div>
-                                            </CardContent>
-                                            <CardFooter className="flex flex-row-reverse">
-                                                {feedbackData && <Feedback dataProps={feedbackData} />}
-                                            </CardFooter>
-                                        </>
-                                    )}
-                                </Card>
-                            )}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
-        </>
+            
+            <div>
+                <Card className="px-4 py-2 gap-1 text-xs bg-gray-100 border-none shadow-none ">
+                    <div className="flex gap-2 items-center">
+                        <AlertTitle className="text-orange-500 md:text-xs lg:text-xs xl:text-sm">คำเตือน: ข้อมูลที่ได้จาก เอไอ เซอร์วิสเดส นี้ เป็นเพียงคำแนะนำเบื้องต้น อาจมีขัอผิดพลาด ไม่เป็นปัจจุบัน หรือไม่สมบูรณ์ </AlertTitle>
+                    </div>
+                    <div className="text-gray-400 flex gap-2">
+                        <p className="lg:text-xs md:text-xs xl:text-sm">กรุณาตรวจสอบด้วยตัวท่านเองอีกครั้งหรือติดต่อเซอร์วิสเดส ตามช่องทางต่อไปนี้</p>
+                        <p className="lg:text-xs md:text-xs xl:text-sm">โทรศัพท์: 02-079-9777</p>
+                        <p className="lg:text-xs md:text-xs xl:text-sm">อีเมล: servicedesk@tripetch-it.co.th</p>
+                    </div>
+                </Card>
+            </div>
+        </div>
     )
 }

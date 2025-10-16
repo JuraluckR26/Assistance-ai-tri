@@ -88,4 +88,16 @@ export type PaginatedResponse<T> = {
         totalPages: number;
     };
 };
-  
+
+export type RequestUpdateHistory = {
+    id: string;
+    loginId: string;
+    system: string;
+    module: string;
+    function: string;
+    ticket: string;
+    aiResult: string;
+    custom1: string;
+    custom2: string;
+    custom3: string;
+};

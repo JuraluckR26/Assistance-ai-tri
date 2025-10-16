@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('User Password auth error:', error);
     return NextResponse.json(
-      { IsAuthenticated: false, LoginId: '' },
+      { IsAuthenticated: false, LoginId: '', IsCanChat: false, IsPilot: false },
       { status: 401 }
     );
   }

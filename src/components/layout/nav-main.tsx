@@ -31,7 +31,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+      <SidebarGroupLabel  className="text-sm">เมนูหลัก</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {

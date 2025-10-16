@@ -5,13 +5,17 @@ let initialStateFromStorage = {
   loginId: null,
   isCanChat: false,
   isAuthenticated: null,
+  isPilot: false,
+  loginType: null,
 };
 
 type AuthStore = {
   loginId: string | null;
   isCanChat: boolean;
   isAuthenticated: boolean | null;
-  setLoginData: (loginId: string, isCanChat: boolean) => void;
+  isPilot: boolean;
+  loginType: 'username' | 'email' | 'token' | null;
+  setLoginData: (loginId: string, isCanChat: boolean, loginType: 'username' | 'email' | 'token', isPilot?: boolean) => void;
   logout: () => void;
   clearAuth: () => void;
 };
@@ -27,6 +31,8 @@ if (typeof window !== "undefined") {
     }
   } catch (error) {
     console.error("Failed to parse persisted auth state:", error);
+    // Clear corrupted data
+    localStorage.removeItem("auth-storage");
   }
 }
 
@@ -45,8 +51,18 @@ export const useAuthStore = create<AuthStore>()(
       loginId: null,
       isCanChat: false,
       isAuthenticated: initialStateFromStorage.isAuthenticated ? initialStateFromStorage.isAuthenticated : null,
-      setLoginData: (loginId, isCanChat) => set({ loginId, isCanChat, isAuthenticated: true }),
-      logout: () => set({ loginId: null, isAuthenticated: false }),
+      isPilot: false,
+      loginType: null,
+      setLoginData: (loginId, isCanChat, loginType, isPilot = false) => {
+        if (!loginType) {
+          console.error('loginType is required but not provided');
+          return;
+        }
+        set({ loginId, isCanChat, isPilot, loginType, isAuthenticated: true });
+      },
+      logout: () => {
+        set({ loginId: null, isAuthenticated: false, isPilot: false, loginType: null });
+      },
       clearAuth: () => {
           clearAuthData();
       },

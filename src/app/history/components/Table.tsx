@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react"
+import React, { useMemo, useState, useCallback, useEffect } from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -12,17 +12,8 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDownToLine, ArrowUpDown, ChevronDown, MoreHorizontal, ThumbsUp, ThumbsDown } from "lucide-react"
+import { ArrowDownToLine, ChevronLeft, ChevronRight, Eye, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -32,160 +23,259 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ResponseHistory } from "@/types/history.type"
+import { ResponseHistory, ResultHistoryItem } from "@/types/history.type"
 import { ButtonFilter } from "./ButtonFilter"
 import { exportReportsToCSV } from "./ExportFeedbacksToCSV"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import ModalDetail from "./ModalDetail"
+import { formatDate } from "@/utils/formatting"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { searchContent } from "@/lib/data"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-// const data: Payment[] = [
-//   {
-//     id: "m5gr84i9",
-//     amount: 316,
-//     status: "success",
-//     email: "ken99@example.com",
-//   },
-//   {
-//     id: "3u1reuv4",
-//     amount: 242,
-//     status: "success",
-//     email: "Abe45@example.com",
-//   },
-//   {
-//     id: "derv1ws0",
-//     amount: 837,
-//     status: "processing",
-//     email: "Monserrat44@example.com",
-//   },
-//   {
-//     id: "5kma53ae",
-//     amount: 874,
-//     status: "success",
-//     email: "Silas22@example.com",
-//   },
-//   {
-//     id: "bhqecj4p",
-//     amount: 721,
-//     status: "failed",
-//     email: "carmella@example.com",
-//   },
-// ]
-
-export type Reports = {
+export type ReportRow = {
+  no: number
   reportDate: string
-  users: string
-  assistants: string
   questions: string
-  feedback: "Like" | "Dislike" | "No feedback"
-  descriptions: string
-  response?: ResponseItem[];
+  assistants: string
+  users: string
+  feedback: string
+  feedbackDetail: string
+  response: string
+  system: string
+  module: string
+  function: string
+  ticket: string
+  aiResult: string
+  custom1: string
+  custom2: string
+  custom3: string
+}
+function mapHistoryToRows(history: ResponseHistory | null): ReportRow[] {
+  const list = history?.result_history ?? []
+  
+  return list.map((it, idx) => ({
+    no: idx + 1,
+    reportDate: it.createdDate,
+    // reportDate: formatTH(it.createdDate),
+    questions: it.searchText || "-",
+    assistants: it.assistantName || "-",
+    users: it.createdBy || it.loginId || "-",
+    feedback: (it.feedback && it.feedback.trim()) ? it.feedback : "No feedback",
+    feedbackDetail: it.feedbackDetail || "-",
+    response: it.resultText || "-",
+    system: it.system || "-",
+    module: it.module || "-",
+    function: it.function || "-",
+    ticket: it.ticket || "-",
+    aiResult: it.aiResult || "-",
+    custom1: it.custom1 || "-",
+    custom2: it.custom2 || "-",
+    custom3: it.custom3 || "-",
+  }))
 }
 
-export type ResponseItem = {
-  title: string;
-  description: string;
-};
-
-export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+function formatTH(iso?: string) {
+  const d = iso ? new Date(iso) : null
+  if (!d || isNaN(d.getTime())) return iso || "-"
+  return d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" })
 }
 
-export const columns: ColumnDef<Reports>[] = [
+const createReportColumns = (
+  historyData: ResponseHistory | null,
+  setSelectedData: (data: ResultHistoryItem | null) => void,
+  setOpenDetail: (open: boolean) => void
+): ColumnDef<ReportRow>[] => [
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => {
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const originalIndex = row.original.no - 1;
+            const fullData = historyData?.result_history?.[originalIndex] || null;
+            setSelectedData(fullData);
+            setOpenDetail(true);
+          }}
+          className="flex items-center gap-1 cursor-pointer"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+      )
+    },
+  },
+  {
+    accessorKey: "no",
+    header: "No.",
+    enableSorting: false,
+    cell: ({ row }) => <div>{row.original.no}</div>,
+  },
   {
     accessorKey: "reportDate",
     header: "Report Date",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("reportDate")}</div>
+      <div className="capitalize" title={row.original.reportDate}>
+        {formatDate(row.original.reportDate)}
+      </div>
     ),
+    // accessorKey: "reportDate",
+    // header: ({ column }) => (
+    //   <Button
+    //     variant="ghost"
+    //     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //   >
+    //     Report date
+    //     <ArrowUpDown className="ml-2 h-4 w-4" />
+    //   </Button>
+    // ),
   },
   {
     accessorKey: "questions",
     header: "Questions",
     cell: ({ row }) => (
-      <>
-        <HoverCard>
-          <HoverCardTrigger><div className="capitalize md:max-w-[200px] xl:max-w-[400px] truncate">{row.getValue("questions")}</div></HoverCardTrigger>
-          <HoverCardContent className="w-full">
-            {row.getValue("questions")}
-          </HoverCardContent>
-        </HoverCard>
-      </>
+      <div className="truncate max-w-[240px]" title={row.original.questions}>
+        {row.original.questions}
+      </div>
     ),
   },
   {
     accessorKey: "assistants",
     header: "Assistants",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("assistants")}</div>
+      <div className="truncate max-w-[240px]" title={row.original.assistants}>
+        {row.original.assistants}
+      </div>
     ),
   },
   {
     accessorKey: "users",
     header: "Users",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("users")}</div>
+      <div className="truncate max-w-[120px]" title={row.original.users}>
+        {row.original.users}
+      </div>
     ),
   },
   {
     accessorKey: "feedback",
     header: "Feedback",
     cell: ({ row }) => {
-      const feedback = row.original.feedback;
-      return feedback === "Like" ? (
-        <div className="flex items-center gap-2">
-          <Avatar><AvatarFallback className="bg-green-200"><ThumbsUp size={16} className="text-green-600"/></AvatarFallback></Avatar>
-          <div className="text-green-600 font-medium">{feedback}</div>
-        </div>
-      ) : feedback === "Dislike" ? (
-        <div className="flex items-center gap-2">
-          <Avatar><AvatarFallback className="bg-red-200"><ThumbsDown size={16} className="text-red-600"/></AvatarFallback></Avatar>
-          <div className="text-red-600 font-medium">{feedback}</div>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <Avatar><AvatarFallback className="bg-gray-200"><ThumbsDown size={16} className="text-gray-600"/></AvatarFallback></Avatar>
-          <div className="text-gray-500 font-medium">{feedback}</div>
-        </div>
+      const fb = row.original.feedback
+      const cls =
+        fb === "Good" ? "bg-green-500" :
+        fb === "Bad" ? "bg-red-500" :
+        "bg-gray-300 text-gray-600"
+      return (
+        <Badge variant={"default"} className={`inline-block rounded-full ${cls}`}>{fb}</Badge>
       )
     },
   },
   {
-    accessorKey: "descriptions",
-    header: "Descriptions",
+    accessorKey: "feedbackDetail",
+    header: "Feedback Detail",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("descriptions")}</div>
+      <div className="truncate max-w-[120px]" title={row.original.feedbackDetail}>
+        {row.original.feedbackDetail}
+      </div>
     ),
   },
-]
-// Function to convert ResponseHistory to Reports array
-const convertHistoryToReports = (historyData: ResponseHistory | null): Reports[] => {
-  if (!historyData || !historyData.result_history) {
-    return [];
+  {
+    accessorKey: "system",
+    header: "System",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.system}>
+        {row.original.system}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "module",
+    header: "Module",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.module}>
+        {row.original.module}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "function",
+    header: "Function",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.function}>
+        {row.original.function}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "ticket",
+    header: "Ticket",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.ticket}>
+        {row.original.ticket}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "aiResult",
+    header: "AI Result",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.aiResult}>
+        {row.original.aiResult}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "custom1",
+    header: "Custom 1",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.custom1}>
+        {row.original.custom1}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "custom2",
+    header: "Custom 2",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.custom2}>
+        {row.original.custom2}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "custom3",
+    header: "Custom 3",
+    cell: ({ row }) => (
+      <div className="truncate max-w-[120px]" title={row.original.custom3}>
+        {row.original.custom3}
+      </div>
+    ),
   }
-
-  return historyData.result_history.map((item) => ({
-    reportDate: new Date(item.createdDate).toLocaleDateString('th-TH'),
-    users: item.createdBy || item.loginId || '-',
-    assistants: item.assistantName || '-',
-    questions: item.searchText || '-',
-    feedback: item.feedback === 'Like' ? 'Like' : item.feedback === 'Dislike' ? 'Dislike' : 'No feedback',
-    descriptions: item.resultText || item.feedbackDetail || '-',
-    response: item.aiResult ? [{ title: 'AI Response', description: item.aiResult }] : undefined
-  }));
-};
+]
 
 export function DataTable() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
+  const [globalFilter, setGlobalFilter] = useState("")
   const [historyData, setHistoryData] = useState<ResponseHistory | null>(null);
+  const [hasFiltered, setHasFiltered] = useState<boolean>(false)
+  const [openDetail, setOpenDetail] = useState(false)
+  const [selectedData, setSelectedData] = useState<ResultHistoryItem | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [feedbackD, setFeedbackD] = useState("")
+  const [selectedFeedback, setSelectedFeedback] = useState<string[]>([])
   const [filterValues, setFilterValues] = useState<{ assistance: string; dateOption: string }>({
     assistance: "",
-    dateOption: "today",
+    dateOption: "",
   });
   const dateLabelMap: Record<string, string> = {
     "today": "Today",
@@ -193,19 +283,103 @@ export function DataTable() {
     "30days": "Last 30 days",
     "custom": "Custom date",
   };
-  
-  // Convert history data to table format
-  const data = convertHistoryToReports(historyData);
-  console.log('History data:', historyData);
-  console.log('Converted data:', data);
+  console.log(hasFiltered)
 
-  const handleHistoryData = (data: ResponseHistory | null) => {
+  const handleSaveFromModal = useCallback((updated: ResultHistoryItem) => {
+    setHistoryData(prev => {
+      if (!prev) return prev;
+      const next = {
+        ...prev,
+        result_history: prev.result_history.map(it =>
+          it.id === updated.id ? { ...it, ...updated } : it
+        )
+      };
+      return next;
+    });
+    setSelectedData(updated);
+  }, []);
+
+  const handleHistoryData = useCallback((data: ResponseHistory | null) => {
     setHistoryData(data);
+    setHasFiltered(true);
+  }, []);
+
+  const handleLoadingChange = useCallback((loading: boolean) => {
+    setIsLoading(loading);
+  }, []);
+
+  const handleFeedbackChange = useCallback((feedback: string, checked: boolean) => {
+    setSelectedFeedback(prev => {
+      if (checked) {
+        return [...prev, feedback];
+      } else {
+        return prev.filter(f => f !== feedback);
+      }
+    });
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    setSelectedFeedback([]);
+    setFeedbackD("");
+  }, []);
+
+  const rows = useMemo(() => mapHistoryToRows(historyData), [historyData])
+  const columns = useMemo(() => {
+    const baseColumns = createReportColumns(historyData, setSelectedData, setOpenDetail);
+    
+    // Add filter functions to specific columns
+    return baseColumns.map(column => {
+      if ('accessorKey' in column && column.accessorKey === "feedback") {
+        return {
+          ...column,
+          filterFn: (row: { original: ReportRow }) => {
+            if (selectedFeedback.length === 0) return true;
+            return selectedFeedback.includes(row.original.feedback);
+          }
+        };
+      }
+      if ('accessorKey' in column && column.accessorKey === "feedbackDetail") {
+        return {
+          ...column,
+          filterFn: (row: { original: ReportRow }) => {
+            if (!feedbackD) return true;
+            
+            if (feedbackD === "อื่น ๆ") {
+              const excludedValues = ["ข้อมูลไม่ถูกต้อง", "คำตอบยังไม่สมบูรณ์", "ไม่มีคำตอบ"];
+              return Boolean(
+                row.original.feedbackDetail && 
+                row.original.feedbackDetail.trim() !== "" &&
+                row.original.feedbackDetail.trim() !== "-" &&
+                !excludedValues.some(excluded => 
+                  row.original.feedbackDetail.toLowerCase().includes(excluded.toLowerCase())
+                )
+              );
+            }
+            
+            return Boolean(row.original.feedbackDetail && row.original.feedbackDetail.toLowerCase().includes(feedbackD.toLowerCase()));
+          }
+        };
+      }
+      return column;
+    });
+  }, [historyData, setSelectedData, setOpenDetail, selectedFeedback, feedbackD])
+  
+  // Custom global filter function - exclude
+  const globalFilterFn = (row: { original: ReportRow }, columnId: string, value: string) => {
+    const search = value.toLowerCase();
+    const searchableColumns = [
+      'questions', 'users', 'system', 'module', 'function', 'ticket', 'aiResult', 'custom1', 'custom2', 'custom3'
+    ];
+    
+    return searchableColumns.some(column => {
+      const cellValue = (row.original as Record<string, unknown>)[column];
+      return cellValue && cellValue.toString().toLowerCase().includes(search);
+    });
   };
 
   const table = useReactTable({
-    data,
-    columns,
+    data: rows,                      
+    columns: columns,        
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -214,144 +388,273 @@ export function DataTable() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: globalFilterFn,
+    state: { sorting, columnFilters, columnVisibility, rowSelection, globalFilter },
+    enableColumnFilters: true,
   })
 
+  // Trigger column filters when state changes
+  useEffect(() => {
+    // Set feedback column filter
+    if (selectedFeedback.length > 0) {
+      table.getColumn("feedback")?.setFilterValue(selectedFeedback);
+    } else {
+      table.getColumn("feedback")?.setFilterValue(undefined);
+    }
+  }, [selectedFeedback, table]);
+
+  useEffect(() => {
+    // Set feedbackDetail column filter
+    if (feedbackD) {
+      table.getColumn("feedbackDetail")?.setFilterValue(feedbackD);
+    } else {
+      table.getColumn("feedbackDetail")?.setFilterValue(undefined);
+    }
+  }, [feedbackD, table]);
+
   const handleExport = () => {
-    const rows = table.getRowModel().rows.map(r => r.original);
     exportReportsToCSV(rows, "report_table.csv");
   };
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between pb-2 pt-1">
+    <div className="w-full flex flex-col overflow-hidden">
+      <div className="flex justify-between py-2">
         <div>
           <ButtonFilter 
             onApply={setFilterValues} 
             onHistoryData={handleHistoryData}
+            onResetFilter={() => setHasFiltered(false)}
+            onLoadingChange={handleLoadingChange}
           />
         </div>
-        <div className="flex flex-row gap-2 ml-2">
+        <div className="flex flex-row gap-2 ml-2 items-center">
           <Input
-            placeholder="Filter questions..."
-            value={(table.getColumn("questions")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("questions")?.setFilterValue(event.target.value)
-            }
+            placeholder="Search table..."
+            value={globalFilter ?? ""}
+            onChange={(event) => {
+              const value = event.target.value;
+              table.setGlobalFilter(value);
+            }}
             className="w-48 md:w-64 xl:w-100 rounded-full"
           />
-          <Button variant={"outline"} onClick={handleExport}><ArrowDownToLine/>Download</Button>
+          <TooltipProvider delayDuration={150}>
+            <Popover>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <PopoverTrigger asChild><Button variant="outline" className="cursor-pointer"><Filter/></Button></PopoverTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Filter</p>
+                </TooltipContent>
+              </Tooltip>
+              <PopoverContent className="w-80 mr-3">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <p className="text-sm font-medium mb-3">Feedback</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="Good" 
+                          checked={selectedFeedback.includes("Good")}
+                          onCheckedChange={(checked) => handleFeedbackChange("Good", checked as boolean)}
+                        />
+                        <Label htmlFor="Good" className="font-normal text-sm">Good</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="Bad" 
+                          checked={selectedFeedback.includes("Bad")}
+                          onCheckedChange={(checked) => handleFeedbackChange("Bad", checked as boolean)}
+                        />
+                        <Label htmlFor="Bad" className="font-normal text-sm">Bad</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="noFeedback" 
+                          checked={selectedFeedback.includes("No feedback")}
+                          onCheckedChange={(checked) => handleFeedbackChange("No feedback", checked as boolean)}
+                        />
+                        <Label htmlFor="noFeedback" className="font-normal text-sm">No feedback</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="noFeedback" 
+                          checked={selectedFeedback.length === 0}
+                          disabled={selectedFeedback.length > 0}
+                        />
+                        <Label htmlFor="noFeedback" className="font-normal text-sm">All</Label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div>
+                    <p className="text-sm font-medium mb-2">Feedback Detail</p>
+                    <Select value={feedbackD || "all"} onValueChange={(v) => setFeedbackD(v === "all" ? "" : v.trim())}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All feedback details" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All feedback details</SelectItem>
+                        {searchContent.map((val, index) => (
+                            <SelectItem 
+                                key={index} 
+                                value={val.text.trim()}
+                            >{val.text.trim()}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Button variant="outline" onClick={handleClearFilters} className="w-full">
+                    Clear filters
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant={"default"} onClick={handleExport} className="cursor-pointer"><ArrowDownToLine/></Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Export to CSV</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
         </div>
-        
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu> */}
       </div>
-      <p className="mb-2">
-          {dateLabelMap[filterValues.dateOption] || filterValues.dateOption}
-      </p>
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+      {hasFiltered && (
+        <p className="mb-2">
+            {dateLabelMap[filterValues.dateOption] || filterValues.dateOption}
+        </p>
+      )}
+      
+      <div className="flex-1 overflow-hidden rounded-md border flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+              ))}
+            </TableHeader>
+            <TableBody
+              className="
+                [&_tr:nth-child(odd)]:bg-gray-100
+                [&_tr:nth-child(even)]:bg-gray-50
+                [&_tr[data-state=selected]]:bg-indigo-500
+              "
+            >
+              {isLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    <div className="flex flex-col items-center gap-2 text-gray-500">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <div>กำลังโหลดข้อมูล...</div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="hover:bg-gray-50"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-30 text-center"
+                  >
+                    {!hasFiltered ? (
+                      <div className="flex flex-col items-center gap-2 text-gray-500">
+                        <div className="text-lg">📊</div>
+                        <div>ยังไม่มีข้อมูล</div>
+                        <div className="text-sm">กรุณาใช้ Filter เพื่อค้นหาข้อมูล</div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-gray-500">
+                        <div className="text-lg">🔍</div>
+                        <div>ไม่พบข้อมูล</div>
+                        <div className="text-sm">ลองเปลี่ยนเงื่อนไขการค้นหา</div>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+        <div className="flex-shrink-0 flex items-center justify-end space-x-2 py-2 px-4 bg-white border-t">
+          <div className="text-muted-foreground flex-1 text-sm">
+            Total {table.getFilteredRowModel().rows.length} row(s) | Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </div>
+          <div className="space-x-2 flex items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              First page
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeft/>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRight/>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              Last page
+            </Button>
+          </div>
         </div>
       </div>
+      <ModalDetail open={openDetail} onOpenChange={setOpenDetail} data={selectedData} onSave={handleSaveFromModal} />
     </div>
   )
 }

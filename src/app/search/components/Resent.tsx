@@ -74,15 +74,15 @@ export default function Resent() {
                         ) : (
                          <>
                             {recent.map((item, index) => (
-                                <Card key={item.link || index}>
-                                    <CardContent>
+                                <Card key={item.link || index} className="py-3">
+                                    <CardContent className="px-4">
                                         <CardTitle className="mb-2">
                                             <Link 
                                                 href={item.link} 
                                                 target="_blank" 
-                                                className="no-underline hover:underline text-blue-600 font-semibold line-clamp-2"
+                                                className="no-underline hover:underline text-blue-600 text-sm font-semibold line-clamp-2"
                                             >{index + 1}. {item.title}</Link>
-                                            <p className="font-normal text-gray-400 mt-1">{item.date}</p>
+                                            <p className="text-sm text-gray-400 font-normal">{item.date}</p>
                                         </CardTitle>
                                         <CardDescription>
                                             <p className="line-clamp-2">{item.description}</p>

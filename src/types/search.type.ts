@@ -6,10 +6,12 @@ export interface DocumentItem {
 }
 
 export type ResponseSearch = {
+    Id: string
+    IsAuthenticated: boolean
     Response: string
+    Response_Other?: string
     SearchDocument: string
     SearchDocumentLocation: string
-    Response_Other?: string
     SearchDocumentLocation_Other?: string
     SearchDocument_Other?: string
 }
@@ -19,11 +21,8 @@ export interface FAQResponse {
 }
 
 export interface RequestFeedback {
-    sender: string
-    searchText: string
-    resultText: string
-    document: string
-    documentLocation: string
+    id: string
+    loginId: string
     feecback?: string
     feecbackDetail?: string
 }
