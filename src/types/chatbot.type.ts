@@ -5,6 +5,8 @@ export interface RequestSearchChat {
 }
 
 export interface ResponseSearchChat {
+    Id: string
+    IsAuthenticated: boolean
     Response: string;
     SearchDocument: string;
     SearchDocumentLocation: string;

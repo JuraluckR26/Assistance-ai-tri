@@ -5,14 +5,14 @@ export async function POST(req: NextRequest) {
   try {
     const { token } = await req.json();
 
-    const response = await httpClient.post("GetMiraiAuthenByTokenId2", token);
+    const response = await httpClient.post("GetMiraiAuthenByTokenId3", token);
 
     return NextResponse.json(response.data);
     
   } catch (error) {
     console.error('Token auth error:', error);
     return NextResponse.json(
-      { IsAuthenticated: false, LoginId: '' },
+      { IsAuthenticated: false, LoginId: '', IsCanChat: false, IsPilot: false },
       { status: 401 }
     );
   }

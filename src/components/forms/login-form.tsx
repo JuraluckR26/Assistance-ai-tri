@@ -40,7 +40,7 @@ export function LoginForm({
 
             const data = await checkLoginAuthenByUserPW(payload)
             if (data?.IsAuthenticated) {
-                setLoginData(data.LoginId, data.IsCanChat);
+                setLoginData(data.LoginId, data.IsCanChat, 'username', false);
                 setTimeout(() => {
                     router.replace('/search');
                 }, 300);
@@ -63,7 +63,6 @@ export function LoginForm({
         e.preventDefault()
         window.location.href = '/api/auth/glogin/start'
     }
-    // if (isCheckingLogin) return <div className="flex items-center justify-center h-screen text-xl text-gray-500">กำลังตรวจ Username และ Password...</div>;
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>

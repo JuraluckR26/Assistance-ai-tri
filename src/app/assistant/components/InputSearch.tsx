@@ -16,6 +16,7 @@ import Loader from "@/components/shared/loading";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { AlertTitle } from "@/components/ui/alert";
 
 // Export ฟังก์ชันสำหรับ get ค่าที่ focus อยู่
 export const useFocusedValue = () => {
@@ -50,13 +51,14 @@ export default function InputSearch() {
     const anchorRef = useRef<HTMLDivElement>(null);
     const [dropUp, setDropUp] = useState(true);
     
-    // State สำหรับ keyboard navigation
+    // State for keyboard navigation
     const [activeIndex, setActiveIndex] = useState(0);
     const [focusedValue, setFocusedValue] = useState<string>("");
     const [previewValue, setPreviewValue] = useState<string>("");
+    const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const [shouldSubmit, setShouldSubmit] = useState(false);
     
-    // useEffect เพื่อ sync focusedValue กับ activeIndex
+    // useEffect for sync focusedValue กับ activeIndex
     useEffect(() => {
         if (suggestions.length > 0 && activeIndex >= 0 && activeIndex < suggestions.length) {
             setFocusedValue(suggestions[activeIndex]);
@@ -122,12 +124,16 @@ export default function InputSearch() {
             if (!el) return;
             
             const rect = el.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-
-            const estimatedPopupH = Math.min(240, suggestions.length * 40 + 16);
-
-            setDropUp(spaceBelow < estimatedPopupH && spaceAbove > spaceBelow);
+            const windowHeight = window.innerHeight;
+            
+            // เช็คว่า input อยู่ด้านล่างของหน้าจอ (ต่ำกว่า 60% ของหน้าจอ)
+            const isInputAtBottom = rect.top > (windowHeight * 0.6);
+            
+            // เช็คว่าเป็นการใช้งานครั้งแรก (ยังไม่มีการ submit)
+            const isFirstTime = !isSubmitted;
+            
+            // ถ้า input อยู่ด้านล่าง หรือเป็นการใช้งานครั้งแรก ให้ popup ขึ้นด้านบน
+            setDropUp(isInputAtBottom || isFirstTime);
         };
 
         updatePlacement();
@@ -245,7 +251,7 @@ export default function InputSearch() {
                     setQuestion(focusedValue);
                     setShowSuggest(false);
                     setPreviewValue("");
-                    setShouldSubmit(true);
+                    // setShouldSubmit(true);
                 }
                 break;
             case 'Escape':
@@ -254,6 +260,15 @@ export default function InputSearch() {
                 break;
         }
     };
+
+    useEffect(() => {
+        if (suggestionRefs.current[activeIndex]) {
+            suggestionRefs.current[activeIndex]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            });
+        }
+    }, [activeIndex]);
 
     const handleSubmit = useCallback(async () => {
         if (question.trim() === "") return
@@ -284,11 +299,8 @@ export default function InputSearch() {
             setYourQuestion(question)
 
             const feedbackObj: RequestFeedback = {
-                sender: loginId!,
-                searchText: question,
-                resultText: data.Response,
-                document: data.SearchDocument,
-                documentLocation: data.SearchDocumentLocation,
+                id: data.Id,
+                loginId: loginId!
             }
             setFeedbackData(feedbackObj)
 
@@ -314,34 +326,41 @@ export default function InputSearch() {
     if(!loginId) return null;
 
     return (
-        <div>
+        <div className="h-full flex flex-col pb-2 gap-2">
             {!isSubmitted && (
-                <>
-                    <p className="text-lg md:text-2xl lg:text-3xl font-semibold text-center pb-2 bg-gradient-to-r from-[#723881] to-[#007AFF] bg-clip-text text-transparent">
+                <div>
+                    <p className="text-lg md:text-2xl lg:text-3xl font-semibold text-center bg-gradient-to-r from-[#723881] to-[#007AFF] bg-clip-text text-transparent">
                         เริ่มสร้างแชทใหม่ของคุณได้เลย
                     </p>
                     <p className="text-sm text-slate-400 text-center">อย่าลืมเลือก Assistance เพื่อการตอบคำถามได้อย่างถูกต้องตรงประเด็น</p>
-                    <BsChatDotsFill size={250} color="#1d8ffe" className="py-6 mx-auto opacity-20 w-auto h-auto"/>
-                </>
+                     <BsChatDotsFill 
+                         size={250} 
+                         color="#1d8ffe" 
+                         className="mx-auto opacity-20 w-32 h-32 sm:w-48 sm:h-48 md:w-50 md:h-50 lg:w-60 lg:h-60 xl:w-100 xl:h-100"
+                     />
+                </div>
             )}
-            
-            <div className="relative" ref={anchorRef}>
-                <div className="bg-white rounded-3xl shadow-md shadow-blue-200/50 p-3 flex flex-col gap-2 w-full border border-gray-200">
-                    {!assistantName ? (
-                        <p className="text-sm p-2 text-rose-400">📢 กรุณาเลือก Assistance ก่อนสอบถาม</p>
-                    ) : (
-                        <>
-                            {showSuggest && suggestions.length > 0 && (
-                                 <div
-                                     className={cn(
-                                         "absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto w-90 p-2",
-                                         dropUp ? "bottom-full mb-1" : "top-full mt-1"
-                                     )}
-                                 >
-                                     <ul className="overflow-y-auto">
-                                         {suggestions.map((item, index) => (
-                                         <li key={item} className="list-none">
-                                             <button
+                
+            <div className="flex-1 flex flex-col justify-center">
+                <div className="relative" ref={anchorRef}>
+                    <div className="bg-white rounded-3xl shadow-md shadow-blue-200/50 p-3 flex flex-col gap-2 w-full border border-gray-200">
+                        {!assistantName ? (
+                            <div className="flex items-center"><p className="text-sm p-2 text-gray-400">📢 กรุณาเลือก Assistance ก่อนสอบถาม</p> <span className="text-rose-400">*</span></div>
+                        ) : (
+                            <>
+                                {showSuggest && suggestions.length > 0 && (
+                                    <div
+                                        className={cn(
+                                        "absolute z-50 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden py-2 px-2",
+                                        "w-full sm:w-96 md:w-[500px] lg:w-[450px] xl:w-[500px]",
+                                        dropUp ? "bottom-full mb-1" : "top-full mt-1"
+                                        )}
+                                    >
+                                        <ul className="overflow-y-auto">
+                                            {suggestions.map((item, index) => (
+                                            <li key={item} className="list-none">
+                                            <button
+                                                ref={(el) => { suggestionRefs.current[index] = el; }}
                                                 type="button"
                                                 onClick={() => {
                                                     setQuestion(item);
@@ -349,7 +368,7 @@ export default function InputSearch() {
                                                     // setShouldSubmit(true);
                                                 }}
                                                 className={cn(
-                                                    "w-full text-left px-1 py-2 cursor-pointer text-sm rounded-sm transition-colors",
+                                                    "w-full text-left px-2 py-2 cursor-pointer text-sm rounded-sm transition-colors",
                                                     index === activeIndex 
                                                         ? "bg-[#EEF5FF] text-blue-600" 
                                                         : "hover:bg-[#EEF5FF]"
@@ -358,131 +377,156 @@ export default function InputSearch() {
                                                     setActiveIndex(index);
                                                     setPreviewValue(item);
                                                 }}
-                                             >
-                                             💡 {item}
-                                             </button>
-                                         </li>
-                                         ))}
-                                     </ul>
-                                 </div>
-                            )}
-                            <Textarea 
-                                value={previewValue || question}
-                                placeholder={!isReady ? "กำลังโหลดข้อมูล..." : "พิมพ์คำถามของคุณที่นี่..."} 
-                                className="border border-1 rounded-tl-xl rounded-tr-xl text-sm"
-                                disabled={!openInput}
-                                autoFocus
-                                onChange={(e) => {
-                                    setQuestion(e.target.value);
-                                    setPreviewValue("");
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleKeyDown(e);
-                                        if (!showSuggest || suggestions.length === 0) {
-                                            handleSubmit();
+                                            >
+                                                💡 {item}
+                                            </button>
+                                            </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                <Textarea 
+                                    value={previewValue || question}
+                                    placeholder={!isReady ? "กำลังโหลดข้อมูล..." : "พิมพ์คำถามของคุณที่นี่..."} 
+                                    className="border border-1 rounded-tl-xl rounded-tr-xl text-sm"
+                                    disabled={!openInput}
+                                    autoFocus
+                                    onChange={(e) => {
+                                        setQuestion(e.target.value);
+                                        setPreviewValue("");
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleKeyDown(e);
+                                            if (!showSuggest || suggestions.length === 0) {
+                                                handleSubmit();
+                                            }
+                                        } else {
+                                            handleKeyDown(e);
                                         }
-                                    } else {
-                                        handleKeyDown(e);
-                                    }
-                                }}
-                            />
-                        </>
-                        
-                    )} 
-                    <div className="flex justify-between items-center">
-                        <Select value={assistantName} onValueChange={(v) => setAssistantName(v.trim())}>
-                            <SelectTrigger className="rounded-full px-4 border text-gray-700 cursor-pointer">
-                                <SelectValue placeholder="Assistance name" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {assistantList.map((val, index) => (
-                                    <SelectItem 
-                                        key={index} 
-                                        value={val.trim()}
-                                    >{val.trim()}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                                    }}
+                                />
+                            </>
+                                
+                        )} 
+                        <div className="flex justify-between items-center">
+                            <Select value={assistantName} onValueChange={(v) => setAssistantName(v.trim())}>
+                                <SelectTrigger className="rounded-full px-4 border text-gray-700 cursor-pointer">
+                                    <SelectValue placeholder="Assistance name" className="lg:text-sm xl:text-base"/>
+                                </SelectTrigger>
+                                <SelectContent className="h-90">
+                                    {assistantList.map((val, index) => (
+                                        <SelectItem 
+                                            key={index} 
+                                            value={val.trim()}
+                                            className="lg:text-sm xl:text-base"
+                                        >{val.trim()}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
 
-                        <div className="flex gap-2 items-center">
-                            {/* <FAQButton/> */}
-
-                            <div
-                                className="flex rounded-full mx-auto bg-gradient-to-r from-[#1E90FF] via-[#1E90FF] to-[#125699] p-1"
+                            {/* <Button 
+                                size={"sm"} 
+                                variant={"secondary"}
+                                className="rounded-full bg-slate-900 text-neutral-50 hover:bg-slate-800" 
                             >
-                                <Button 
-                                    onClick={handleSubmit}
-                                    className="rounded-full bg-white hover:bg-white py-1 flex items-center gap-1 h-auto cursor-pointer"
+                                <div  className="flex pr-1 items-center gap-1"><Send/><span>สอบถาม</span></div>
+                            </Button> */}
+                            <div className="flex gap-2 items-center">
+                                <div
+                                    className="flex rounded-full mx-auto bg-gradient-to-r from-[#1E90FF] via-[#1E90FF] to-[#125699] p-1"
                                 >
-                                    <span className="text-[#1E90FF] font-bold">สอบถาม</span> <ArrowUpRight className="!w-5 !h-5 text-[#1E90FF]" />
-                                </Button>
+                                    <Button 
+                                        onClick={handleSubmit}
+                                        className="rounded-full bg-white hover:bg-white py-1 flex items-center gap-1 h-auto cursor-pointer"
+                                    >
+                                        <span className="text-[#1E90FF] font-bold">สอบถาม</span> <ArrowUpRight className="!w-5 !h-5 text-[#1E90FF]" />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            {isSubmitted && (
-                <div className="pt-4">
-                    <div className="p-2 bg-[#F5F5F5] rounded-md">
-                    {isLoading ? (
-                            <>
-                                <div className="relative w-full min-h-[80px]">
-                                    <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                                        <Loader />
-                                    </div>
-                                </div>
-                            </>
-
-                        ) : (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>คำถาม : {yourQuestion}</CardTitle>
-                                <CardDescription>
-                                    <Badge variant={"secondary"} className="bg-blue-200 text-blue-600 rounded-full px-3">
-                                        {assistantName}
-                                    </Badge>
-                                </CardDescription>
-                            </CardHeader>
-                            {responseData && (
+                
+                {isSubmitted && (
+                    <div className="pt-4 flex-1 overflow-y-auto">
+                        <div className="p-2 bg-[#F5F5F5] rounded-md">
+                        {isLoading ? (
                                 <>
-                                    <CardContent>
-                                        <CardTitle>ตอบ :</CardTitle>
-                                        <div className="whitespace-pre-line">
-                                            <div dangerouslySetInnerHTML={{ __html: responseData.response }} />
-                                            <div>
-                                                {responseData.documents?.some(val => val?.url && val?.name) && <p>เอกสาร :</p>}
-                                                <ul className="list-disc ml-4">
-                                                    {responseData.documents
-                                                        .filter(val => val?.url && val?.name)
-                                                        .map((val, index) => (
-                                                            <li key={index}>
-                                                              <Link
-                                                                href={val.url}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-blue-500 underline"
-                                                              >
-                                                                {val.name}
-                                                              </Link>
-                                                            </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
+                                    <div className="relative w-full min-h-[80px]">
+                                        <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                                            <Loader />
                                         </div>
-                                    </CardContent>
-                                    <CardFooter className="flex flex-row-reverse">
-                                        {feedbackData && <Feedback dataProps={feedbackData} />}
-                                    </CardFooter>
+                                    </div>
                                 </>
-                            )}
-                        </Card>
-                    )}
+
+                            ) : (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="lg:text-sm xl:text-base">คำถาม : {yourQuestion}</CardTitle>
+                                    <CardDescription>
+                                        <Badge variant={"secondary"} className="bg-blue-200 text-blue-600 rounded-full px-3">
+                                            {assistantName || "IT10 Service desk assistant"}
+                                        </Badge>
+                                    </CardDescription>
+                                </CardHeader>
+                                {responseData && (
+                                    <>
+                                        <CardContent>
+                                            <CardTitle className="lg:text-sm xl:text-base">ตอบ :</CardTitle>
+                                            <div className="whitespace-pre-line">
+                                                <div dangerouslySetInnerHTML={{ __html: responseData.response }} className="lg:text-sm xl:text-base"/>
+                                                <div>
+                                                    {responseData.documents?.some(val => val?.url && val?.name) && <p className="text-sm xl:text-base font-semibold">เอกสาร :</p>}
+                                                    <ul className="list-disc ml-4">
+                                                        {responseData.documents
+                                                            .filter(val => val?.url && val?.name)
+                                                            .map((val, index) => (
+                                                                <li key={index}>
+                                                                <Link
+                                                                    href={val.url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-500 underline lg:text-sm xl:text-base"
+                                                                >
+                                                                    {val.name}
+                                                                </Link>
+                                                                </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                        <CardFooter className="flex ml-auto gap-2">
+                                            {/* <ReadAloudButton
+                                                onClick={() => console.log("เริ่มอ่านเอกสาร")}
+                                                label="อ่านเอกสารให้ฟัง"
+                                                // iconSrc="/icons/microphone.png"
+                                                size={28}
+                                            /> */}
+                                            {feedbackData && <Feedback dataProps={feedbackData} />}
+                                        </CardFooter>
+                                    </>
+                                )}
+                            </Card>
+                        )}
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
+            <div>
+                <Card className="px-4 py-2 gap-1 text-xs bg-gray-100 border-none shadow-none ">
+                    <div className="flex gap-2 items-center">
+                        <AlertTitle className="text-orange-300 md:text-xs lg:text-xs xl:text-sm">คำเตือน: ข้อมูลที่ได้จาก เอไอ เซอร์วิสเดส นี้ เป็นเพียงคำแนะนำเบื้องต้น อาจมีขัอผิดพลาด ไม่เป็นปัจจุบัน หรือไม่สมบูรณ์ </AlertTitle>
+                    </div>
+                    <div className="text-gray-400 flex gap-2">
+                        <p className="lg:text-xs md:text-xs xl:text-sm">กรุณาตรวจสอบด้วยตัวท่านเองอีกครั้งหรือติดต่อเซอร์วิสเดส ตามช่องทางต่อไปนี้</p>
+                        <p className="lg:text-xs md:text-xs xl:text-sm">โทรศัพท์: 02-079-9777</p>
+                        <p className="lg:text-xs md:text-xs xl:text-sm">อีเมล: servicedesk@tripetch-it.co.th</p>
+                    </div>
+                </Card>
+            </div>
         </div>
     )
 }

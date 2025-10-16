@@ -19,7 +19,7 @@ export default function Feedback({ dataProps }: FeedbackProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false); 
     const [selectedReason, setSelectedReason] = useState<string>();
     const [customReason, setCustomReason] = useState<string>("");
-    
+
     const handleFeedback = (value: string) => {
         setFeedback(value);
         if (value === "Good") {
@@ -34,7 +34,7 @@ export default function Feedback({ dataProps }: FeedbackProps) {
           const payload: RequestFeedback = {
             ...dataProps,
             feecback: "Good",
-            feecbackDetail: "Test Feedback"
+            feecbackDetail: ""
           };
           const res = await sendFeedback(payload);
           if (res === "Success") {

@@ -14,8 +14,9 @@ export default function HeaderPage() {
     if (isHidden) return null
 
     const menuMap: Record<string, string> = {
-        "/search": "Ask Khun Jai Dee (ธุรกิจหลังการขาย, เทเลเทค)",
+        "/search": "ข้อมูล คุณใจดี (ธุรกิจหลังการขาย, เทเลเทค)",
         "/assistant": "AI Assistant",
+        "/dealer-assistant": "เอไอ เซอร์วิสเดส",
         "/history": "History",
     }
       

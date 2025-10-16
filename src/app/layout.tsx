@@ -4,7 +4,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import "@/lib/fontawesome";
 import { Toaster } from 'sonner';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Kanit } from 'next/font/google';
 import AuthTokenGuard from "@/components/layout/AuthTokenGuard";
 import HeaderPage from "@/components/layout/Header";
 
@@ -16,14 +16,10 @@ export const metadata: Metadata = {
   },
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const kanit = Kanit({
+  subsets: ["thai", "latin"],
+  weight: ["300","400","500","600","700","800"],
+  display: "swap",
 });
 
 export default function RootLayout({
@@ -33,18 +29,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={kanit.className}>
         <>
           <AuthTokenGuard>
             <SidebarProvider>
               <AppSidebar />
-              <SidebarInset>
-                <header>
+              <SidebarInset className="flex flex-col min-h-screen overflow-x-hidden">
+                <header className="flex-shrink-0">
                   <HeaderPage/>
                 </header>
 
-                <main className="flex-1 min-h-screen overflow-auto">
-                  <div className="px-0">
+                <main className="flex-1 overflow-hidden">
+                  <div className="h-full w-full px-3">
                     <>
                       {children}
                     </>

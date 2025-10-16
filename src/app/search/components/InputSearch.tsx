@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, ChevronUp, PackageSearch, Send } from "lucide-react";
-import { FAQButton } from "./FAQ";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getFAQ, searchKhunJaiDee } from "@/lib/api/searchService";
 import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
@@ -144,7 +143,7 @@ export default function InputSearch() {
                     setQuestion(focusedValue);
                     setShowSuggest(false);
                     setPreviewValue("");
-                    setShouldSubmit(true);
+                    // setShouldSubmit(true);
                 }
                 break;
             case 'Escape':
@@ -199,11 +198,8 @@ export default function InputSearch() {
                 setYourQuestion(question)
 
                 const feedbackObj: RequestFeedback = {
-                    sender: loginId!,
-                    searchText: question,
-                    resultText: data.Response,
-                    document: data.SearchDocument,
-                    documentLocation: data.SearchDocumentLocation,
+                    id: data.Id,
+                    loginId: loginId!
                 }
                 setFeedbackData(feedbackObj)                
             }
@@ -259,18 +255,7 @@ export default function InputSearch() {
                     className="text-sm w-full py-6 px-6 pr-40 md:pr-40 xl:pr-40 rounded-full bg-white border border-[#D9D9D9] shadow-lg shadow-blue-200/50"
                 />
                 <div className="absolute inset-y-0 right-2 bottom-0 flex items-center gap-2">
-                    <div onKeyDown={(e) => e.stopPropagation()}>
-                        
-                    </div>
-                    <FAQButton 
-                        onSelect={(value) => {
-                            if (!isLoading) {
-                                setQuestion(value);
-                            }
-                        }}
-                        inputRef={inputRef}
-                        sharedFAQList={faqList}
-                    />
+                    {/* <div onKeyDown={(e) => e.stopPropagation()}></div> */}
                     <Button
                         size="icon"
                         onClick={handleSubmit}

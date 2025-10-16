@@ -1,76 +1,275 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Pen } from "lucide-react";
+import { ResultHistoryItem } from "@/types/history.type";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { updateHistory } from "@/lib/api/historyService";
+import { Button } from "@/components/ui/button";
+import { formatDate } from "@/utils/formatting";
 
 type ModalDetailProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  data?: { assistants: string; descriptions: string; feedback: string; questions: string; reportDate: string; users: string };
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    data: ResultHistoryItem | null;
+    onSave?: (updated: ResultHistoryItem) => void;
 };
 
-export default function ModalDetail({ open, onOpenChange, data }: ModalDetailProps) {
+export default function ModalDetail({ open, onOpenChange, data, onSave }: ModalDetailProps) {
+    const [activeEdit, setActiveEdit] = useState<boolean>(false)
+    const [system, setSystem] = useState<string>("")
+    const [module, setModule] = useState<string>("")
+    const [valFunction, setValFunction] = useState<string>("")
+    const [ticket, setTicket] = useState<string>("")
+    const [aiResult, setAiResult] = useState<string>("")
+    const [custom1, setCustom1] = useState<string>("")
+    const [custom2, setCustom2] = useState<string>("")
+    const [custom3, setCustom3] = useState<string>("")
+    
+    const splitDocuments = (docString: string) => {
+        return docString ? docString.split('||').map(doc => doc.trim()) : [];
+    };
+    
+    const splitDocumentLocations = (locationString: string) => {
+        return locationString ? locationString.split('||').map(loc => loc.trim()) : [];
+    };
+    
+    const documents = data?.document ? splitDocuments(data.document) : [];
+    const documentLocations = data?.documentLocation ? splitDocumentLocations(data.documentLocation) : [];
+    const description = data?.resultText ? splitDocumentLocations(data.resultText) : [];
 
+    const handleSave = async () => {
+        if (!data) return;
+
+        const payload = {
+          id: data.id,
+          loginId: data.loginId || "",
+          system: system,
+          module: module,
+          function: valFunction,
+          ticket: ticket,
+          aiResult: aiResult,
+          custom1: custom1,
+          custom2: custom2,
+          custom3: custom3,
+        };
+        try {
+          await updateHistory(payload);
+          const updated: ResultHistoryItem = { ...data, ...payload };
+          onSave?.(updated);
+          setActiveEdit(false);
+          onOpenChange(false);
+        } catch (e) {
+          console.error(e);
+        }
+    }
+    useEffect(() => {
+        if (!open || !data) return;
+        setSystem(data.system || "");
+        setModule(data.module || "");
+        setValFunction(data.function || "");
+        setTicket(data.ticket || "");
+        setAiResult(data.aiResult || "");
+        setCustom1(data.custom1 || "");
+        setCustom2(data.custom2 || "");
+        setCustom3(data.custom3 || "");
+    }, [open, data]);
+    
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-white md:max-w-4xl xl:max-w-5xl">
-                <DialogHeader>
-                    <DialogTitle hidden></DialogTitle>
-                    <div className="grid gap-2">
-                        <p className="font-bold text-gray-900">Questions and Answers</p>
-                        <div className="grid grid-cols-6 gap-3">
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Username</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.users}</Label>
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Question</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.questions}</Label>
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Assistant</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.assistants}</Label>
-                        </div>
-                        <Label className="mt-1 md:text-sm xl:text-base">Response</Label>
-                        <div className="bg-blue-100 p-2 rounded-md md:h-64 xl:h-100 overflow-y-auto">
-                            <p className="font-semibold text-blue-600 text-sm">1. PMG-PB-OTB-2024 01 เพิ่ม Fig Key หมวดอะไหล่ Body Parts.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัทตรีเพชรอีซูซุเซลส์เพิ่ม Fig Key ในหมวด Body Parts จำนวน 12 รายการ (รวมเป็น 51 รายการ) โดยมีการปรับเปลี่ยนรายละเอียดให้ชัดเจนขึ้น อัปเดตในระบบมิไร 29 มกราคม 2567
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">2. TIS-PMG 001-2024แจ้งจำหน่ายชุดประดับยนต์ตรีเพชร สำหรับ All new Isuzu D-Max 2020-ปัจจุบัน.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์แจ้งจำหน่ายชุดประดับยนต์ใหม่สำหรับ Isuzu D-Max พร้อมรับคำสั่งซื้อเริ่มตั้งแต่ 18 มกราคม 2567 สินค้าได้แก่ชุดผ่อนแรงและชุดล็อคฝาท้ายกระบะโดยมีราคาขายมากกว่า 1,300 บาท                        
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">3. TIS-PMG 030-2024_แคมเพจน์ส่วนลดพิเศษ 40-90% สำหรับอะไหล่แท้_CDR TISCO AUTEC.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ จัดแคมเพจ๋นลดราคาสำหรับอะไหล่แท้ 40%-90% ตั้งแต่ 1 ก.ค.-31 ส.ค.2567 ผู้จำหน่ายสามารถสั่งซื้อตั้งแต่วันนี้ โดยไม่สามารถคืนสินค้า และยอดสั่งซื้อไม่รวมเงินรางวัลอื่นๆ                     
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">5. 1) TIS-PMG 014-2023 การรับคืนอะไหล่เป็นกรณีพิเศษ - Copy.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ จำกัด ประกาศรับคืนอะไหล่ในกรณีพิเศษ ตั้งแต่ 18 เม.ย. - 17 มิ.ย. 66 โดยมีค่าธรรมเนียม 5% ของราคาขายส่ง ผู้จำหน่ายต้องทำตามขั้นตอน กำหนดกลุ่มอะไหล่ที่คืน โดยต้องอยู่ในสภาพสมบูรณ์ หากไม่แน่ใจ สามารถสอบถามข้อมูลเพิ่มเติมได้ค่ะ
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">6. PMG-PB-PIB-2023 09 การเพิ่ม สายการผลิต [ชุบผิวโลหะกันสนิม _ EDP _Electro Deposition Painting].pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                มีการเพิ่มสายการผลิตชุบผิวโลหะกันสนิม EDP สำหรับชิ้นส่วนอะไหล่ตัวถัง ในกลุ่มแผงข้างกระบะท้าย โดยสีผิวงานจะเป็นสีเทาเข้ม เริ่มจัดส่งตั้งแต่ 19 ตุลาคม 2566 โดยมีทั้งชิ้นส่วนสีเทาและสีเทาเข้มพร้อมกัน
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">7. TIS-PMG 101-2021 แจ้งจำหน่ายชุดแต่งมาตรฐาน  ALL-NEW D-MAX รุ่น V-Cross 4 ปรตู รุ่นปี 2022 (ฉบับแก้ไข).pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัทตรีเพชรอีซูซุเซลส์แจ้งการจำหน่ายชุดแต่งมาตรฐานสำหรับรถ All-NEW ISUZU D-MAX รุ่น V-Cross 4 ประตู ปี 2022 รวมอะไหล่และราคา ชุดเสริมขอบกระบะมีหลายสี ราคาขายยังไม่รวมภาษีมูลค่าเพิ่ม และอาจมีการเปลี่ยนแปลงราคาได้
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">8. TIS-PMG 006-2020 แจ้งจำหน่าย พื้นปูกระบะ_Spark ปี 2020.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ แจ้งจำหน่ายพื้นปูกระบะรุ่นสปาร์คปี 2020 พร้อมอุปกรณ์ติดตั้ง ผู้จำหน่ายสามารถสั่งซื้อได้ตั้งแต่บัดนี้ ราคา 4,333 บาท (ขายส่ง) ไม่รวมภาษีมูลค่าเพิ่ม 7% ขอบคุณผู้สนับสนุน
-                            </p>
-                            <p className="font-semibold text-blue-600 text-sm">9. TIS-PMG 033-2020 แจ้งจำหน่าย พื้นปูกระบะตรีเพชร รุ่น Spark 2020.pdf</p>
-                            <p className="md:text-sm xl:text-base">
-                                บริษัท ตรีเพชรอีซูซุเซลส์ แจ้งจำหน่ายพื้นปูกระบะสำหรับออล-นิว อีซูซุดีแมคซ์ ปี 2020 รุ่นสปาร์ค เริ่มรับคำสั่งซื้อ 6 เม.ย. 2563 และส่งมอบวันที่ 8 เม.ย. 2563 ราคาขายส่ง 3,549 บาท ขายปลีก 5,460 บาท
-                            </p>
-                        </div>
-                        <p className="font-bold text-gray-900">Feedback details</p>
-                        <div className="grid grid-cols-6 gap-3">
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Feedback</Label>
-                            {data?.feedback === "Like" ? <Label className="col-span-5 col-end-7 text-green-500 font-semibold md:text-sm xl:text-base">Like</Label> : <Label className="col-span-5 col-end-7 text-red-500 font-semibold md:text-sm xl:text-base">Dislike</Label>}
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Reason</Label>
-                            {data?.descriptions === "อื่นๆ" ? <div className="col-span-5 col-end-7 flex flex-row"><Label className="md:text-sm xl:text-base mr-1">{data?.descriptions} -</Label> <Label className="md:text-sm xl:text-base">คำตอบเพิ่มเติม</Label></div> : <Label className="md:text-sm xl:text-base mr-1">{data?.descriptions}</Label>}
-                            <Label className="col-start-1 col-end-2 md:text-sm xl:text-base">Report date</Label>
-                            <Label className="col-span-5 col-end-7 md:text-sm xl:text-base">{data?.reportDate}</Label>
+        <>
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent 
+                    className="bg-white/40 backdrop-blur-xl shadow-2xl rounded-2xl md:max-w-5xl xl:max-w-5xl"
+                    // className="bg-white shadow-2xl rounded-2xl md:max-w-5xl xl:max-w-5xl"
+                    overlay="transparent"
+                >
+                    <div className="flex flex-row">
+                        <div className="grid grid-cols-5">
+                            <div className="col-span-2 pr-4">
+                                <DialogHeader className="mb-2">
+                                    <DialogTitle className="text-sm">
+                                        <div className="flex justify-between items-center">
+                                            <div className="">Feedback details</div>
+                                            <div 
+                                                className="bg-stone-200 px-1 py-1 rounded-sm cursor-pointer hover:bg-stone-300"
+                                                onClick={() => setActiveEdit(v => !v)}
+                                            ><Pen size={12} className="text-gray-600"/></div>
+                                        </div>
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="text-sm md:h-[440px] lg:h-[440px] overflow-y-auto">
+                                    <div className="grid grid-cols-4 gap-2">
+                                        <p>Feedback</p>
+                                        <div className="col-span-3">{data?.feedback || "-"}</div>
+                                        <p>Reason</p>
+                                        <div className="col-span-3">{data?.feedbackDetail || "-"}</div>
+                                        <p>Report date</p>
+                                        {/* <div className="col-span-3">{data?.createdDate ? new Date(data.createdDate).toLocaleString('th-TH') : "-"}</div> */}
+                                        <div className="col-span-3">{formatDate(data?.createdDate)}</div>
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-1 pt-2">
+                                        <p className="pb-4">System</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.system || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.system || "-"} onChange={(e) => setSystem(e.target.value)}/>
+                                            )}
+                                        </div>
+                                        <p className="pb-4">Module</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.module || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.module || "-"} onChange={(e) => setModule(e.target.value)}/>
+                                            )}
+                                        </div>
+                                        <p className="pb-4">Function</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.function || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.function || "-"} onChange={(e) => setValFunction(e.target.value)}/>
+                                            )}
+                                        </div>
+                                        <p className="pb-4">Ticket</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.ticket || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.ticket || "-"} onChange={(e) => setTicket(e.target.value)}/>
+                                            )}
+                                        </div>
+                                        <p className="pb-4">AI Result</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.aiResult || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.aiResult || "-"} onChange={(e) => setAiResult(e.target.value)}/>
+                                            )}
+                                        </div>
+                                        <p className="pb-4">Custom 1</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.custom1 || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.custom1 || ""} onChange={(e) => setCustom1(e.target.value)}/>
+                                            )}
+                                        </div>
+                                        <p className="pb-4">Custom 2</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.custom2 || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.custom2 || ""} onChange={(e) => setCustom2(e.target.value)}/>
+                                            )}
+                                        </div>
+                                        <p className="pb-4">Custom 3</p>
+                                        <div className="col-span-3">
+                                            {!activeEdit ? 
+                                                <div className="break-words overflow-wrap-anywhere">{data?.custom3 || "-"}</div>
+                                            : (
+                                                <Input className="bg-white" defaultValue={data?.custom3 || ""} onChange={(e) => setCustom3(e.target.value)}/>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {activeEdit && 
+                                        <DialogFooter className="mt-1">
+                                            <Button size={"sm"} variant={"ghost"} onClick={() => { setActiveEdit(false); }}>Cancel</Button>
+                                            <Button 
+                                                size={"sm"} 
+                                                variant={"default"} 
+                                                className="bg-slate-800 hover:bg-slate-700" 
+                                                onClick={() => {
+                                                    handleSave();
+                                                }}
+                                            >Save</Button>
+                                        </DialogFooter>
+                                    }
+                                </div>
+                            </div>
+                            <div className="col-span-3">
+                                <DialogHeader className="mb-2">
+                                    <DialogTitle className="text-sm">
+                                        <div>Question and answer</div>
+                                    </DialogTitle>
+                                </DialogHeader>
+                                
+                                <div className="text-sm">
+                                    <div className="grid grid-cols-6 gap-2">
+                                        <p>Username</p>
+                                        <div className="col-span-5 break-words overflow-wrap-anywhere">{data?.createdBy || data?.loginId || "-"}</div>
+                                        <p>Question</p>
+                                        <div className="col-span-5 break-words overflow-wrap-anywhere">{data?.searchText || "-"}</div>
+                                        <div className="">Assistant</div>
+                                        <div className="col-span-5 break-words overflow-wrap-anywhere">{data?.assistantName || "-"}</div>
+                                    </div>
+                                    <div className="">
+                                        <div className="py-2">Response</div>
+                                        <div className="">
+                                            <div className="bg-[#4D77FF]/20 w-full h-full p-3 rounded-sm flex flex-col gap-2 md:h-72 lg:h-82 xl:h-82">
+                                                {data?.resultText ? (
+                                                    <div className="whitespace-pre-wrap text-sm overflow-y-auto break-words overflow-wrap-anywhere">
+                                                        <>
+                                                            {documents.length > 0 && (
+                                                                <div className="space-y-2">
+                                                                    {data.assistantName === "Khun Jai Dee" ? (
+                                                                        <>
+                                                                            {documents.map((document, index) => (
+                                                                                <div key={index}>
+                                                                                    <Link 
+                                                                                        href={documentLocations[index]}
+                                                                                        target="_blank" 
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="text-blue-600 font-semibold hover:underline"
+                                                                                    >
+                                                                                        {index + 1}. {document}
+                                                                                    </Link>
+                                                                                    <p className="line-clamp-2">{description[index]}</p>
+                                                                                </div>
+                                                                            ))}
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            {data.resultText}
+                                                                            <p>เอกสาร :</p>
+                                                                            {documents.map((document, index) => (
+                                                                                <div key={index}>
+                                                                                    <Link
+                                                                                        href={documentLocations[index]}
+                                                                                        target="_blank" 
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="text-blue-600 font-semibold hover:underline"
+                                                                                    >
+                                                                                        {index + 1}. {document}
+                                                                                    </Link>
+                                                                                </div>
+                                                                            ))}
+                                                                        </>
+                                                                    )}
+                                                                    
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-gray-500 italic">ไม่มีข้อมูลการตอบกลับ</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </DialogHeader>
-            </DialogContent>
-        </Dialog>
+                </DialogContent>
+            </Dialog>
+            {/* {loadUpdate && (
+                <div>
+                    <Loader2/>
+                </div>
+            )} */}
+
+        </>
     )
 }

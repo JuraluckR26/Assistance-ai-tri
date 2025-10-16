@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const { searchContent, loginId } = await req.json();
 
-    const { data } = await httpClient.post("SearchSpeKJDAllNew", {searchContent, loginId});
+    const { data } = await httpClient.post("SearchSpeKJDAllNew2", {searchContent, loginId});
     
     return NextResponse.json(data);
     

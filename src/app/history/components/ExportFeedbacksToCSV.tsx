@@ -1,38 +1,47 @@
-import { Reports, ResponseItem } from "./Table";
+import { ReportRow } from "./Table";
+import { formatDate } from "@/utils/formatting";
 
-export function exportReportsToCSV(rows: Reports[], filename = "report_table.csv") {
+export function exportReportsToCSV(rows: ReportRow[], filename = "report_table.csv") {
   const headers = [
     "No.",
     "Report Date",
-    "Users",
     "Questions",
     "Assistants",
-    "Response",
+    "Answer",
+    "Users",
     "Feedback",
-    "Descriptions",
+    "Feedback Detail",
+    "System",
+    "Module",
+    "Function",
+    "Ticket",
+    "AI Result",
+    "Custom 1",
+    "Custom 2",
+    "Custom 3"
   ];
-
-  function stringifyResponse(items?: ResponseItem[]) {
-    if (!items || items.length === 0) return "";
-    // รวมเป็นหลายบรรทัด: "1) ชื่อ - เนื้อหา"
-    return items
-      .map((it, i) => `${i + 1}. ${it.title}\r\n${it.description}`)
-      .join("\r\n\r\n");
-  }
 
   const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
 
   const csvRows = [
     headers,
-    ...rows.map((row, idx) => [
-      idx + 1,
-      q(row.reportDate),
-      q(row.users),
+    ...rows.map((row) => [
+      row.no,
+      q(formatDate(row.reportDate)),
       q(row.questions),
       q(row.assistants),
-      q(stringifyResponse(row.response)),
+      q(row.response),
+      q(row.users),
       q(row.feedback),
-      q(row.descriptions),
+      q(row.feedbackDetail),
+      q(row.system),
+      q(row.module),
+      q(row.function),
+      q(row.ticket),
+      q(row.aiResult),
+      q(row.custom1),
+      q(row.custom2),
+      q(row.custom3),
     ]),
   ];
 

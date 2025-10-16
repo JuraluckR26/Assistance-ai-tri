@@ -5,6 +5,7 @@ export type AuthResult = {
     IsAuthenticated: boolean;
     LoginId: string;
     IsCanChat: boolean;
+    IsPilot?: boolean;
 };
 
 export interface LogoutState {
@@ -17,12 +18,12 @@ export async function checkAuthenticateByToken(token: string): Promise<AuthResul
     try {
         const response = await axios.post<AuthResult>("/api/auth/token", {token}); 
         const res = response?.data; 
-
+        
         return res;
     }
     catch (err: unknown) {
         console.error('checkAuthenticateByToken error', err);
-        return { IsAuthenticated: false, LoginId: '', IsCanChat: false };
+        return { IsAuthenticated: false, LoginId: '', IsCanChat: false, IsPilot: false };
     }
   
 }

@@ -15,8 +15,12 @@ export default function AuthTokenGuard({ children }: Props) {
   const { isAuthenticated, setLoginData, clearAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleAuthSuccess = useCallback(async (loginId: string, isCanChat: boolean) => {
-    setLoginData(loginId, isCanChat);
+  const handleAuthSuccess = useCallback(async (loginId: string, isCanChat: boolean, isPilot?: boolean, loginType?: 'username' | 'email' | 'token') => {
+    if (!loginType) {
+      console.error('loginType is required in handleAuthSuccess');
+      return;
+    }
+    setLoginData(loginId, isCanChat, loginType, isPilot);
     if (pathname === '/login') {
       await router.replace('/search');
     }
@@ -25,7 +29,7 @@ export default function AuthTokenGuard({ children }: Props) {
   const checkTokenAuth = useCallback(async (token: string) => {
     const result = await checkAuthenticateByToken(token);
     if (result.IsAuthenticated) {
-      await handleAuthSuccess(result.LoginId, result.IsCanChat);
+      await handleAuthSuccess(result.LoginId, result.IsCanChat, result.IsPilot, 'token');
       return true;
     }
     return false;
@@ -34,7 +38,7 @@ export default function AuthTokenGuard({ children }: Props) {
   const checkEmailAuth = useCallback(async (email: string) => {
     const result = await checkLoginAuthenByEmail(email);
     if (result.IsAuthenticated) {
-      await handleAuthSuccess(result.LoginId, result.IsCanChat);
+      await handleAuthSuccess(result.LoginId, result.IsCanChat, undefined, 'email');
       return true;
     }
     return false;

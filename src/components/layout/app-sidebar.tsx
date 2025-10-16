@@ -4,6 +4,7 @@ import * as React from "react"
 import {
   AudioWaveform,
   BotMessageSquare,
+  Clock3,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -34,12 +35,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const hiddenRoutes = ["/login"];
   const isHidden = hiddenRoutes.some(route => pathname.startsWith(route));
-  const { isCanChat, loginId } = useAuthStore();
+  const { isCanChat, loginId, isPilot, loginType } = useAuthStore();
+  
   const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
     setIsClient(true);
-  }, [pathname, isCanChat, loginId]);
+  }, [pathname, isCanChat, loginId, isPilot, loginType]);
 
   if (isHidden || !loginId) return null;
 
@@ -67,9 +69,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
     navMain: [
       {
-        title: "Ask Khun Jai Dee",
+        title: "ข้อมูล คุณใจดี",
         url: "/search",
-        // icon: <FontAwesomeIcon icon={faHeadset} className="w-4 h-4" />,
         icon: MessageCircleMore
       },
       ...(isCanChat ? [{
@@ -77,15 +78,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/assistant",
         icon: BotMessageSquare,
       }] : []),
-      ...(!isCanChat ? [{
-        title: "Dealer center",
+      ...(isPilot ? [{
+        title: "เอไอ เซอร์วิสเดส",
         url: "/dealer-assistant",
         icon: BotMessageSquare,
       }] : []),
+      ...(loginType !== 'token' ? [{
+        title: "History",
+        url: "/history",
+        icon: Clock3,
+      }] : []),
       // {
-      //   title: "History",
-      //   url: "/history",
-      //   icon: Clock3,
+      //   title: "Test",
+      //   url: "/testpage",
+      //   icon: BotMessageSquare,
       // },
     ],
     projects: [

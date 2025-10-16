@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const { data } = await httpClient.post("SaveCosmosDb", body);
+    const { data } = await httpClient.post("UpdateFeedback", body);
 
     return NextResponse.json(data);
     
