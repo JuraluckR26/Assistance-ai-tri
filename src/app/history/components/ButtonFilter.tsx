@@ -152,6 +152,7 @@ export function ButtonFilter({ onApply, onHistoryData, onResetFilter, onLoadingC
                             <div className="col-span-4">
                                 <Select value={assistance} onValueChange={setAssistance}>
                                     <SelectTrigger className={`w-full bg-white ${hasAttemptedSubmit && !assistance ? 'border-red-300' : ''}`}>
+                                    {/* <SelectTrigger className="w-full bg-white"> */}
                                         <SelectValue placeholder="Select assistant" />
                                     </SelectTrigger>
                                     <SelectContent className="absolute z-60">
@@ -253,7 +254,6 @@ export function ButtonFilter({ onApply, onHistoryData, onResetFilter, onLoadingC
                                     disabled={loadFilter}
                                 >
                                     Retrieve
-                                    {/* {loadFilter ? "Loading..." : "Retrieve"} */}
                                 </Button>
                             </div>
                         </div>

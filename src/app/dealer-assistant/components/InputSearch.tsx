@@ -400,20 +400,20 @@ export default function InputSearch() {
                         )}
                     </div>
                 </div>
+                <div className="py-3">
+                    <Card className="px-4 py-2 gap-1 text-xs bg-gray-100 border-none shadow-none ">
+                        <div className="flex gap-2 items-center">
+                            <AlertTitle className="text-orange-500 md:text-xs lg:text-xs xl:text-sm">คำเตือน: ข้อมูลที่ได้จาก เอไอ เซอร์วิสเดส นี้ เป็นเพียงคำแนะนำเบื้องต้น อาจมีขัอผิดพลาด ไม่เป็นปัจจุบัน หรือไม่สมบูรณ์ </AlertTitle>
+                        </div>
+                        <div className="text-gray-400 flex gap-2">
+                            <p className="lg:text-xs md:text-xs xl:text-sm">กรุณาตรวจสอบด้วยตัวท่านเองอีกครั้งหรือติดต่อเซอร์วิสเดส ตามช่องทางต่อไปนี้</p>
+                            <p className="lg:text-xs md:text-xs xl:text-sm">โทรศัพท์: 02-079-9777</p>
+                            <p className="lg:text-xs md:text-xs xl:text-sm">อีเมล: servicedesk@tripetch-it.co.th</p>
+                        </div>
+                    </Card>
+                </div>
             </div>
             
-            <div>
-                <Card className="px-4 py-2 gap-1 text-xs bg-gray-100 border-none shadow-none ">
-                    <div className="flex gap-2 items-center">
-                        <AlertTitle className="text-orange-500 md:text-xs lg:text-xs xl:text-sm">คำเตือน: ข้อมูลที่ได้จาก เอไอ เซอร์วิสเดส นี้ เป็นเพียงคำแนะนำเบื้องต้น อาจมีขัอผิดพลาด ไม่เป็นปัจจุบัน หรือไม่สมบูรณ์ </AlertTitle>
-                    </div>
-                    <div className="text-gray-400 flex gap-2">
-                        <p className="lg:text-xs md:text-xs xl:text-sm">กรุณาตรวจสอบด้วยตัวท่านเองอีกครั้งหรือติดต่อเซอร์วิสเดส ตามช่องทางต่อไปนี้</p>
-                        <p className="lg:text-xs md:text-xs xl:text-sm">โทรศัพท์: 02-079-9777</p>
-                        <p className="lg:text-xs md:text-xs xl:text-sm">อีเมล: servicedesk@tripetch-it.co.th</p>
-                    </div>
-                </Card>
-            </div>
         </div>
     )
 }

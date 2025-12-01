@@ -6,13 +6,12 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDownToLine, ChevronLeft, ChevronRight, Eye, Filter } from "lucide-react"
+import { ArrowDownToLine, Eye, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -61,7 +60,6 @@ function mapHistoryToRows(history: ResponseHistory | null): ReportRow[] {
   return list.map((it, idx) => ({
     no: idx + 1,
     reportDate: it.createdDate,
-    // reportDate: formatTH(it.createdDate),
     questions: it.searchText || "-",
     assistants: it.assistantName || "-",
     users: it.createdBy || it.loginId || "-",
@@ -77,12 +75,6 @@ function mapHistoryToRows(history: ResponseHistory | null): ReportRow[] {
     custom2: it.custom2 || "-",
     custom3: it.custom3 || "-",
   }))
-}
-
-function formatTH(iso?: string) {
-  const d = iso ? new Date(iso) : null
-  if (!d || isNaN(d.getTime())) return iso || "-"
-  return d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" })
 }
 
 const createReportColumns = (
@@ -125,16 +117,6 @@ const createReportColumns = (
         {formatDate(row.original.reportDate)}
       </div>
     ),
-    // accessorKey: "reportDate",
-    // header: ({ column }) => (
-    //   <Button
-    //     variant="ghost"
-    //     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //   >
-    //     Report date
-    //     <ArrowUpDown className="ml-2 h-4 w-4" />
-    //   </Button>
-    // ),
   },
   {
     accessorKey: "questions",
@@ -224,7 +206,7 @@ const createReportColumns = (
   },
   {
     accessorKey: "aiResult",
-    header: "AI Result",
+    header: "Result",
     cell: ({ row }) => (
       <div className="truncate max-w-[120px]" title={row.original.aiResult}>
         {row.original.aiResult}
@@ -283,7 +265,6 @@ export function DataTable() {
     "30days": "Last 30 days",
     "custom": "Custom date",
   };
-  console.log(hasFiltered)
 
   const handleSaveFromModal = useCallback((updated: ResultHistoryItem) => {
     setHistoryData(prev => {
@@ -383,7 +364,6 @@ export function DataTable() {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -418,7 +398,7 @@ export function DataTable() {
   };
 
   return (
-    <div className="w-full flex flex-col overflow-hidden">
+    <div className="w-full flex flex-col pb-2">
       <div className="flex justify-between py-2">
         <div>
           <ButtonFilter 
@@ -531,11 +511,10 @@ export function DataTable() {
             {dateLabelMap[filterValues.dateOption] || filterValues.dateOption}
         </p>
       )}
-      
-      <div className="flex-1 overflow-hidden rounded-md border flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <Table>
-            <TableHeader>
+      <div className="rounded-md border">
+        <div className="relative md:max-h-[1024px] lg:max-h-[1024px] xl:max-h-[1040px] overflow-auto">
+          <Table className="">
+            <TableHeader className="sticky top-0 bg-white">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
@@ -613,44 +592,11 @@ export function DataTable() {
               )}
             </TableBody>
           </Table>
+          
         </div>
         <div className="flex-shrink-0 flex items-center justify-end space-x-2 py-2 px-4 bg-white border-t">
           <div className="text-muted-foreground flex-1 text-sm">
-            Total {table.getFilteredRowModel().rows.length} row(s) | Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-          </div>
-          <div className="space-x-2 flex items-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              First page
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeft/>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRight/>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              Last page
-            </Button>
+            Total {table.getFilteredRowModel().rows.length} row(s)
           </div>
         </div>
       </div>

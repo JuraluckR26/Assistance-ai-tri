@@ -73,6 +73,7 @@ export function setFormatAssistant(input: string): string[] {
     .filter(val => val !== "");
 }
 
+//Format date dd/MM/yyyy
 export function formatDate(iso?: string): string {
   const d = iso ? new Date(iso) : null
   if (!d || isNaN(d.getTime())) return iso || "-"
