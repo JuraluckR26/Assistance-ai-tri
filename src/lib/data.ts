@@ -432,3 +432,33 @@ export const ModuleList: ModuleOption[] = [
   { id: "m_hcm", label: "HCM", systemId: "s_it10" },
   { id: "m_bibo", label: "BIBO", systemId: "s_it10" },
 ]
+
+export const CATEGORIES = [
+  {
+    key: "default",
+    label: "ทั้งหมด",
+    icon: "all",
+    children: [],
+  },
+  {
+    key: "After_sales_business",
+    label: "ธุรกิจหลังการขาย",
+    icon: "file",
+    children: [
+      { key: "asb_1", label: "การตลาดหลังการขาย" },
+      { key: "asb_2", label: "เวลาซ่อมมาตรฐานและชุดอาการแจ้งซ่อม" },
+      { key: "asb_3", label: "มาตรฐานและเครื่องมือ" },
+      { key: "asb_4", label: "ข้อมูลซ่อมตัวถังและสี" },
+      { key: "asb_5", label: "ข้อมูลเทคนิกและการเคลม" },
+      { key: "asb_6", label: "ข่าวสารอะไหล่" },
+      { key: "asb_7", label: "คูปองเช็คระยะ" },
+      { key: "asb_8", label: "งานระบบ" }
+    ],
+  },
+  {
+    key: "Teletech",
+    label: "เทเลเทค",
+    icon: "bot",
+    children: [],
+  },
+]

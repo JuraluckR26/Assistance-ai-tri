@@ -37,4 +37,7 @@ export type ResponseResent = {
 export type RequestSearch = {
     searchContent: string;
     loginId: string;
+    system?: string;
+    module?: string;
+    function?: string; 
 }

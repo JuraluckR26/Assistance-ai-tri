@@ -45,6 +45,7 @@ export type ReportRow = {
   feedback: string
   feedbackDetail: string
   response: string
+  documents: string
   system: string
   module: string
   function: string
@@ -54,27 +55,39 @@ export type ReportRow = {
   custom2: string
   custom3: string
 }
+
 function mapHistoryToRows(history: ResponseHistory | null): ReportRow[] {
   const list = history?.result_history ?? []
   
-  return list.map((it, idx) => ({
-    no: idx + 1,
-    reportDate: it.createdDate,
-    questions: it.searchText || "-",
-    assistants: it.assistantName || "-",
-    users: it.createdBy || it.loginId || "-",
-    feedback: (it.feedback && it.feedback.trim()) ? it.feedback : "No feedback",
-    feedbackDetail: it.feedbackDetail || "-",
-    response: it.resultText || "-",
-    system: it.system || "-",
-    module: it.module || "-",
-    function: it.function || "-",
-    ticket: it.ticket || "-",
-    aiResult: it.aiResult || "-",
-    custom1: it.custom1 || "-",
-    custom2: it.custom2 || "-",
-    custom3: it.custom3 || "-",
-  }))
+  return list.map((it, idx) => {
+    const documents = it.document
+      ? it.document
+          .split("||")
+          .map(d => d.trim())
+          .filter(Boolean)
+          .join("\n")
+      : "-";  
+    
+    return {
+      no: idx + 1,
+      reportDate: it.createdDate,
+      questions: it.searchText || "-",
+      assistants: it.assistantName || "-",
+      users: it.createdBy || it.loginId || "-",
+      feedback: (it.feedback && it.feedback.trim()) ? it.feedback : "No feedback",
+      feedbackDetail: it.feedbackDetail || "-",
+      response: it.resultText || "-",
+      documents: documents,
+      system: it.system || "-",
+      module: it.module || "-",
+      function: it.function || "-",
+      ticket: it.ticket || "-",
+      aiResult: it.aiResult || "-",
+      custom1: it.custom1 || "-",
+      custom2: it.custom2 || "-",
+      custom3: it.custom3 || "-",
+    }
+  })
 }
 
 const createReportColumns = (

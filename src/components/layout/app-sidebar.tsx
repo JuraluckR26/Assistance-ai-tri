@@ -73,6 +73,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/search",
         icon: MessageCircleMore
       },
+      ...(isPilot || isCanChat ? [{
+        title: "ข้อมูล คุณใจดี (Categories)",
+        url: "/search-categories",
+        icon: MessageCircleMore,
+      }] : []),
       ...(isCanChat ? [{
         title: "AI Assistant",
         url: "/assistant",
