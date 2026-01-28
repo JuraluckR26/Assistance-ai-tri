@@ -15,17 +15,22 @@ export function setFormatFromSearch(raw: ResponseSearch): {
   const relatedDescriptions = raw.Response_Other?.split("||") || [];
   const relatedLinks = raw.SearchDocumentLocation_Other?.split("||") || [];
 
-  const primary: DocumentItem[] = primaryTitles.map((title, index) => ({
-    title: title.trim(),
-    description: primaryDescriptions[index]?.trim() || "",
-    link: primaryLinks[index]?.trim() || "#",
-  }));
+  const primary: DocumentItem[] = primaryTitles
+    .map((title, index) => ({
+      title: title.trim(),
+      description: primaryDescriptions[index]?.trim() || "",
+      link: primaryLinks[index]?.trim() || "#",
+    }))
+    // กันเคส split จาก string ว่าง -> [""] ทำให้มี item เปล่า 1 ตัว
+    .filter((item) => item.title !== "" && item.link !== "#");
 
-  const related: DocumentItem[] = relatedTitles.map((title, index) => ({
-    title: title.trim(),
-    description: relatedDescriptions[index]?.trim() || "",
-    link: relatedLinks[index]?.trim() || "#",
-  }));
+  const related: DocumentItem[] = relatedTitles
+    .map((title, index) => ({
+      title: title.trim(),
+      description: relatedDescriptions[index]?.trim() || "",
+      link: relatedLinks[index]?.trim() || "#",
+    }))
+    .filter((item) => item.title !== "" && item.link !== "#");
 
   return { primary, related };
 }
