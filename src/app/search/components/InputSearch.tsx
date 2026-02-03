@@ -4,16 +4,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { ChevronDown, ChevronUp, PackageSearch, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getFAQ, searchKhunJaiDee } from "@/lib/api/searchService";
+import { getFAQ, searchKhunJaiDeeWithCategory } from "@/lib/api/searchService";
 import { DocumentItem, RequestFeedback, RequestSearch } from "@/types/search.type";
 import Loader from "@/components/shared/loading";
 import { setFormatFromSearch } from "@/utils/formatting";
-import { FcReading } from "react-icons/fc";
 import Feedback from "@/components/shared/Feedback";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { CategoriesSearch, SelectedCategory } from "./CategoriesSearch";
+import Image from "next/image";
+
+type ViewMode = "ALL" | "TOP_ONLY" | "BOTTOM_ONLY" | "EMPTY";
 
 export default function InputSearch() {
     const { loginId, clearAuth } = useAuthStore();
@@ -25,10 +28,10 @@ export default function InputSearch() {
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [feedbackData, setFeedbackData] = useState<RequestFeedback>()
-    const [emptyView, setEmptyView] = useState<boolean>(false)
     const inputRef = useRef<HTMLInputElement>(null);
     const [openDocList, setOpenDocList] = useState<boolean>(false)
     const handleOpenDoc = () => setOpenDocList(prev => !prev)
+    const [viewMode, setViewMode] = useState<ViewMode>("EMPTY");
     
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -38,6 +41,14 @@ export default function InputSearch() {
     const [focusedValue, setFocusedValue] = useState<string>("");
     const [previewValue, setPreviewValue] = useState<string>("");
     const [shouldSubmit, setShouldSubmit] = useState(false);
+    const displayAsk = yourQuestion.replace(/\s+/g, " ").trim();
+
+    const [selectedCategory, setSelectedCategory] = useState<SelectedCategory>({
+        key: "default",
+        cat: "ทั้งหมด",
+        sub: "",
+        subKey: "",
+    })
 
     const [faqList, setFaqList] = useState<string[]>(() => {
         const localFAQ = localStorage.getItem('faqList');
@@ -153,31 +164,45 @@ export default function InputSearch() {
         }
     };
 
-    function checkEmptyResponse(data: {Response?: string; SearchDocument?: string; SearchDocumentLocation?: string;}): boolean {
-        return (
-            !data.Response?.trim() &&
-            !data.SearchDocument?.trim() &&
-            !data.SearchDocumentLocation?.trim()
-        );
-    }
+    const mapCategoryToSystemModuleFunction = (catKey?: string, catName?: string, subName?: string) => {
+        if (!catKey || catKey === "default" || !catName || catName === "ทั้งหมด") {
+            return { system: "ทั้งหมด", moduleName: "", functionName: "" };
+        }
+
+        const system = catName;
+        const moduleName = subName || "";
+        const functionName = "";
+
+        return { system, moduleName, functionName };
+    };
 
     const handleSubmit = useCallback(async () => {
         if (question.trim() === "") return
 
         setIsLoading(true)
         setIsSubmitted(true)
-        setEmptyView(false);
         setResults([]);      
         setFeedbackData(undefined);
         setOpenDocList(false)
-
+        setYourQuestion(question)
+        setShowSuggest(false)
+        
         try {
+            const { system, moduleName, functionName } = mapCategoryToSystemModuleFunction(
+                selectedCategory.key,
+                selectedCategory.cat,
+                selectedCategory.sub,
+            );
+
             const payload: RequestSearch = {
                 searchContent: question,
-                loginId: loginId!
+                loginId: loginId!,
+                system: system,
+                module: moduleName,
+                function: functionName,
             };
 
-            const data = await searchKhunJaiDee(payload)
+            const data = await searchKhunJaiDeeWithCategory(payload)
 
             if(typeof data === "string") {
                 alert(data);
@@ -186,22 +211,35 @@ export default function InputSearch() {
                 return
             }
 
-            if(checkEmptyResponse(data))
-            {
-                setEmptyView(true);
-                return;
-                
-            } else {
-                const { primary, related } = setFormatFromSearch(data);
-                setResults(primary)
-                setRelatedResults(related)
-                setYourQuestion(question)
+            const hasTop =
+            !!data.Response?.trim() ||
+            !!data.SearchDocument?.trim() ||
+            !!data.SearchDocumentLocation?.trim();
 
-                const feedbackObj: RequestFeedback = {
-                    id: data.Id,
-                    loginId: loginId!
-                }
-                setFeedbackData(feedbackObj)                
+            const hasBottom =
+            !!data.SearchDocument_Other?.trim();
+
+            let mode: ViewMode = "EMPTY";
+
+            if (hasTop && hasBottom) {
+            mode = "ALL";
+            } else if (hasTop) {
+            mode = "TOP_ONLY";
+            } else if (hasBottom) {
+            mode = "BOTTOM_ONLY";
+            }
+
+            setViewMode(mode);
+
+            if (mode !== "EMPTY") {
+            const { primary, related } = setFormatFromSearch(data);
+            setResults(primary);
+            setRelatedResults(related);
+
+            setFeedbackData({
+                id: data.Id,
+                loginId: loginId!,
+            });
             }
             
         } catch (err: unknown) {
@@ -214,7 +252,7 @@ export default function InputSearch() {
             setQuestion("")
             setIsLoading(false)
         }
-    }, [question, loginId, clearAuth]);
+    }, [question, loginId, clearAuth, selectedCategory]);
 
     useEffect(() => {
         if (shouldSubmit && question.trim() !== "") {
@@ -231,6 +269,12 @@ export default function InputSearch() {
 
     return (
         <>
+            <div className="relative w-full md:max-w-4xl xl:max-w-5xl pb-1">
+                <CategoriesSearch
+                    selected={selectedCategory}
+                    onChange={setSelectedCategory}
+                />
+            </div>
             <div className="relative w-full md:max-w-4xl xl:max-w-5xl">
                 <Input
                     type="text"
@@ -315,19 +359,32 @@ export default function InputSearch() {
 
                         ) : (
                             <Card className="text-foreground">
-                                {emptyView ? (
-                                    <div className="flex justify-center">
-                                        <div className="flex items-center gap-6 bg-white px-6 py-4">
-                                            <FcReading size={60}/>
+                                {viewMode === "EMPTY" && (
+                                    <div className="flex px-10 text-sm">
+                                        <div className="flex items-center gap-10 bg-white">
+                                            <Image src="/images/no-results.png" alt="icon" width={160} height={20}/>
 
-                                            <div className="text-left">
-                                                <p className="text-lg font-semibold text-gray-800">ขออภัย เราไม่พบข้อมูลที่ตรงกับคำค้นหาของท่าน</p>
-                                                <p className="text-gray-500 font-medium mt-1">กรุณาค้นหาใหม่อีกครั้ง หรือค้นหาจากคำค้นหาที่แนะนำ</p>
+                                            <div className="">
+                                                <div className="grid gap-2">
+                                                    <center className="text-lg font-semibold text-gray-800">ขออภัย ฉันไม่พบข้อมูลใดที่เกี่ยวกับคำค้นหาของคุณ</center> 
+                                                    <span className="line-clamp-2 break-all max-w-[520px] bg-gray-100 px-4 py-2 rounded-lg">
+                                                        {displayAsk}
+                                                    </span>
+                                                    
+                                                    <div>
+                                                        <li>ลองตรวจสอบคำสะกดอีกครั้ง</li>
+                                                        <li>ลองใช้คำค้นหาที่สั้นลง</li>
+                                                        <li>หรือเลือกหมวดหมู่ด้านบน</li>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            
                                         </div>
                                         
                                     </div>
-                                ) : (
+                                )}
+
+                                {(viewMode === "ALL" || viewMode === "TOP_ONLY") && (
                                     <>
                                         <CardHeader>
                                             <CardTitle>
@@ -353,44 +410,61 @@ export default function InputSearch() {
                                                     </div>
                                                 ))}
                                             </CardDescription>
-                                            {relatedResults.length > 0 && (
-                                                <>
-                                                    <Separator className="my-4" />
-                                                    <Button 
-                                                        className="rounded-full cursor-pointer bg-[#4D77FF]/20 text-[#4D77FF] hover:bg-[#4D77FF]/20"
-                                                        onClick={handleOpenDoc}
-                                                        >
-                                                        <PackageSearch /> เอกสารเพิ่มเติมที่อาจเกี่ยวข้องกับสิ่งที่คุณสนใจ {!openDocList ? <ChevronUp /> : <ChevronDown />}
-                                                    </Button>
-
-                                                    {openDocList && (
-                                                        <CardDescription>
-                                                            {relatedResults.map((item, index) => (
-                                                                <div key={item.title ?? index} className="flex flex-col mt-3">
-                                                                    <div className="mb-2">
-                                                                        <Link 
-                                                                            href={item.link}
-                                                                            target="_blank" 
-                                                                            rel="noopener noreferrer"
-                                                                            className="text-blue-600 font-semibold hover:underline"
-                                                                        >
-                                                                            {index + 1}. {item.title}
-                                                                        </Link>
-                                                                        <p className="line-clamp-2">{item.description}</p>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </CardDescription>
-                                                    )}
-                                                </>
-                                            )}
+                                            
                                         </CardContent>
                                         <CardFooter className="flex flex-row-reverse ...">
                                             {feedbackData && <Feedback dataProps={feedbackData} />}
                                         </CardFooter>
                                     </>
                                 )}
-                                
+
+                                {(viewMode === "ALL" || viewMode === "BOTTOM_ONLY") && (
+                                    <>
+                                        <CardHeader>
+                                            <CardTitle>
+                                                <div>คำถามของคุณ : {yourQuestion}</div>
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <CardTitle className="pb-3">ตอบ :</CardTitle>
+                                            <CardDescription>
+                                                <span>ไม่มีข้อมูล</span>
+                                            </CardDescription>
+                                        <>
+                                        <Separator className="my-4" />
+                                            <Button 
+                                                className="rounded-full cursor-pointer bg-[#4D77FF]/20 text-[#4D77FF] hover:bg-[#4D77FF]/20"
+                                                onClick={handleOpenDoc}
+                                                >
+                                                <PackageSearch /> เอกสารเพิ่มเติมที่อาจเกี่ยวข้องกับสิ่งที่คุณสนใจ {!openDocList ? <ChevronUp /> : <ChevronDown />}
+                                            </Button>
+
+                                            {openDocList && (
+                                                <CardDescription>
+                                                    {relatedResults.map((item, index) => (
+                                                        <div key={item.title ?? index} className="flex flex-col mt-3">
+                                                            <div className="mb-2">
+                                                                <Link 
+                                                                    href={item.link}
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-600 font-semibold hover:underline"
+                                                                >
+                                                                    {index + 1}. {item.title}
+                                                                </Link>
+                                                                <p className="line-clamp-2">{item.description}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </CardDescription>
+                                            )}
+                                        </>
+                                        </CardContent>
+                                        <CardFooter className="flex flex-row-reverse ...">
+                                            {feedbackData && <Feedback dataProps={feedbackData} />}
+                                        </CardFooter>
+                                    </>
+                                )}
                             </Card>
                         )}
                     </div>

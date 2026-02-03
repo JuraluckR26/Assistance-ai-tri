@@ -17,39 +17,40 @@ import {
 import { useState } from "react"
 import { CATEGORIES } from "@/lib/data"
 
-export function CategoriesSearch() {
+export type SelectedCategory = {
+  key: string;      
+  cat: string;   
+  sub?: string;   
+  subKey?: string;  
+}
+
+type CategoriesSearchProps = {
+  selected: SelectedCategory;
+  onChange: (value: SelectedCategory) => void;
+}
+
+export function CategoriesSearch({ selected, onChange }: CategoriesSearchProps) {
     const [open, setOpen] = useState(false)
-    const [selected, setSelected] = useState<{ key?: string; cat?: string; sub?: string }>({
-            key: "default",
-            cat: "ทั้งหมด",
-            sub: ""
-    })
 
     const getStyleCategories = (key?: string, value?: string, sub?: string) => {
 
         switch (key) {
             case "After_sales_business":
-                return <div className="flex items-center gap-2 text-[11px]"><div className="box-border size-6 p-1 bg-red-100 rounded-full flex items-center justify-center"><File color="#EF4444" className="size-3.5"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
+                return <div className="flex items-center gap-2 text-[12px]"><div className="box-border size-6 p-1 bg-red-100 rounded-full flex items-center justify-center"><File color="#EF4444" className="size-3.5"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
             case "Teletech":
-                return <div className="flex items-center gap-2 text-[11px]"><div className="box-border size-6 p-1 bg-orange-100 rounded-full flex items-center justify-center"><Bot color="#F97316"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
+                return <div className="flex items-center gap-2 text-[12px]"><div className="box-border size-6 p-1 bg-orange-100 rounded-full flex items-center justify-center"><Bot color="#F97316"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
             case "cat3":
-                return <div className="flex items-center gap-2 text-[11px]"><div className="box-border size-6 p-1 bg-green-100 rounded-full flex items-center justify-center"><Car color="#22C55E"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
+                return <div className="flex items-center gap-2 text-[12px]"><div className="box-border size-6 p-1 bg-green-100 rounded-full flex items-center justify-center"><Car color="#22C55E"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
             case "cat4": 
-                return <div className="flex items-center gap-2 text-[11px]"><div className="box-border size-6 p-1 bg-blue-100 rounded-full flex items-center justify-center"><Wrench color="#3B82F6"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
+                return <div className="flex items-center gap-2 text-[12px]"><div className="box-border size-6 p-1 bg-blue-100 rounded-full flex items-center justify-center"><Wrench color="#3B82F6"/></div> <span className="">{value}</span>{sub && <div className="flex gap-2"><span className="">-</span><span className="">{sub}</span></div>}</div>
             default:
-                return <div className="flex items-center gap-2 text-[11px]"><div className="box-border size-6 p-1 bg-gray-200 rounded-full flex items-center justify-center font-semibold"><span className="">All</span></div> <span className="text-xs"> {value}</span> </div>
+                return <div className="flex items-center gap-2 text-[12px]"><div className="box-border size-6 p-1 bg-gray-200 rounded-full flex items-center justify-center font-semibold"><span className="">All</span></div> <span className="text-xs"> {value}</span> </div>
         }
     }
 
   return (
     <div className="flex items-start gap-1 sm:flex-row sm:items-center">
-      {/* <p className="text-sm leading-none font-medium">
-        <span className="bg-primary text-primary-foreground mr-2 rounded-lg px-2 py-1 text-xs">
-          {label}
-        </span>
-        <span className="text-muted-foreground">Create a new project</span>
-      </p> */}
-        <span className="text-[11px] text-gray-400">ค้นหาเรื่อง :</span>
+        <span className="text-[12px] text-gray-400">ค้นหาเรื่อง :</span>
 
         <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
@@ -83,7 +84,7 @@ export function CategoriesSearch() {
                                             <DropdownMenuItem
                                                 key={sub.key}
                                                 onClick={() => {
-                                                    setSelected({ key: cat.key, cat: cat.label, sub: sub.label })
+                                                    onChange({ key: cat.key, cat: cat.label, sub: sub.label, subKey: sub.key })
                                                     setOpen(false)
                                                 }}
                                             >
@@ -98,7 +99,7 @@ export function CategoriesSearch() {
                                     key={cat.key}
                                     onClick={() => {
                                         if (!cat.children.length) {
-                                            setSelected({ key: cat.key, cat: cat.label, sub: "" })
+                                            onChange({ key: cat.key, cat: cat.label, sub: "", subKey: "" })
                                             setOpen(false)
                                         }
                                     }}
